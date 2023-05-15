@@ -24,7 +24,7 @@ class _TransectInfoState extends State<TransectInfo> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const SizedBox(
-            height: 20,
+            height: 18,
           ),
           const Text('Transect Info'),
           Row(

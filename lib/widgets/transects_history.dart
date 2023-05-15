@@ -7,6 +7,7 @@ import 'package:intl/intl.dart';
 
 import '../model/transect.dart';
 import '../service/data_service.dart';
+import '../utils/ux_builder.dart';
 
 class TransectsHistory extends StatefulWidget {
   const TransectsHistory({
@@ -62,16 +63,35 @@ class _TransectsHistoryState extends State<TransectsHistory> {
                   // onTap: () {
                   //   Navigator.of(context).pop();
                   // },
-                  subtitle: Text(
-                      'Markers: ${transects[index]?.markers?.length ?? 0} '
-                          'Distance: ${calculateDistance(transects[index]?.points?.map((e) => LatLng(e.latitude, e.longitude)).toList() ?? []).toStringAsFixed(2)}km '
-                          'Time: ${getTimeDifference(transects[index]!.startDate, transects[index]?.endDate ?? DateTime.now())}'),
+                  subtitle: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                          'Markers: ${transects[index]?.markers?.length ?? 0} '
+                              'Distance: ${calculateDistance(transects[index]?.points?.map((e) => LatLng(e.latitude, e.longitude)).toList() ?? []).toStringAsFixed(2)}km '
+                              'Time: ${getTimeDifference(transects[index]!.startDate, transects[index]?.endDate ?? DateTime.now())}'),
+                      Row(
+                        children: [
+                          IconButton(
+                            onPressed: () {
+                              transects[index]?.shareCSV();
+                            },
+                            icon: const Icon(Icons.share),
+                          ),
+                        ]
+                      ),],
+                  ),
+
+                  isThreeLine: true,
+
                   trailing: IconButton(
                     onPressed: () {
+                      showYesNoDialog(() {
                       IsarService().deleteTransect(transects[index]!);
                       setState(() {
                         transects.removeAt(index);
                       });
+                      }, () {});
                     },
                     icon: const Icon(Icons.delete),
                   )

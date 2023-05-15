@@ -24,12 +24,12 @@ import 'package:flutter/material.dart';
 showBottomModal(Widget widget) {
   showModalBottomSheet(
     context: ContextHolder.currentContext,
-    shape: const RoundedRectangleBorder(
-      borderRadius: BorderRadius.only(
-        topLeft: Radius.circular(15.0),
-        topRight: Radius.circular(15.0),
-      ),
-    ),
+    // shape: const RoundedRectangleBorder(
+    //   borderRadius: BorderRadius.only(
+    //     topLeft: Radius.circular(15.0),
+    //     topRight: Radius.circular(15.0),
+    //   ),
+    // ),
     builder: (BuildContext context) {
       return widget;
     },
@@ -46,10 +46,16 @@ showDialogBox(Widget widget) {
 }
 
 showAlertDialog(Widget content, List<Widget> actions) {
-  showDialogBox( AlertDialog(content: content, actions: actions));
+  showDialogBox(AlertDialog(
+    content: content,
+    actions: actions,
+    backgroundColor: Theme.of(ContextHolder.currentContext).cardColor,
+  ));
 }
 
-showYesNoDialog(Function yesFunction, Function noFunction, {
+showYesNoDialog(
+  Function yesFunction,
+  Function noFunction, {
   String title = 'Are you sure?',
   String yesText = 'Yes',
   String noText = 'No',
@@ -75,19 +81,27 @@ showYesNoDialog(Function yesFunction, Function noFunction, {
   );
 }
 
-showTextInputDialog(String title, String hint, String? defaultValue, Function(String) onConfirm) {
-  final TextEditingController controller = TextEditingController(text: defaultValue);
+showTextInputDialog(String title, String hint, String? defaultValue,
+    Function(String) onConfirm) {
+  // final TextEditingController controller = TextEditingController(text: defaultValue);
+  String value = defaultValue ?? '';
   showDialogBox(AlertDialog(
     title: Text(title),
-    content: TextField(
-      controller: controller,
+    backgroundColor: Theme.of(ContextHolder.currentContext).cardColor,
+    content: TextFormField(
+      // controller: controller,
       decoration: InputDecoration(hintText: hint),
+      autofocus: true,
+      initialValue: defaultValue,
+      onChanged: (String newValue) {
+        value = newValue;
+      },
     ),
     actions: [
       TextButton(
         onPressed: () {
           Navigator.of(ContextHolder.currentContext).pop();
-          onConfirm(controller.text);
+          onConfirm(value);
         },
         child: const Text('Confirm'),
       ),
@@ -100,7 +114,6 @@ showTextInputDialog(String title, String hint, String? defaultValue, Function(St
     ],
   ));
 }
-
 
 showSnackBar(String message, {int duration = 1}) {
   ScaffoldMessenger.of(ContextHolder.currentContext).showSnackBar(
@@ -120,15 +133,20 @@ showFullScreenDialog(Widget widget) {
     transitionDuration: const Duration(milliseconds: 400),
     pageBuilder: (_, __, ___) {
       return Scaffold(
+        backgroundColor: Theme.of(ContextHolder.currentContext).cardColor,
         appBar: AppBar(
-          foregroundColor: Colors.black,
-          backgroundColor: Theme.of(ContextHolder.currentContext).secondaryHeaderColor,
+          toolbarHeight: 30,
           elevation: 0,
           title: const Text('Add Specie'),
-          actions: [IconButton(
-            onPressed: () => Navigator.of(ContextHolder.currentContext).pop(),
-            icon: const Icon(Icons.close, color: Colors.black,),
-          )],
+          actions: [
+            IconButton(
+              onPressed: () => Navigator.of(ContextHolder.currentContext).pop(),
+              icon: const Icon(
+                Icons.close,
+                color: Colors.black,
+              ),
+            )
+          ],
         ),
         body: widget,
       );

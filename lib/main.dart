@@ -24,7 +24,10 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         // on below line we are specifying theme
-        primarySwatch: Colors.green,
+        // primarySwatch: Colors.green,
+        // primaryColor: Colors.green,
+        colorScheme: ColorScheme.fromSwatch(primarySwatch: Colors.green),
+        useMaterial3: true,
       ),
       // First screen of our app
       home: const HomePage(),

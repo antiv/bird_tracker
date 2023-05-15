@@ -74,19 +74,17 @@ Marker getNewMarker(String id, LocationData locationData, Function onTap) {
   );
 }
 
-
-
 void showMarkerInfo(int index) {
-  final selected = DataService().transect?.markers?.firstWhere((m) => m.id == index);
-  showBottomModal(
-      MarkerInfo(selected: selected));
+  final selected =
+      DataService().transect?.markers?.firstWhere((m) => m.id == index);
+  showBottomModal(MarkerInfo(selected: selected));
 }
-
 
 double calculateDistance(List<LatLng> polyline) {
   double totalDistance = 0;
   for (int i = 0; i < polyline.length; i++) {
-    if (i < polyline.length - 1) { // skip the last index
+    if (i < polyline.length - 1) {
+      // skip the last index
       totalDistance += getStraightLineDistance(
           polyline[i + 1].latitude,
           polyline[i + 1].longitude,
@@ -115,11 +113,25 @@ dynamic deg2rad(deg) {
   return deg * (math.pi / 180);
 }
 
-
 getTimeDifference(DateTime? startDate, DateTime? endDate) {
   if (startDate == null || endDate == null) {
     return '';
   }
   final difference = endDate.difference(startDate);
   return '${difference.inHours}h ${difference.inMinutes.remainder(60)}m';
+}
+
+String convertLatLng(double decimal, bool isLat) {
+  String degree = "${decimal.toString().split(".")[0]}°";
+  double minutesBeforeConversion =
+      double.parse("0.${decimal.toString().split(".")[1]}");
+  String minutes =
+      "${(minutesBeforeConversion * 60).toString().split('.')[0]}'";
+  double secondsBeforeConversion = double.parse(
+      "0.${(minutesBeforeConversion * 60).toString().split('.')[1]}");
+  String seconds =
+      '${double.parse((secondsBeforeConversion * 60).toString()).toStringAsFixed(2)}" ';
+  String dmsOutput =
+      "${isLat ? decimal > 0 ? 'N' : 'S' : decimal > 0 ? 'E' : 'W'} $degree $minutes $seconds";
+  return dmsOutput;
 }

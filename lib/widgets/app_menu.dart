@@ -25,13 +25,13 @@ class AppMenu extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Drawer(
-      backgroundColor: Theme.of(context).secondaryHeaderColor,
+      backgroundColor: Theme.of(context).cardColor,
         child: ListView(
       // Important: Remove any padding from the ListView.
       padding: EdgeInsets.zero,
       children: [
         SizedBox(
-          height: 86,
+          height: 94,
           child: DrawerHeader(
             decoration: BoxDecoration(
               color: Theme.of(context).primaryColor,
@@ -43,7 +43,7 @@ class AppMenu extends StatelessWidget {
               children: [
                 SizedBox(
                   width: 40,
-                  height: 40,
+                  height: 48,
                   child: InkWell(
                     onTap: () {
                       Navigator.pop(context);
@@ -59,7 +59,7 @@ class AppMenu extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
                     Text(kAppTitle, style: Theme.of(context).textTheme.titleSmall?.copyWith(color: Colors.white)),
-                    Text('v$kAppVersion', style: Theme.of(context).textTheme.bodySmall?.copyWith(color: Colors.grey.shade300)),
+                    Text('v$kAppVersion', style: Theme.of(context).textTheme.bodySmall?.copyWith(color: Colors.grey.shade300,)),
                   ],
                 ),
               ],
@@ -119,7 +119,7 @@ class AppMenu extends StatelessWidget {
                     DataService().getEmailPreference(),
                       (value) {
                         DataService().setEmailPreference(value);
-                        Navigator.pop(context);
+                        // Navigator.pop(context);
                       }
                   );
               },

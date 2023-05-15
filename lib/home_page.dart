@@ -50,7 +50,16 @@ class _HomePageState extends State<HomePage> {
   @override
   void initState() {
     IsarService().init();
-    _polyLines = {Polyline(polylineId: const PolylineId('1'), points: transect?.points?.map((e) => LatLng(e.latitude, e.longitude)).toList() ?? [], color: Colors.red, width: 5)};
+    _polyLines = {
+      Polyline(
+          polylineId: const PolylineId('1'),
+          points: transect?.points
+                  ?.map((e) => LatLng(e.latitude, e.longitude))
+                  .toList() ??
+              [],
+          color: Colors.red,
+          width: 5)
+    };
     _goToCurrentLocation();
     DataService().initPreferences();
     super.initState();
@@ -64,14 +73,13 @@ class _HomePageState extends State<HomePage> {
   _goToCurrentLocation() async {
     if (locationStream != null) {
       await _stopListener();
-      await goToCurrentLocation(_serviceEnabled ?? false, location, _locationData,
-          completer, _controller);
+      await goToCurrentLocation(_serviceEnabled ?? false, location,
+          _locationData, completer, _controller);
       await _startListener();
     } else {
-      await goToCurrentLocation(_serviceEnabled ?? false, location, _locationData,
-          completer, _controller);
+      await goToCurrentLocation(_serviceEnabled ?? false, location,
+          _locationData, completer, _controller);
     }
-
   }
 
   onLocationChange(LocationData currentLocation) {
@@ -80,13 +88,15 @@ class _HomePageState extends State<HomePage> {
       // points.add(LatLng(_locationData!.latitude!, _locationData!.longitude!));
       _polyLines?.add(Polyline(
           polylineId: const PolylineId('1'),
-          points: _polyLines?.first.points ?? []..add(LatLng(_locationData!.latitude!, _locationData!.longitude!)),
+          points: _polyLines?.first.points ?? []
+            ..add(LatLng(_locationData!.latitude!, _locationData!.longitude!)),
           color: Colors.red,
           width: 5));
       transect?.points = transect?.points?.toList(growable: true) ?? [];
       transect?.points?.add(Point()
         ..latitude = _locationData!.latitude!
         ..longitude = _locationData!.longitude!);
+
       /// get current camera zum
       completer?.getZoomLevel().then((value) {
         /// change camera position
@@ -107,8 +117,8 @@ class _HomePageState extends State<HomePage> {
       isOpen.value = false;
       locationStream =
           location.onLocationChanged.listen((LocationData currentLocation) {
-            onLocationChange(currentLocation);
-          });
+        onLocationChange(currentLocation);
+      });
     }
   }
 
@@ -116,7 +126,11 @@ class _HomePageState extends State<HomePage> {
     // locationStream?.pause();
     /// Save transect with points and markers
     // transect?.markers = Placemark.fromMarkers(_markers);
-    transect?.points = _polyLines?.first.points.map((e) => Point()..latitude = e.latitude..longitude = e.longitude).toList();
+    transect?.points = _polyLines?.first.points
+        .map((e) => Point()
+          ..latitude = e.latitude
+          ..longitude = e.longitude)
+        .toList();
     await IsarService().updateTransect(transect!);
     _stopListener();
   }
@@ -128,34 +142,39 @@ class _HomePageState extends State<HomePage> {
 
   _stopTransect() async {
     /// Ask for confirmation
-    showYesNoDialog(() async {
+    showYesNoDialog(() {
       _stopListener();
       transect?.endDate = DateTime.now();
-      // transect?.markers = Placemark.fromMarkers(_markers);
-      transect?.points = _polyLines?.first.points.map((e) => Point()..latitude = e.latitude..longitude = e.longitude).toList();
-      await IsarService().updateTransect(transect!);
+      transect?.points = _polyLines?.first.points
+          .map((e) => Point()
+            ..latitude = e.latitude
+            ..longitude = e.longitude)
+          .toList();
+      IsarService().updateTransect(transect!);
       transect = null;
       DataService().setTransect(null);
+      setState(() {});
     }, () {});
-
   }
 
   _addMarker() {
-    showFullScreenDialog(SpeciesForm(onSaved: (species) {
-      setState(() {
-        transect?.markers = transect?.markers?.toList(growable: true) ?? [];
-        transect?.markers?.add(
-          Placemark(
-            latitude: _locationData!.latitude!,
-            longitude: _locationData!.longitude!,
-            startDate: DateTime.now(),
-            id: transect?.markers?.length ?? 0,
-            species: [species],
-          ),
-        );
-      });
-      _goToCurrentLocation();
-    },));
+    showFullScreenDialog(SpeciesForm(
+      onSaved: (species) {
+        setState(() {
+          transect?.markers = transect?.markers?.toList(growable: true) ?? [];
+          transect?.markers?.add(
+            Placemark(
+              latitude: _locationData!.latitude!,
+              longitude: _locationData!.longitude!,
+              startDate: DateTime.now(),
+              id: transect?.markers?.length ?? 0,
+              species: [species],
+            ),
+          );
+        });
+        _goToCurrentLocation();
+      },
+    ));
   }
 
   _startTransect() async {
@@ -169,6 +188,7 @@ class _HomePageState extends State<HomePage> {
         ..points = List<Point>.empty(growable: true)
         ..markers = List<Placemark>.empty(growable: true);
       DataService().setTransect(transect);
+
       /// insert transect to db
       await IsarService().addTransect(transect!);
       _startListener();
@@ -181,7 +201,7 @@ class _HomePageState extends State<HomePage> {
       key: _key,
       appBar: AppBar(
         backgroundColor: const Color(0xFF0F9D58),
-        title: const Text(kAppTitle),
+        title: const Text(kAppTitle, style: TextStyle(color: Colors.white)),
         leading: InkWell(
           onTap: () {
             _key.currentState!.openDrawer();
@@ -199,39 +219,43 @@ class _HomePageState extends State<HomePage> {
       body: SafeArea(
         // on below line creating google maps
         child: Consumer<DataService>(builder: (context, dataService, _) {
-          debugPrint('============================================= reBuild =============================================');
+          debugPrint(
+              '============================================= reBuild =============================================');
           transect = dataService.transect;
           _polyLines?.first.points.clear();
-          _polyLines?.first.points.addAll(transect?.points?.map((e) => LatLng(e.latitude, e.longitude)).toList() ?? []);
+          _polyLines?.first.points.addAll(transect?.points
+                  ?.map((e) => LatLng(e.latitude, e.longitude))
+                  .toList() ??
+              []);
           return GoogleMap(
-              // on below line setting camera position
-              initialCameraPosition: _kHome,
-              // on below line we are setting markers on the map
-              markers: Set<Marker>.of(transect?.markers?.map((e) => e.toMarker()) ?? []),
-              polylines: _polyLines ?? {},
-              // on below line specifying map type.
-              mapType: dataService.mapType ?? MapType.hybrid,
-              // on below line setting user location enabled.
-              myLocationEnabled: true,
-              myLocationButtonEnabled: false,
-              // on below line setting compass enabled.
-              compassEnabled: true,
-              // on below line setting zoom controls enabled.
-              zoomControlsEnabled: true,
-              // on below line setting map toolbar enabled.
-              mapToolbarEnabled: true,
-              // on below line setting traffic enabled
-              trafficEnabled: false,
-              // on below line setting buildings enabled.
-              buildingsEnabled: false,
-              indoorViewEnabled: false,
-              // on below line specifying controller on map complete.
-              onMapCreated: (GoogleMapController controller) {
-                _controller.complete(controller);
-              },
-            );
-          }
-        ),
+            // on below line setting camera position
+            initialCameraPosition: _kHome,
+            // on below line we are setting markers on the map
+            markers: Set<Marker>.of(
+                transect?.markers?.map((e) => e.toMarker()) ?? []),
+            polylines: _polyLines ?? {},
+            // on below line specifying map type.
+            mapType: dataService.mapType ?? MapType.hybrid,
+            // on below line setting user location enabled.
+            myLocationEnabled: true,
+            myLocationButtonEnabled: false,
+            // on below line setting compass enabled.
+            compassEnabled: true,
+            // on below line setting zoom controls enabled.
+            zoomControlsEnabled: true,
+            // on below line setting map toolbar enabled.
+            mapToolbarEnabled: true,
+            // on below line setting traffic enabled
+            trafficEnabled: false,
+            // on below line setting buildings enabled.
+            buildingsEnabled: false,
+            indoorViewEnabled: false,
+            // on below line specifying controller on map complete.
+            onMapCreated: (GoogleMapController controller) {
+              _controller.complete(controller);
+            },
+          );
+        }),
       ),
       // on pressing floating action button the camera will take to user current location
       floatingActionButton: Padding(
@@ -271,6 +295,9 @@ class _HomePageState extends State<HomePage> {
                   }
                 });
               },
+              onClose: () {
+                setState(() {});
+              },
               children: [
                 SpeedDialChild(
                   child: const Icon(Icons.pause),
@@ -289,14 +316,15 @@ class _HomePageState extends State<HomePage> {
                   label: 'Stop',
                   onTap: () async {
                     await _stopTransect();
-                    setState(() {});
                   },
                 ),
               ],
             ),
             SizedBox(height: isOpen.value ? 130 : 10),
             FloatingActionButton(
-                onPressed: locationStream != null ? _addMarker : () => showSnackBar('Start transect first'),
+                onPressed: locationStream != null
+                    ? _addMarker
+                    : () => showSnackBar('Start transect first'),
                 backgroundColor: Colors.orangeAccent,
                 child: const Icon(Icons.add_location_alt_outlined)),
           ],

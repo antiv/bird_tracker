@@ -21,8 +21,8 @@ class _SpeciesFormState extends State<SpeciesForm> {
   final TextEditingController _descriptionController = TextEditingController();
   final FocusNode _spicesFocusNode = FocusNode();
 
-  Direction _direction = Direction.N;
-  Stratification _stratification = Stratification.D;
+  Direction? _direction;
+  Stratification? _stratification;
 
   @override
   void initState() {
@@ -162,16 +162,6 @@ class _SpeciesFormState extends State<SpeciesForm> {
                     }
                   },
                 ),
-                // Autocomplete(optionsBuilder: (TextEditingValue textEditingValue) {
-                //   if (textEditingValue.text == '') {
-                //     return const Iterable<String>.empty();
-                //   }
-                //   return kSpecies.where((String option) {
-                //     return option
-                //         .toLowerCase()
-                //         .contains(textEditingValue.text.toLowerCase());
-                //   });
-                // },),
                 TextFormField(
                   controller: _countController,
                   decoration: InputDecoration(
