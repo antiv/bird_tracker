@@ -1,5 +1,13 @@
+import 'dart:io';
+
+import 'package:bird_tracker/service/data_service.dart';
+import 'package:bird_tracker/service/isar_service.dart';
+import 'package:bird_tracker/utils/kml_utils.dart';
 import 'package:context_holder/context_holder.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
+
+import '../model/transect.dart';
 
 /// EG.
 // showBottomModal(context, Column(
@@ -152,4 +160,25 @@ showFullScreenDialog(Widget widget) {
       );
     },
   );
+}
+
+showImportKMLDialog() async {
+  /// Use File picker lib to get KML file path,
+  /// then convert data to Transect and save to DB
+  /// than, show it on map
+  FilePickerResult? result = await FilePicker.platform.pickFiles();
+
+  if (result != null) {
+    File file = File(result.files.single.path?? '' );
+    /// get file data as String XML
+    String fileData = await file.readAsString();
+    /// convert XML to Transect
+    Transect transect = KMLUtils().kmlToTransect(fileData, file.lastModifiedSync());
+    /// save transect to DB
+    IsarService().addTransect(transect);
+    /// show transect on map
+    DataService().setTransect(transect);
+  } else {
+    // User canceled the picker
+  }
 }

@@ -33,6 +33,7 @@ class _TransectsHistoryState extends State<TransectsHistory> {
       this.transects = transects;
     });
   }
+
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -46,59 +47,67 @@ class _TransectsHistoryState extends State<TransectsHistory> {
           height: 20,
         ),
         Expanded(
-          child: transects.isNotEmpty ? ListView.builder(
-            shrinkWrap: true,
-            itemCount: transects.length,
-            itemBuilder: (BuildContext context, int index) {
-              return Card(
-                child: ListTile(
-                  onTap: () {
-                    DataService().setTransect(transects[index]!);
-                    Navigator.pop(ContextHolder.currentContext);
-                  },
-                  // leading: const Icon(Icons.map_outlined),
-                  title: Text('Transect ${transects[index]?.id}: '
-                      '${DateFormat('dd.MM.yyyy HH:mm').format(transects[index]!.startDate)} - '
-                      '${transects[index]?.endDate != null ? DateFormat('HH:mm').format(transects[index]!.endDate!) : 'in progress'}'),
-                  // onTap: () {
-                  //   Navigator.of(context).pop();
-                  // },
-                  subtitle: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                          'Markers: ${transects[index]?.markers?.length ?? 0} '
-                              'Distance: ${calculateDistance(transects[index]?.points?.map((e) => LatLng(e.latitude, e.longitude)).toList() ?? []).toStringAsFixed(2)}km '
-                              'Time: ${getTimeDifference(transects[index]!.startDate, transects[index]?.endDate ?? DateTime.now())}'),
-                      Row(
-                        children: [
-                          IconButton(
-                            onPressed: () {
-                              transects[index]?.shareCSV();
-                            },
-                            icon: const Icon(Icons.share),
+          child: transects.isNotEmpty
+              ? ListView.builder(
+                  shrinkWrap: true,
+                  itemCount: transects.length,
+                  itemBuilder: (BuildContext context, int index) {
+                    return Card(
+                      child: ListTile(
+                          onTap: () {
+                            DataService().setTransect(transects[index]!);
+                            Navigator.pop(ContextHolder.currentContext);
+                          },
+                          // leading: const Icon(Icons.map_outlined),
+                          title: Text('Transect ${transects[index]?.id}: '
+                              '${DateFormat('dd.MM.yyyy HH:mm').format(transects[index]!.startDate)} - '
+                              '${transects[index]?.endDate != null ? DateFormat('HH:mm').format(transects[index]!.endDate!) : 'in progress'}'),
+                          // onTap: () {
+                          //   Navigator.of(context).pop();
+                          // },
+                          subtitle: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                  'Markers: ${transects[index]?.markers?.length ?? 0} '
+                                  'Distance: ${calculateDistance(transects[index]?.points?.map((e) => LatLng(e.latitude, e.longitude)).toList() ?? []).toStringAsFixed(2)}km '
+                                  'Time: ${getTimeDifference(transects[index]!.startDate, transects[index]?.endDate ?? DateTime.now())}'),
+                              Row(children: [
+                                ElevatedButton.icon(
+                                  onPressed: () {
+                                    transects[index]?.shareCSV();
+                                  },
+                                  icon: const Icon(Icons.share), label: const Text('CSV'),
+                                ),
+                                const SizedBox(
+                                  width: 20,
+                                ),
+                                ElevatedButton.icon(
+                                  onPressed: () {
+                                    transects[index]?.shareKML();
+                                  },
+                                  icon: const Icon(Icons.share),
+                                  label: const Text('KML'),
+                                ),
+                              ]),
+                            ],
                           ),
-                        ]
-                      ),],
-                  ),
-
-                  isThreeLine: true,
-
-                  trailing: IconButton(
-                    onPressed: () {
-                      showYesNoDialog(() {
-                      IsarService().deleteTransect(transects[index]!);
-                      setState(() {
-                        transects.removeAt(index);
-                      });
-                      }, () {});
-                    },
-                    icon: const Icon(Icons.delete),
-                  )
-                ),
-              );
-            },
-          ) : const Center(child: Text('No transects yet.')),
+                          isThreeLine: true,
+                          trailing: IconButton(
+                            onPressed: () {
+                              showYesNoDialog(() {
+                                IsarService().deleteTransect(transects[index]!);
+                                setState(() {
+                                  transects.removeAt(index);
+                                });
+                              }, () {});
+                            },
+                            icon: const Icon(Icons.delete),
+                          )),
+                    );
+                  },
+                )
+              : const Center(child: Text('No transects yet.')),
         ),
         TextButton(
           onPressed: () => Navigator.pop(ContextHolder.currentContext),

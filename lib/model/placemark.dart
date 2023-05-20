@@ -63,5 +63,33 @@ class Placemark {
     }
     return '';
   }
+
+  String get durationWithDay {
+    if (startDate != null) {
+      if (endDate == null) {
+        return DateFormat('dd.MM.yyyy HH:mm:ss').format(startDate!);
+      }
+      return '${DateFormat('dd.MM.yyyy HH:mm:ss').format(startDate!)} - ${DateFormat('HH:mm:ss').format(endDate!)}';
+    }
+    return '';
+  }
+
+  String get speciesString {
+    /// return all species in format: species1, species2, species3
+    /// if no species, return 'No species recorded'
+    if (species != null) {
+      if (species!.isNotEmpty) {
+        return species!.map((e) => e.speciesString).join(';\n');
+      } else {
+        return 'No species recorded';
+      }
+    } else {
+      return 'No species recorded';
+    }
+  }
+
+  LatLng get latLng {
+    return LatLng(latitude!, longitude!);
+  }
 }
 

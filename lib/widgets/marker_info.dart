@@ -3,7 +3,6 @@ import 'package:bird_tracker/service/isar_service.dart';
 import 'package:bird_tracker/widgets/species_form.dart';
 import 'package:context_holder/context_holder.dart';
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 
 import '../model/placemark.dart';
 import '../utils/ux_builder.dart';
@@ -25,6 +24,7 @@ class _MarkerInfoState extends State<MarkerInfo> {
     showFullScreenDialog(SpeciesForm(
       onSaved: (species) {
         setState(() {
+          widget.selected?.endDate = DateTime.now();
           widget.selected?.species =
               widget.selected?.species?.toList(growable: true) ?? [];
           widget.selected?.species?.add(
@@ -52,10 +52,7 @@ class _MarkerInfoState extends State<MarkerInfo> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(widget.selected?.startDate != null
-                  ? DateFormat('dd.MM.yyyy HH:mm')
-                      .format(widget.selected!.startDate!)
-                  : ''),
+              Text(widget.selected?.durationWithDay ?? ''),
               Text('${widget.selected?.species?.length} species'),
             ],
           ),
@@ -63,7 +60,7 @@ class _MarkerInfoState extends State<MarkerInfo> {
             height: speciesLength * 80 > 340
                 ? 340
                 : speciesLength * 80 < 200 ? 200 : speciesLength * 80,
-            child: ListView.builder(
+            child: speciesLength > 0 ? ListView.builder(
               itemCount: speciesLength,
               itemBuilder: (context, index) {
                 int revIdx = speciesLength - index - 1;
@@ -73,8 +70,8 @@ class _MarkerInfoState extends State<MarkerInfo> {
                   subtitle: Text(
                       'Count: ${widget.selected?.species?[revIdx].count} '
                       'Time: ${widget.selected?.species?[revIdx].time} '
-                      'Direction: ${widget.selected?.species?[revIdx].direction?.toString().split('.').last} '
-                      'Strat.: ${widget.selected?.species?[revIdx].stratification?.toString().split('.').last} '),
+                      'Direction: ${widget.selected?.species?[revIdx].direction?.toString().split('.').last ?? '-'} '
+                      'Strat.: ${widget.selected?.species?[revIdx].stratification?.toString().split('.').last ?? '-'}'),
                   trailing: IconButton(
                     icon: const Icon(Icons.delete),
                     onPressed: () {
@@ -91,6 +88,7 @@ class _MarkerInfoState extends State<MarkerInfo> {
                       species: widget.selected?.species?[revIdx],
                       onSaved: (species) {
                         setState(() {
+                          widget.selected?.endDate = DateTime.now();
                           widget.selected?.species?[revIdx] = species;
                         });
                         DataService().transect?.updateMarker(widget.selected!);
@@ -100,7 +98,7 @@ class _MarkerInfoState extends State<MarkerInfo> {
                   }
                 ),
               );},
-            ),
+            ) : Text(widget.selected?.description ?? ''),
           ),
           Row(
             mainAxisAlignment: MainAxisAlignment.end,

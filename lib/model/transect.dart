@@ -3,10 +3,12 @@ import 'dart:typed_data';
 import 'package:bird_tracker/model/placemark.dart';
 import 'package:bird_tracker/model/point.dart';
 import 'package:bird_tracker/model/species.dart';
+import 'package:bird_tracker/utils/kml_utils.dart';
 import 'package:intl/intl.dart';
 import 'package:isar/isar.dart';
 import 'package:share_plus/share_plus.dart';
 
+import '../service/data_service.dart';
 import '../utils/location_helper.dart';
 
 part 'transect.g.dart';
@@ -89,12 +91,18 @@ class Transect {
             '${convertLatLng(placeMark.latitude!, true)},${convertLatLng(placeMark.longitude!, false)},'
             '${species.count},'
             '${species.description ?? ''},'
-            '${species.stratification.toString().split('.').last},'
-            '${species.direction.toString().split('.').last}');
+            '${species.stratification?.toShortString()},'
+            '${species.direction?.toShortString()}');
       });
     });
     return sb.toString();
   }
+
+  /// convert transect to KML
+  String toKML() {
+    return KMLUtils.generateKML(this);
+  }
+
 
   /// share transect as CSV file
   Future<void> shareCSV() async {
@@ -108,5 +116,35 @@ class Transect {
       text: 'Transect ${DateFormat('dd/MM/yyyy').format(startDate)}',
       subject: 'Transect ${DateFormat('dd/MM/yyyy').format(startDate)}',
     );
+  }
+
+  /// share transect as KML file
+  Future<void> shareKML() async {
+    Uint8List? bytes = Uint8List.fromList(toKML().codeUnits);
+    await Share.shareXFiles(
+      [
+        XFile.fromData(bytes,
+            mimeType: 'application/vnd.google-earth.kml+xml',
+            name: 'transect-${DateFormat('dd/MM/yyyy').format(startDate)}.kml'),
+      ],
+      text: 'Transect ${DateFormat('dd/MM/yyyy').format(startDate)} as KML',
+      subject: 'Transect ${DateFormat('dd/MM/yyyy').format(startDate)} as KML',
+    );
+  }
+
+  void goToFirst() {
+    if (points?.isNotEmpty ?? false) {
+      goToLocation(
+          points!.first.latLng, DataService().controller,
+          DataService().completer
+      );
+    } else {
+      if (markers?.isNotEmpty ?? false) {
+        goToLocation(
+            markers!.first.latLng, DataService().controller,
+            DataService().completer
+        );
+      }
+    }
   }
 }

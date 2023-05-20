@@ -35,8 +35,8 @@ class _HomePageState extends State<HomePage> {
 
   StreamSubscription<LocationData>? locationStream;
 
-  final Completer<GoogleMapController> _controller = Completer();
-  GoogleMapController? completer;
+  final Completer<GoogleMapController> _completer = Completer();
+  GoogleMapController? controller;
 // on below line we have specified camera position
   static const CameraPosition _kHome = CameraPosition(
     target: LatLng(44.8, 20.36),
@@ -60,8 +60,11 @@ class _HomePageState extends State<HomePage> {
           color: Colors.red,
           width: 5)
     };
-    _goToCurrentLocation();
+
     DataService().initPreferences();
+    DataService().completer = _completer;
+    DataService().controller = controller;
+    _goToCurrentLocation();
     super.initState();
   }
 
@@ -74,11 +77,11 @@ class _HomePageState extends State<HomePage> {
     if (locationStream != null) {
       await _stopListener();
       await goToCurrentLocation(_serviceEnabled ?? false, location,
-          _locationData, completer, _controller);
+          _locationData, controller, _completer);
       await _startListener();
     } else {
       await goToCurrentLocation(_serviceEnabled ?? false, location,
-          _locationData, completer, _controller);
+          _locationData, controller, _completer);
     }
   }
 
@@ -98,13 +101,13 @@ class _HomePageState extends State<HomePage> {
         ..longitude = _locationData!.longitude!);
 
       /// get current camera zum
-      completer?.getZoomLevel().then((value) {
+      controller?.getZoomLevel().then((value) {
         /// change camera position
         CameraPosition cameraPosition = CameraPosition(
           target: LatLng(_locationData!.latitude!, _locationData!.longitude!),
           zoom: value,
         );
-        completer
+        controller
             ?.animateCamera(CameraUpdate.newCameraPosition(cameraPosition));
       });
     });
@@ -167,6 +170,7 @@ class _HomePageState extends State<HomePage> {
               latitude: _locationData!.latitude!,
               longitude: _locationData!.longitude!,
               startDate: DateTime.now(),
+              endDate: DateTime.now(),
               id: transect?.markers?.length ?? 0,
               species: [species],
             ),
@@ -179,20 +183,30 @@ class _HomePageState extends State<HomePage> {
 
   _startTransect() async {
     if (transect != null) {
-      _startListener();
+      /// ask to continue or open new transect
+      showYesNoDialog(() {
+        _startListener();
+      }, () {
+        _startNewTransect();
+      },
+          title: 'Continue transect or start new one?',
+          yesText: 'Continue',
+          noText: 'New transect'
+      );
     } else {
-      // _markers.clear();
-      // points.clear();
-      transect = Transect()
-        ..startDate = DateTime.now()
-        ..points = List<Point>.empty(growable: true)
-        ..markers = List<Placemark>.empty(growable: true);
-      DataService().setTransect(transect);
-
-      /// insert transect to db
-      await IsarService().addTransect(transect!);
-      _startListener();
+      _startNewTransect();
     }
+  }
+
+  _startNewTransect() {
+    transect = Transect()
+      ..startDate = DateTime.now()
+      ..points = List<Point>.empty(growable: true)
+      ..markers = List<Placemark>.empty(growable: true);
+    DataService().setTransect(transect);
+    /// insert transect to db
+    IsarService().addTransect(transect!);
+    _startListener();
   }
 
   @override
@@ -252,7 +266,7 @@ class _HomePageState extends State<HomePage> {
             indoorViewEnabled: false,
             // on below line specifying controller on map complete.
             onMapCreated: (GoogleMapController controller) {
-              _controller.complete(controller);
+              _completer.complete(controller);
             },
           );
         }),

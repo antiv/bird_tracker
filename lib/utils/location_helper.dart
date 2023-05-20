@@ -41,6 +41,16 @@ goToCurrentLocation(
   // });
 }
 
+goToLocation(
+    LatLng locationData, GoogleMapController? controller, Completer<GoogleMapController> completer) async {
+  CameraPosition cameraPosition = CameraPosition(
+    target: locationData,
+    zoom: 16,
+  );
+  controller ??= await completer.future;
+  controller.animateCamera(CameraUpdate.newCameraPosition(cameraPosition));
+}
+
 Future<bool> enableBackgroundMode(
   Location location,
 ) async {

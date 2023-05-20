@@ -36,8 +36,8 @@ class _TransectInfoState extends State<TransectInfo> {
           ),
           Text('Duration: ${current?.duration ?? ''}'),
           Text('Distance: ${current?.distanceString ?? ''}'),
-          SizedBox(
-            height: 340,
+          Expanded(
+            // height: 340,
             child: ListView.builder(
               itemCount: current?.markers?.length ?? 0,
               itemBuilder: (context, index) {

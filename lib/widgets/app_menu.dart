@@ -80,7 +80,6 @@ class AppMenu extends StatelessWidget {
           onTap: () {
             Navigator.pop(context);
             _showTracksHistory();
-
           },
         ),
         ExpansionTile(
@@ -125,6 +124,14 @@ class AppMenu extends StatelessWidget {
               },
             ),
           ],
+        ),
+        ListTile(
+          leading: const MenuIcon(asset: 'owl', height: 36),
+          title: const Text('Import KML'),
+          onTap: () {
+            Navigator.pop(context);
+            showImportKMLDialog();
+          },
         ),
       ],
     ));

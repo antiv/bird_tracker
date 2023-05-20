@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/foundation.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -31,6 +33,9 @@ class DataService with ChangeNotifier{
 
   MapType? mapType;
 
+  Completer<GoogleMapController> completer = Completer();
+  GoogleMapController? controller;
+
   void setMapType(MapType? mapType) {
     this.mapType = mapType;
     notifyListeners();
@@ -43,6 +48,7 @@ class DataService with ChangeNotifier{
 
   void setTransect(Transect? transect) {
     this.transect = transect;
+    this.transect?.goToFirst();
     notifyListeners();
   }
 

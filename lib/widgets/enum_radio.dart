@@ -16,7 +16,7 @@ class _EnumRadioState extends State<EnumRadio> {
 
   @override
   void initState() {
-    enumValue = widget.value ?? widget.enumValues?.first;
+    enumValue = widget.value;
     super.initState();
   }
 
@@ -25,8 +25,8 @@ class _EnumRadioState extends State<EnumRadio> {
     return Stack(
       children: [
         Container(
-          margin: const EdgeInsets.symmetric(vertical: 10),
-          padding: const EdgeInsets.only(right: 10),
+          margin: const EdgeInsets.symmetric(vertical: 10, horizontal: 10),
+          padding: const EdgeInsets.only(right: 15),
           decoration: BoxDecoration(
             border: Border.all(color: Colors.grey),
             borderRadius: BorderRadius.circular(5),
@@ -66,16 +66,47 @@ class _EnumRadioState extends State<EnumRadio> {
           ),
         ),
         Positioned(
-          left: 10,
-          top: 5,
+          left: 20,
+          top: 3,
           child: Container(
             padding: const EdgeInsets.only(left: 5, right: 5),
             color: Colors.white,
             child: Text(
-              widget.value.runtimeType.toString().split('.').last,
+              widget.enumValues!.first.toString().split('.').first,
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
                 color: Colors.grey,
               )
+            ),
+          ),
+        ),
+        Positioned(
+          right: 2,
+          top: 0,
+          child: Container(
+            // padding: const EdgeInsets.only(left: 5, right: 5),
+            color: Colors.white,
+            child: SizedBox(
+              height: 20,
+              width: 20,
+              child: IconButton(
+                icon: const Icon(Icons.clear, size: 18, color: Colors.red),
+                style: ButtonStyle(
+                  padding: MaterialStateProperty.all<EdgeInsetsGeometry>(
+                    const EdgeInsets.all(0),
+                  ),
+                  backgroundColor: MaterialStateProperty.all<Color>(
+                    Colors.grey.shade300,
+                  ),
+                ),
+                onPressed: () {
+                  setState(() {
+                    enumValue = null;
+                    if (widget.onChanged != null) {
+                      widget.onChanged!(null);
+                    }
+                  });
+                },
+              ),
             ),
           ),
         ),

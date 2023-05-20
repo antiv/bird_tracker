@@ -31,8 +31,8 @@ class _SpeciesFormState extends State<SpeciesForm> {
       _spicesController.text = widget.species?.species ?? '';
       _countController.text = widget.species!.count.toString();
       _descriptionController.text = widget.species!.description ?? '';
-      _direction = widget.species!.direction!;
-      _stratification = widget.species!.stratification!;
+      _direction = widget.species?.direction;
+      _stratification = widget.species?.stratification;
     } else {
       _spicesFocusNode.requestFocus();
     }
