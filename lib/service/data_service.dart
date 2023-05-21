@@ -52,6 +52,11 @@ class DataService with ChangeNotifier{
     notifyListeners();
   }
 
+  void clearTransect() {
+    transect = null;
+    notifyListeners();
+  }
+
   String? getEmailPreference() {
     return prefs?.getString('email');
   }

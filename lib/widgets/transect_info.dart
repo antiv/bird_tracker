@@ -71,6 +71,13 @@ class _TransectInfoState extends State<TransectInfo> {
             mainAxisAlignment: MainAxisAlignment.end,
             children: [
               TextButton(
+                onPressed: () {
+                  Navigator.of(ContextHolder.currentContext,).pop();
+                  DataService().clearTransect();
+                  },
+                child: const Text('CLEAR MAP'),
+              ),
+              TextButton(
                 onPressed: () => Navigator.of(
                   ContextHolder.currentContext,
                 ).pop(),

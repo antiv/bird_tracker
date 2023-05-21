@@ -31,7 +31,7 @@ class AppMenu extends StatelessWidget {
       padding: EdgeInsets.zero,
       children: [
         SizedBox(
-          height: 94,
+          height: 110,
           child: DrawerHeader(
             decoration: BoxDecoration(
               color: Theme.of(context).primaryColor,
@@ -57,6 +57,7 @@ class AppMenu extends StatelessWidget {
                 ),
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.end,
+                  mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Text(kAppTitle, style: Theme.of(context).textTheme.titleSmall?.copyWith(color: Colors.white)),
                     Text('v$kAppVersion', style: Theme.of(context).textTheme.bodySmall?.copyWith(color: Colors.grey.shade300,)),

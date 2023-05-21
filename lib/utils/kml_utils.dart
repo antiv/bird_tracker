@@ -40,33 +40,7 @@ class KMLUtils {
           });
           builder.element('PolyStyle', nest: () {
             builder.element('color', nest: () {
-              builder.text('ff0051e6');
-            });
-          });
-        });
-
-        /// Normal placemark style
-        builder.element('Style', nest: () {
-          builder.attribute('id', 'normalPlacemark');
-          builder.element('IconStyle', nest: () {
-            builder.element('Icon', nest: () {
-              builder.element('href', nest: () {
-                builder.text(
-                    'https://www.gstatic.com/mapspro/images/stock/503-wht-blank_maps.png');
-              });
-            });
-          });
-        });
-
-        /// highlight placemark style
-        builder.element('Style', nest: () {
-          builder.attribute('id', 'highlightPlacemark');
-          builder.element('IconStyle', nest: () {
-            builder.element('Icon', nest: () {
-              builder.element('href', nest: () {
-                builder.text(
-                    'http://maps.google.com/mapfiles/kml/paddle/red-circle.png');
-              });
+              builder.text('ff9C1E13');
             });
           });
         });
@@ -74,20 +48,12 @@ class KMLUtils {
         /// placemark style for markers
         builder.element('Style', nest: () {
           builder.attribute('id', 'markerPlacemark');
-          builder.element('Pair', nest: () {
-            builder.element('key', nest: () {
-              builder.text('normal');
+          builder.element('IconStyle', nest: () {
+           builder.element('Color', nest: () {
+              builder.text('ff0051e6');
             });
-            builder.element('styleUrl', nest: () {
-              builder.text('#normalPlacemark');
-            });
-          });
-          builder.element('Pair', nest: () {
-            builder.element('key', nest: () {
-              builder.text('highlight');
-            });
-            builder.element('styleUrl', nest: () {
-              builder.text('#highlightPlacemark');
+            builder.element('scale', nest: () {
+              builder.text('1.0');
             });
           });
         });
