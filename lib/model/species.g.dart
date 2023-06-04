@@ -13,35 +13,45 @@ const SpeciesSchema = Schema(
   name: r'Species',
   id: -1724512414814962385,
   properties: {
-    r'count': PropertySchema(
+    r'code': PropertySchema(
       id: 0,
+      name: r'code',
+      type: IsarType.long,
+    ),
+    r'count': PropertySchema(
+      id: 1,
       name: r'count',
       type: IsarType.long,
     ),
     r'description': PropertySchema(
-      id: 1,
+      id: 2,
       name: r'description',
       type: IsarType.string,
     ),
     r'direction': PropertySchema(
-      id: 2,
+      id: 3,
       name: r'direction',
       type: IsarType.int,
       enumMap: _SpeciesdirectionEnumValueMap,
     ),
     r'species': PropertySchema(
-      id: 3,
+      id: 4,
       name: r'species',
       type: IsarType.string,
     ),
+    r'speciesString': PropertySchema(
+      id: 5,
+      name: r'speciesString',
+      type: IsarType.string,
+    ),
     r'stratification': PropertySchema(
-      id: 4,
+      id: 6,
       name: r'stratification',
       type: IsarType.int,
       enumMap: _SpeciesstratificationEnumValueMap,
     ),
     r'time': PropertySchema(
-      id: 5,
+      id: 7,
       name: r'time',
       type: IsarType.string,
     )
@@ -65,6 +75,7 @@ int _speciesEstimateSize(
     }
   }
   bytesCount += 3 + object.species.length * 3;
+  bytesCount += 3 + object.speciesString.length * 3;
   bytesCount += 3 + object.time.length * 3;
   return bytesCount;
 }
@@ -75,12 +86,14 @@ void _speciesSerialize(
   List<int> offsets,
   Map<Type, List<int>> allOffsets,
 ) {
-  writer.writeLong(offsets[0], object.count);
-  writer.writeString(offsets[1], object.description);
-  writer.writeInt(offsets[2], object.direction?.index);
-  writer.writeString(offsets[3], object.species);
-  writer.writeInt(offsets[4], object.stratification?.index);
-  writer.writeString(offsets[5], object.time);
+  writer.writeLong(offsets[0], object.code);
+  writer.writeLong(offsets[1], object.count);
+  writer.writeString(offsets[2], object.description);
+  writer.writeInt(offsets[3], object.direction?.index);
+  writer.writeString(offsets[4], object.species);
+  writer.writeString(offsets[5], object.speciesString);
+  writer.writeInt(offsets[6], object.stratification?.index);
+  writer.writeString(offsets[7], object.time);
 }
 
 Species _speciesDeserialize(
@@ -90,14 +103,15 @@ Species _speciesDeserialize(
   Map<Type, List<int>> allOffsets,
 ) {
   final object = Species();
-  object.count = reader.readLong(offsets[0]);
-  object.description = reader.readStringOrNull(offsets[1]);
+  object.code = reader.readLongOrNull(offsets[0]);
+  object.count = reader.readLong(offsets[1]);
+  object.description = reader.readStringOrNull(offsets[2]);
   object.direction =
-      _SpeciesdirectionValueEnumMap[reader.readIntOrNull(offsets[2])];
-  object.species = reader.readString(offsets[3]);
+      _SpeciesdirectionValueEnumMap[reader.readIntOrNull(offsets[3])];
+  object.species = reader.readString(offsets[4]);
   object.stratification =
-      _SpeciesstratificationValueEnumMap[reader.readIntOrNull(offsets[4])];
-  object.time = reader.readString(offsets[5]);
+      _SpeciesstratificationValueEnumMap[reader.readIntOrNull(offsets[6])];
+  object.time = reader.readString(offsets[7]);
   return object;
 }
 
@@ -109,17 +123,21 @@ P _speciesDeserializeProp<P>(
 ) {
   switch (propertyId) {
     case 0:
-      return (reader.readLong(offset)) as P;
+      return (reader.readLongOrNull(offset)) as P;
     case 1:
-      return (reader.readStringOrNull(offset)) as P;
+      return (reader.readLong(offset)) as P;
     case 2:
-      return (_SpeciesdirectionValueEnumMap[reader.readIntOrNull(offset)]) as P;
+      return (reader.readStringOrNull(offset)) as P;
     case 3:
-      return (reader.readString(offset)) as P;
+      return (_SpeciesdirectionValueEnumMap[reader.readIntOrNull(offset)]) as P;
     case 4:
+      return (reader.readString(offset)) as P;
+    case 5:
+      return (reader.readString(offset)) as P;
+    case 6:
       return (_SpeciesstratificationValueEnumMap[reader.readIntOrNull(offset)])
           as P;
-    case 5:
+    case 7:
       return (reader.readString(offset)) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
@@ -147,18 +165,87 @@ const _SpeciesdirectionValueEnumMap = {
   7: Direction.NW,
 };
 const _SpeciesstratificationEnumValueMap = {
-  'G': 0,
+  'D': 0,
   'S': 1,
-  'D': 2,
+  'G': 2,
 };
 const _SpeciesstratificationValueEnumMap = {
-  0: Stratification.G,
+  0: Stratification.D,
   1: Stratification.S,
-  2: Stratification.D,
+  2: Stratification.G,
 };
 
 extension SpeciesQueryFilter
     on QueryBuilder<Species, Species, QFilterCondition> {
+  QueryBuilder<Species, Species, QAfterFilterCondition> codeIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNull(
+        property: r'code',
+      ));
+    });
+  }
+
+  QueryBuilder<Species, Species, QAfterFilterCondition> codeIsNotNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNotNull(
+        property: r'code',
+      ));
+    });
+  }
+
+  QueryBuilder<Species, Species, QAfterFilterCondition> codeEqualTo(
+      int? value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'code',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<Species, Species, QAfterFilterCondition> codeGreaterThan(
+    int? value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'code',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<Species, Species, QAfterFilterCondition> codeLessThan(
+    int? value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'code',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<Species, Species, QAfterFilterCondition> codeBetween(
+    int? lower,
+    int? upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'code',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+      ));
+    });
+  }
+
   QueryBuilder<Species, Species, QAfterFilterCondition> countEqualTo(
       int value) {
     return QueryBuilder.apply(this, (query) {
@@ -553,6 +640,138 @@ extension SpeciesQueryFilter
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.greaterThan(
         property: r'species',
+        value: '',
+      ));
+    });
+  }
+
+  QueryBuilder<Species, Species, QAfterFilterCondition> speciesStringEqualTo(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'speciesString',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Species, Species, QAfterFilterCondition>
+      speciesStringGreaterThan(
+    String value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'speciesString',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Species, Species, QAfterFilterCondition> speciesStringLessThan(
+    String value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'speciesString',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Species, Species, QAfterFilterCondition> speciesStringBetween(
+    String lower,
+    String upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'speciesString',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Species, Species, QAfterFilterCondition> speciesStringStartsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.startsWith(
+        property: r'speciesString',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Species, Species, QAfterFilterCondition> speciesStringEndsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.endsWith(
+        property: r'speciesString',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Species, Species, QAfterFilterCondition> speciesStringContains(
+      String value,
+      {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.contains(
+        property: r'speciesString',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Species, Species, QAfterFilterCondition> speciesStringMatches(
+      String pattern,
+      {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.matches(
+        property: r'speciesString',
+        wildcard: pattern,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Species, Species, QAfterFilterCondition> speciesStringIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'speciesString',
+        value: '',
+      ));
+    });
+  }
+
+  QueryBuilder<Species, Species, QAfterFilterCondition>
+      speciesStringIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        property: r'speciesString',
         value: '',
       ));
     });

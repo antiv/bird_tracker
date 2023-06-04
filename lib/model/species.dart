@@ -8,6 +8,7 @@ class Species {
   late String species;
   late String time; // hh:mm:ss
   late int count;
+  late int? code;
 
   late String? description;
 
@@ -17,7 +18,7 @@ class Species {
   Direction? direction;
 
   String get speciesString {
-    return '$species: $count,  $time, ${stratification?.toShortString()}, ${direction?.toShortString()}, ${description ?? ''}';
+    return '$species: $count, ${code ?? '-'}, $time, ${stratification?.toShortString() ?? ''}, ${direction?.toShortString() ?? ''}; ${description ?? ''}';
   }
 
   List<Species>? listFromString(List<String> species) {
@@ -29,7 +30,7 @@ class Species {
     if (test.length < 2) {
       return null;
     }
-    if (test[1].split(', ').length < 4) {
+    if (test[1].split('; ').length < 5) {
       return null;
     }
     String species = e.split(': ')[0];
@@ -37,20 +38,21 @@ class Species {
     List<String> parts = rest.split(', ');
     return Species()
       ..species = species
-      ..count = int.parse(parts[0])
-      ..time = parts[1]
+      ..count = int.tryParse(parts[0]) ?? 1
+      ..code = int.tryParse(parts[1])
+      ..time = parts[2]
       ..stratification = Stratification.values
-          .firstWhereOrNull((element) => element.toShortString() == parts[2])
-      ..direction = Direction.values
           .firstWhereOrNull((element) => element.toShortString() == parts[3])
-      ..description = parts.length < 5 ? null : parts[4];
+      ..direction = Direction.values
+          .firstWhereOrNull((element) => element.toShortString() == parts[4])
+      ..description = parts.length < 6 ? null : '"${parts.sublist(5).join(', ')}"';
   }
 }
 
 enum Stratification {
-  G,
-  S,
   D,
+  S,
+  G,
 }
 
 extension StratificationExt on Stratification {

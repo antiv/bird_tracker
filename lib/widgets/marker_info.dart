@@ -22,7 +22,7 @@ class MarkerInfo extends StatefulWidget {
 class _MarkerInfoState extends State<MarkerInfo> {
   _addSpecies() {
     showFullScreenDialog(SpeciesForm(
-      onSaved: (species) {
+      onSaved: (species, close) {
         setState(() {
           widget.selected?.endDate = DateTime.now();
           widget.selected?.species =
@@ -48,7 +48,7 @@ class _MarkerInfoState extends State<MarkerInfo> {
           const SizedBox(
             height: 20,
           ),
-          Text('Marker ${(widget.selected?.id ?? 0) + 1}'),
+          Text('Point ${(widget.selected?.id ?? 0) + 1}'),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [

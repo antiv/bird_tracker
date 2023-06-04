@@ -68,7 +68,7 @@ class AppMenu extends StatelessWidget {
           ),
         ),
         ListTile(
-          leading: const MenuIcon(asset: 'blackbird',),
+          leading: const Icon(Icons.fmd_bad_outlined),
           title: const Text('Current track'),
           onTap: () {
             Navigator.pop(context);
@@ -76,7 +76,7 @@ class AppMenu extends StatelessWidget {
           },
         ),
         ListTile(
-          leading: const MenuIcon(asset: 'owl', height: 36),
+          leading: const Icon(Icons.history),
           title: const Text('Saved tracks'),
           onTap: () {
             Navigator.pop(context);
@@ -84,13 +84,13 @@ class AppMenu extends StatelessWidget {
           },
         ),
         ExpansionTile(
-          leading: const MenuIcon(asset: 'raven', height: 28),
+          leading: const Icon(Icons.tune),
           title: const Text('Settings'),
           // subtitle: Text(''),
           children: <Widget>[
             ListTile(
               title: const Text('Select map type'),
-              leading: const Icon(Icons.layers,),
+              leading: const Icon(Icons.layers_outlined,),
               subtitle: Row(
                 children: [
                   TextButton(onPressed: () {
@@ -110,7 +110,7 @@ class AppMenu extends StatelessWidget {
             ),
             ListTile(
                 title: const Text('Set email address'),
-              leading: const Icon(Icons.email,),
+              leading: const Icon(Icons.email_outlined,),
               onTap: () {
                   Navigator.pop(context);
                   showTextInputDialog(
@@ -127,7 +127,7 @@ class AppMenu extends StatelessWidget {
           ],
         ),
         ListTile(
-          leading: const MenuIcon(asset: 'owl', height: 36),
+          leading: const Icon(Icons.file_open_outlined),
           title: const Text('Import KML'),
           onTap: () {
             Navigator.pop(context);

@@ -47,7 +47,7 @@ class Placemark {
       markerId: MarkerId(id.toString()),
       position: LatLng(latitude!, longitude!),
       infoWindow: InfoWindow(
-        title: description ?? 'Marker ${(id ?? 0) + 1}',
+        title: description ?? 'Point ${(id ?? 0) + 1}',
       ),
       onTap: () => showMarkerInfo(id ?? 0),
     );
@@ -79,7 +79,7 @@ class Placemark {
     /// if no species, return 'No species recorded'
     if (species != null) {
       if (species!.isNotEmpty) {
-        return species!.map((e) => e.speciesString).join(';\n');
+        return species!.map((e) => e.speciesString).join('\n');
       } else {
         return 'No species recorded';
       }
@@ -88,6 +88,7 @@ class Placemark {
     }
   }
 
+  @ignore
   LatLng get latLng {
     return LatLng(latitude!, longitude!);
   }

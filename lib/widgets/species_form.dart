@@ -1,11 +1,15 @@
+import 'package:bird_tracker/configuration/codes.dart';
 import 'package:bird_tracker/configuration/species.dart';
 import 'package:bird_tracker/model/species.dart';
 import 'package:bird_tracker/widgets/enum_radio.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
+import '../utils/ux_builder.dart';
+import 'bt_autocomplete.dart';
+
 class SpeciesForm extends StatefulWidget {
-  const SpeciesForm({Key? key, this.onSaved, this.species }) : super(key: key);
+  const SpeciesForm({Key? key, this.onSaved, this.species}) : super(key: key);
 
   final Function? onSaved;
   final Species? species;
@@ -17,12 +21,15 @@ class SpeciesForm extends StatefulWidget {
 class _SpeciesFormState extends State<SpeciesForm> {
   final _formKey = GlobalKey<FormState>();
   final TextEditingController _spicesController = TextEditingController();
-  final TextEditingController _countController = TextEditingController();
+  final TextEditingController _countController =
+      TextEditingController(text: '1');
   final TextEditingController _descriptionController = TextEditingController();
   final FocusNode _spicesFocusNode = FocusNode();
 
   Direction? _direction;
-  Stratification? _stratification;
+  Stratification? _stratification = Stratification.D;
+
+  int? _code;
 
   @override
   void initState() {
@@ -32,7 +39,8 @@ class _SpeciesFormState extends State<SpeciesForm> {
       _countController.text = widget.species!.count.toString();
       _descriptionController.text = widget.species!.description ?? '';
       _direction = widget.species?.direction;
-      _stratification = widget.species?.stratification;
+      _stratification = widget.species?.stratification ?? Stratification.D;
+      _code = widget.species?.code;
     } else {
       _spicesFocusNode.requestFocus();
     }
@@ -48,18 +56,18 @@ class _SpeciesFormState extends State<SpeciesForm> {
     super.dispose();
   }
 
-  _save() {
+  _save(bool close) {
     if (_formKey.currentState!.validate()) {
       final species = Species()
         ..species = _spicesController.text
+        ..code = _code
         ..count = int.parse(_countController.text)
         ..time = DateFormat.Hms().format(DateTime.now())
         ..direction = _direction
         ..stratification = _stratification
-        ..description = _descriptionController.text
-      ;
+        ..description = _descriptionController.text;
       if (widget.onSaved != null) {
-        widget.onSaved!(species);
+        widget.onSaved!(species, close);
       }
       return true;
     } else {
@@ -70,14 +78,16 @@ class _SpeciesFormState extends State<SpeciesForm> {
       );
       return false;
     }
-
   }
 
   _clear() {
     _spicesController.clear();
-    _countController.clear();
+    _countController.text = '1';
     _spicesFocusNode.requestFocus();
     _descriptionController.clear();
+    _code = null;
+    _direction = null;
+    _stratification = Stratification.D;
   }
 
   @override
@@ -91,109 +101,103 @@ class _SpeciesFormState extends State<SpeciesForm> {
             key: _formKey,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
               children: [
-                RawAutocomplete(
-                  key: const ValueKey('autocomplete_text_field'),
-                  focusNode: _spicesFocusNode,
-                  textEditingController: _spicesController,
-                  fieldViewBuilder: (BuildContext context,
-                      TextEditingController textEditingController,
-                      FocusNode focusNode,
-                      VoidCallback onFieldSubmitted) {
-                    return TextFormField(
-                      controller: textEditingController,
-                      focusNode: focusNode,
-                      onFieldSubmitted: (String value) {
-                        onFieldSubmitted();
-                      },
-                      decoration: InputDecoration(
-                        labelText: 'Specie',
-                        prefixIcon: const Icon(Icons.search),
-                        suffixIcon: InkWell(
-                          child: const Icon(Icons.clear),
-                          onTap: () {
-                            _spicesController.clear();
+                BtAutocomplete(
+                  spicesFocusNode: _spicesFocusNode,
+                  spicesController: _spicesController,
+                  kOptions: kSpecies,
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  mainAxisSize: MainAxisSize.max,
+                  children: [
+                    Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children:[ TextButton(
+                          onPressed: () {
+                            /// show poput to select atlas code
+                            showDialogBox(
+                              AlertDialog(
+                                // icon: const Icon(Icons.code),
+                                backgroundColor: Theme.of(context).cardColor,
+                                title: const Text('Select atlas code'),
+                                contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 20),
+                                content: SingleChildScrollView(
+                                  child: Column(
+                                    children: [
+                                      for (var code in kCodes.keys)
+                                        Card(
+                                          child: ListTile(
+                                            leading: Text('$code.'),
+                                            dense: true,
+                                            title: Text(kCodes[code]!),
+                                            onTap: () {
+                                              setState(() {
+                                                _code = code;
+                                              });
+                                              Navigator.pop(context);
+                                            },
+                                          ),
+                                        ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            );
                           },
-                        ),
-                      ),
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return 'Please enter specie';
-                        }
-                        return null;
-                      },
-                    );
-                  },
-                  optionsViewBuilder: (BuildContext context,
-                      AutocompleteOnSelected<String> onSelected,
-                      Iterable<String> options) {
-                    return Align(
-                      alignment: Alignment.topLeft,
-                      child: Material(
-                        elevation: 4.0,
-                        child: SizedBox(
-                          height: 200.0,
-                          child: ListView(
-                            padding: const EdgeInsets.all(8.0),
-                            children: options
-                                .map((String option) => GestureDetector(
-                                      onTap: () {
-                                        onSelected(option);
-                                      },
-                                      child: ListTile(
-                                        title: Text(option),
-                                      ),
-                                    ))
-                                .toList(),
+                          child: Text(
+                            _code != null
+                                ? 'Select code: $_code'
+                                : 'Select atlas code',
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          )),
+                        InkWell(onTap:() => setState(() {
+                          _code = null;
+                        }),child: const Icon(Icons.clear, color: Colors.grey, size: 20,)),
+                      ],
+                    ),
+                    SizedBox(
+                      width: 160,
+                      child: TextFormField(
+                        controller: _countController,
+                        decoration: InputDecoration(
+                          labelText: 'Count',
+                          suffixIcon: InkWell(
+                              onTap: () {
+                                if (_countController.text.isNotEmpty) {
+                                  _countController.text =
+                                      (int.parse(_countController.text) + 1)
+                                          .toString();
+                                } else {
+                                  _countController.text = '1';
+                                }
+                              },
+                              child: const Icon(Icons.add)),
+                          prefixIcon: InkWell(
+                            child: const Icon(Icons.remove),
+                            onTap: () {
+                              if (_countController.text.isNotEmpty) {
+                                _countController.text =
+                                    (int.parse(_countController.text) - 1)
+                                        .toString();
+                              } else {
+                                _countController.text = '0';
+                              }
+                            },
                           ),
                         ),
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return 'Please enter count';
+                          }
+                          return null;
+                        },
+                        keyboardType: TextInputType.number,
                       ),
-                    );
-                  },
-                  optionsBuilder: (TextEditingValue textEditingValue) {
-                    if (textEditingValue.text == '') {
-                      return const Iterable<String>.empty();
-                    } else {
-                      return kSpecies.where((String option) {
-                        return option
-                            .toLowerCase()
-                            .contains(textEditingValue.text.toLowerCase());
-                      });
-                    }
-                  },
-                ),
-                TextFormField(
-                  controller: _countController,
-                  decoration: InputDecoration(
-                    labelText: 'Count',
-                    prefixIcon: InkWell(onTap: () {
-                      if (_countController.text.isNotEmpty) {
-                        _countController.text =
-                            (int.parse(_countController.text) + 1).toString();
-                      } else {
-                        _countController.text = '1';
-                      }
-                    }, child: const Icon(Icons.add)),
-                    suffixIcon: InkWell(
-                      child: const Icon(Icons.remove),
-                      onTap: () {
-                        if (_countController.text.isNotEmpty) {
-                          _countController.text =
-                              (int.parse(_countController.text) - 1).toString();
-                        } else {
-                          _countController.text = '0';
-                        }
-                      },
                     ),
-                  ),
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Please enter count';
-                    }
-                    return null;
-                  },
-
-                  keyboardType: TextInputType.number,
+                  ],
                 ),
 
                 /// Enum to radio buttons widget
@@ -207,26 +211,30 @@ class _SpeciesFormState extends State<SpeciesForm> {
                   value: _direction,
                   onChanged: (val) => _direction = val,
                 ),
+
                 /// description field
                 TextFormField(
                   controller: _descriptionController,
                   decoration: InputDecoration(
-                    labelText: 'Description',
+                    labelText: 'Behavior',
                     prefixIcon: const Icon(Icons.description),
                     suffixIcon: InkWell(
                       child: const Icon(Icons.clear),
                       onTap: () {
                         _descriptionController.clear();
                       },
-                  ),),
-                  maxLines: 3,
+                    ),
+                  ),
+                  maxLines: 2,
+                  keyboardType: TextInputType.multiline,
+                  textInputAction: TextInputAction.newline,
                 ),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
                     ElevatedButton(
                         onPressed: () {
-                          if (_save()) {
+                          if (_save(false)) {
                             Navigator.pop(context);
                           }
                         },
@@ -234,10 +242,13 @@ class _SpeciesFormState extends State<SpeciesForm> {
                     const SizedBox(width: 10),
                     ElevatedButton(
                         onPressed: () {
-                          _save();
-                          _clear();
+                          if (_save(false)) {
+                            setState(() {
+                              _clear();
+                            });
+                          }
                         },
-                        child: const Text('Sava and new')),
+                        child: const Text('Save and new')),
                     // const SizedBox(width: 10),
                     // ElevatedButton(onPressed: () => Navigator.pop(context), child: const Text('Cancel')),
                   ],

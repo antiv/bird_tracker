@@ -18,34 +18,49 @@ const PlacemarkSchema = Schema(
       name: r'description',
       type: IsarType.string,
     ),
-    r'endDate': PropertySchema(
+    r'duration': PropertySchema(
       id: 1,
+      name: r'duration',
+      type: IsarType.string,
+    ),
+    r'durationWithDay': PropertySchema(
+      id: 2,
+      name: r'durationWithDay',
+      type: IsarType.string,
+    ),
+    r'endDate': PropertySchema(
+      id: 3,
       name: r'endDate',
       type: IsarType.dateTime,
     ),
     r'id': PropertySchema(
-      id: 2,
+      id: 4,
       name: r'id',
       type: IsarType.long,
     ),
     r'latitude': PropertySchema(
-      id: 3,
+      id: 5,
       name: r'latitude',
       type: IsarType.double,
     ),
     r'longitude': PropertySchema(
-      id: 4,
+      id: 6,
       name: r'longitude',
       type: IsarType.double,
     ),
     r'species': PropertySchema(
-      id: 5,
+      id: 7,
       name: r'species',
       type: IsarType.objectList,
       target: r'Species',
     ),
+    r'speciesString': PropertySchema(
+      id: 8,
+      name: r'speciesString',
+      type: IsarType.string,
+    ),
     r'startDate': PropertySchema(
-      id: 6,
+      id: 9,
       name: r'startDate',
       type: IsarType.dateTime,
     )
@@ -68,6 +83,8 @@ int _placemarkEstimateSize(
       bytesCount += 3 + value.length * 3;
     }
   }
+  bytesCount += 3 + object.duration.length * 3;
+  bytesCount += 3 + object.durationWithDay.length * 3;
   {
     final list = object.species;
     if (list != null) {
@@ -81,6 +98,7 @@ int _placemarkEstimateSize(
       }
     }
   }
+  bytesCount += 3 + object.speciesString.length * 3;
   return bytesCount;
 }
 
@@ -91,17 +109,20 @@ void _placemarkSerialize(
   Map<Type, List<int>> allOffsets,
 ) {
   writer.writeString(offsets[0], object.description);
-  writer.writeDateTime(offsets[1], object.endDate);
-  writer.writeLong(offsets[2], object.id);
-  writer.writeDouble(offsets[3], object.latitude);
-  writer.writeDouble(offsets[4], object.longitude);
+  writer.writeString(offsets[1], object.duration);
+  writer.writeString(offsets[2], object.durationWithDay);
+  writer.writeDateTime(offsets[3], object.endDate);
+  writer.writeLong(offsets[4], object.id);
+  writer.writeDouble(offsets[5], object.latitude);
+  writer.writeDouble(offsets[6], object.longitude);
   writer.writeObjectList<Species>(
-    offsets[5],
+    offsets[7],
     allOffsets,
     SpeciesSchema.serialize,
     object.species,
   );
-  writer.writeDateTime(offsets[6], object.startDate);
+  writer.writeString(offsets[8], object.speciesString);
+  writer.writeDateTime(offsets[9], object.startDate);
 }
 
 Placemark _placemarkDeserialize(
@@ -112,17 +133,17 @@ Placemark _placemarkDeserialize(
 ) {
   final object = Placemark(
     description: reader.readStringOrNull(offsets[0]),
-    endDate: reader.readDateTimeOrNull(offsets[1]),
-    id: reader.readLongOrNull(offsets[2]),
-    latitude: reader.readDoubleOrNull(offsets[3]),
-    longitude: reader.readDoubleOrNull(offsets[4]),
+    endDate: reader.readDateTimeOrNull(offsets[3]),
+    id: reader.readLongOrNull(offsets[4]),
+    latitude: reader.readDoubleOrNull(offsets[5]),
+    longitude: reader.readDoubleOrNull(offsets[6]),
     species: reader.readObjectList<Species>(
-      offsets[5],
+      offsets[7],
       SpeciesSchema.deserialize,
       allOffsets,
       Species(),
     ),
-    startDate: reader.readDateTimeOrNull(offsets[6]),
+    startDate: reader.readDateTimeOrNull(offsets[9]),
   );
   return object;
 }
@@ -137,21 +158,27 @@ P _placemarkDeserializeProp<P>(
     case 0:
       return (reader.readStringOrNull(offset)) as P;
     case 1:
-      return (reader.readDateTimeOrNull(offset)) as P;
+      return (reader.readString(offset)) as P;
     case 2:
-      return (reader.readLongOrNull(offset)) as P;
+      return (reader.readString(offset)) as P;
     case 3:
-      return (reader.readDoubleOrNull(offset)) as P;
+      return (reader.readDateTimeOrNull(offset)) as P;
     case 4:
-      return (reader.readDoubleOrNull(offset)) as P;
+      return (reader.readLongOrNull(offset)) as P;
     case 5:
+      return (reader.readDoubleOrNull(offset)) as P;
+    case 6:
+      return (reader.readDoubleOrNull(offset)) as P;
+    case 7:
       return (reader.readObjectList<Species>(
         offset,
         SpeciesSchema.deserialize,
         allOffsets,
         Species(),
       )) as P;
-    case 6:
+    case 8:
+      return (reader.readString(offset)) as P;
+    case 9:
       return (reader.readDateTimeOrNull(offset)) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
@@ -307,6 +334,273 @@ extension PlacemarkQueryFilter
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.greaterThan(
         property: r'description',
+        value: '',
+      ));
+    });
+  }
+
+  QueryBuilder<Placemark, Placemark, QAfterFilterCondition> durationEqualTo(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'duration',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Placemark, Placemark, QAfterFilterCondition> durationGreaterThan(
+    String value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'duration',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Placemark, Placemark, QAfterFilterCondition> durationLessThan(
+    String value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'duration',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Placemark, Placemark, QAfterFilterCondition> durationBetween(
+    String lower,
+    String upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'duration',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Placemark, Placemark, QAfterFilterCondition> durationStartsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.startsWith(
+        property: r'duration',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Placemark, Placemark, QAfterFilterCondition> durationEndsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.endsWith(
+        property: r'duration',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Placemark, Placemark, QAfterFilterCondition> durationContains(
+      String value,
+      {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.contains(
+        property: r'duration',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Placemark, Placemark, QAfterFilterCondition> durationMatches(
+      String pattern,
+      {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.matches(
+        property: r'duration',
+        wildcard: pattern,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Placemark, Placemark, QAfterFilterCondition> durationIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'duration',
+        value: '',
+      ));
+    });
+  }
+
+  QueryBuilder<Placemark, Placemark, QAfterFilterCondition>
+      durationIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        property: r'duration',
+        value: '',
+      ));
+    });
+  }
+
+  QueryBuilder<Placemark, Placemark, QAfterFilterCondition>
+      durationWithDayEqualTo(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'durationWithDay',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Placemark, Placemark, QAfterFilterCondition>
+      durationWithDayGreaterThan(
+    String value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'durationWithDay',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Placemark, Placemark, QAfterFilterCondition>
+      durationWithDayLessThan(
+    String value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'durationWithDay',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Placemark, Placemark, QAfterFilterCondition>
+      durationWithDayBetween(
+    String lower,
+    String upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'durationWithDay',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Placemark, Placemark, QAfterFilterCondition>
+      durationWithDayStartsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.startsWith(
+        property: r'durationWithDay',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Placemark, Placemark, QAfterFilterCondition>
+      durationWithDayEndsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.endsWith(
+        property: r'durationWithDay',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Placemark, Placemark, QAfterFilterCondition>
+      durationWithDayContains(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.contains(
+        property: r'durationWithDay',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Placemark, Placemark, QAfterFilterCondition>
+      durationWithDayMatches(String pattern, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.matches(
+        property: r'durationWithDay',
+        wildcard: pattern,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Placemark, Placemark, QAfterFilterCondition>
+      durationWithDayIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'durationWithDay',
+        value: '',
+      ));
+    });
+  }
+
+  QueryBuilder<Placemark, Placemark, QAfterFilterCondition>
+      durationWithDayIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        property: r'durationWithDay',
         value: '',
       ));
     });
@@ -710,6 +1004,142 @@ extension PlacemarkQueryFilter
         upper,
         includeUpper,
       );
+    });
+  }
+
+  QueryBuilder<Placemark, Placemark, QAfterFilterCondition>
+      speciesStringEqualTo(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'speciesString',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Placemark, Placemark, QAfterFilterCondition>
+      speciesStringGreaterThan(
+    String value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'speciesString',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Placemark, Placemark, QAfterFilterCondition>
+      speciesStringLessThan(
+    String value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'speciesString',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Placemark, Placemark, QAfterFilterCondition>
+      speciesStringBetween(
+    String lower,
+    String upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'speciesString',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Placemark, Placemark, QAfterFilterCondition>
+      speciesStringStartsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.startsWith(
+        property: r'speciesString',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Placemark, Placemark, QAfterFilterCondition>
+      speciesStringEndsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.endsWith(
+        property: r'speciesString',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Placemark, Placemark, QAfterFilterCondition>
+      speciesStringContains(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.contains(
+        property: r'speciesString',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Placemark, Placemark, QAfterFilterCondition>
+      speciesStringMatches(String pattern, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.matches(
+        property: r'speciesString',
+        wildcard: pattern,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Placemark, Placemark, QAfterFilterCondition>
+      speciesStringIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'speciesString',
+        value: '',
+      ));
+    });
+  }
+
+  QueryBuilder<Placemark, Placemark, QAfterFilterCondition>
+      speciesStringIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        property: r'speciesString',
+        value: '',
+      ));
     });
   }
 

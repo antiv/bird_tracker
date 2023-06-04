@@ -9,6 +9,7 @@ import 'package:isar/isar.dart';
 import 'package:share_plus/share_plus.dart';
 
 import '../service/data_service.dart';
+import '../utils/file_utils.dart';
 import '../utils/location_helper.dart';
 
 part 'transect.g.dart';
@@ -17,6 +18,7 @@ part 'transect.g.dart';
 class Transect {
   Id id = Isar.autoIncrement;
   late DateTime startDate;
+  String? name;
   DateTime? endDate;
   String? description;
   List<Point>? points;
@@ -39,6 +41,16 @@ class Transect {
     if (endDate != null) {
       final duration = endDate!.difference(startDate);
       return '${duration.inHours}h ${duration.inMinutes.remainder(60)}m ${duration.inSeconds.remainder(60)}s';
+    }
+    return '';
+  }
+  /// get duration in format hh:mm:ss - hh:mm:ss
+  String get fromTo {
+    if (startDate != null) {
+      if (endDate == null) {
+        return DateFormat('hh:mm:ss').format(startDate);
+      }
+      return '${DateFormat('hh:mm:ss').format(startDate)} - ${DateFormat('hh:mm:ss').format(endDate!)}';
     }
     return '';
   }
@@ -82,17 +94,20 @@ class Transect {
   String toCSV() {
     final sb = StringBuffer();
     sb.writeln(
-        'Specie,Date, Time (from - to), Latitude(DMS),Longitude(DMS),Count, Comment, Stratification, Direction');
+        'Specie, Date, Time (from - to), Time, Latitude(DMS),Longitude(DMS),Count, Behavior, Stratification, Direction, Code');
     markers?.forEach((placeMark) {
       placeMark.species?.forEach((species) {
         sb.writeln('${species.species},'
             '${DateFormat('dd/MM/yyyy').format(placeMark.startDate!)},'
             '${placeMark.duration},'
-            '${convertLatLng(placeMark.latitude!, true)},${convertLatLng(placeMark.longitude!, false)},'
+            '${species.time},'
+            '${convertLatLng(placeMark.latitude!, true)},'
+            '${convertLatLng(placeMark.longitude!, false)},'
             '${species.count},'
             '${species.description ?? ''},'
             '${species.stratification?.toShortString()},'
-            '${species.direction?.toShortString()}');
+            '${species.direction?.toShortString()},'
+            '${species.code}');
       });
     });
     return sb.toString();
@@ -107,11 +122,10 @@ class Transect {
   /// share transect as CSV file
   Future<void> shareCSV() async {
     Uint8List? bytes = Uint8List.fromList(toCSV().codeUnits);
+    String path = await storeFileTemporarily(bytes, 'transect-${DateFormat('dd-MM-yyyy').format(startDate)}.csv');
     await Share.shareXFiles(
       [
-        XFile.fromData(bytes,
-            mimeType: 'text/csv',
-            name: 'transect-${DateFormat('dd/MM/yyyy').format(startDate)}.csv'),
+        XFile(path)
       ],
       text: 'Transect ${DateFormat('dd/MM/yyyy').format(startDate)}',
       subject: 'Transect ${DateFormat('dd/MM/yyyy').format(startDate)}',
@@ -121,11 +135,11 @@ class Transect {
   /// share transect as KML file
   Future<void> shareKML() async {
     Uint8List? bytes = Uint8List.fromList(toKML().codeUnits);
+    String path = await storeFileTemporarily(bytes, 'transect-${DateFormat('dd-MM-yyyy').format(startDate)}.kml');
+
     await Share.shareXFiles(
       [
-        XFile.fromData(bytes,
-            mimeType: 'application/vnd.google-earth.kml+xml',
-            name: 'transect-${DateFormat('dd/MM/yyyy').format(startDate)}.kml'),
+        XFile(path)
       ],
       text: 'Transect ${DateFormat('dd/MM/yyyy').format(startDate)} as KML',
       subject: 'Transect ${DateFormat('dd/MM/yyyy').format(startDate)} as KML',

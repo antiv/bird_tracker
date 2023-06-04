@@ -66,7 +66,7 @@ class KMLUtils {
               builder.text('#markerPlacemark');
             });
             builder.element('name', nest: () {
-              builder.text('Marker ${marker.id! + 1}');
+              builder.text('Point ${marker.id! + 1}');
             });
             builder.element('description', nest: () {
               // builder.text('<![CDATA[  ${marker.speciesString ?? ''} ]]>');
@@ -157,7 +157,7 @@ class KMLUtils {
     if (description == null) {
       return null;
     }
-    final species = description.split(';');
+    final species = description.split('\n');
     if (species.isEmpty) {
       return null;
     } else {

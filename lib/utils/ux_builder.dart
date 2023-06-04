@@ -32,12 +32,6 @@ import '../model/transect.dart';
 showBottomModal(Widget widget) {
   showModalBottomSheet(
     context: ContextHolder.currentContext,
-    // shape: const RoundedRectangleBorder(
-    //   borderRadius: BorderRadius.only(
-    //     topLeft: Radius.circular(15.0),
-    //     topRight: Radius.circular(15.0),
-    //   ),
-    // ),
     builder: (BuildContext context) {
       return widget;
     },
@@ -145,7 +139,7 @@ showFullScreenDialog(Widget widget) {
         appBar: AppBar(
           toolbarHeight: 30,
           elevation: 0,
-          title: const Text('Add Specie'),
+          title: const Text('Add Species'),
           actions: [
             IconButton(
               onPressed: () => Navigator.of(ContextHolder.currentContext).pop(),

@@ -25,13 +25,15 @@ class _EnumRadioState extends State<EnumRadio> {
     return Stack(
       children: [
         Container(
+          width: double.infinity,
           margin: const EdgeInsets.symmetric(vertical: 10, horizontal: 10),
           padding: const EdgeInsets.only(right: 15),
           decoration: BoxDecoration(
             border: Border.all(color: Colors.grey),
-            borderRadius: BorderRadius.circular(5),
+            borderRadius: BorderRadius.circular(15),
           ),
           child: Wrap(
+            alignment: WrapAlignment.spaceEvenly,
             children: widget.enumValues
                 ?.map((e) => InkWell(
                   onTap: () {
@@ -81,7 +83,7 @@ class _EnumRadioState extends State<EnumRadio> {
         ),
         Positioned(
           right: 2,
-          top: 0,
+          top: 3,
           child: Container(
             // padding: const EdgeInsets.only(left: 5, right: 5),
             color: Colors.white,

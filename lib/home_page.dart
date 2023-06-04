@@ -12,6 +12,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_speed_dial/flutter_speed_dial.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:intl/intl.dart';
 import 'package:location/location.dart';
 import 'package:provider/provider.dart';
 
@@ -144,39 +145,69 @@ class _HomePageState extends State<HomePage> {
   }
 
   _stopTransect() async {
-    /// Ask for confirmation
-    showYesNoDialog(() {
+    /// showTextInputDialog to enter transect name
+    await showTextInputDialog(
+        'Enter transect name', 'Transect name', 'Transect ${DateFormat('dd.MM.yyyy').format(DateTime.now())}', (name) {
       _stopListener();
       transect?.endDate = DateTime.now();
+      transect?.name = name;
       transect?.points = _polyLines?.first.points
           .map((e) => Point()
-            ..latitude = e.latitude
-            ..longitude = e.longitude)
+        ..latitude = e.latitude
+        ..longitude = e.longitude)
           .toList();
       IsarService().updateTransect(transect!);
       transect = null;
       DataService().setTransect(null);
       setState(() {});
-    }, () {});
+    });
   }
 
   _addMarker() {
     showFullScreenDialog(SpeciesForm(
-      onSaved: (species) {
+      onSaved: (species, close) {
         setState(() {
           transect?.markers = transect?.markers?.toList(growable: true) ?? [];
-          transect?.markers?.add(
-            Placemark(
-              latitude: _locationData!.latitude!,
-              longitude: _locationData!.longitude!,
-              startDate: DateTime.now(),
-              endDate: DateTime.now(),
-              id: transect?.markers?.length ?? 0,
-              species: [species],
-            ),
-          );
+          /// Find last marker
+          /// if this marker is not closed, add species to it
+          /// else create new marker
+          if (transect?.markers?.isNotEmpty ?? false) {
+            Placemark lastMarker = transect!.markers!.last;
+            if (lastMarker.endDate == null) {
+              lastMarker.species?.add(species);
+              /// if close set to true, close marker
+              if (close) {
+                lastMarker.endDate = DateTime.now();
+              }
+              return;
+            } else {
+              transect?.markers?.add(
+                Placemark(
+                  latitude: _locationData!.latitude!,
+                  longitude: _locationData!.longitude!,
+                  startDate: DateTime.now(),
+                  endDate: null,
+                  id: transect?.markers?.length ?? 0,
+                  species: [species],
+                ),
+              );
+            }
+          } else {
+            transect?.markers?.add(
+              Placemark(
+                latitude: _locationData!.latitude!,
+                longitude: _locationData!.longitude!,
+                startDate: DateTime.now(),
+                endDate: null,
+                id: transect?.markers?.length ?? 0,
+                species: [species],
+              ),
+            );
+          }
         });
         _goToCurrentLocation();
+        print(transect?.markers?.last.id);
+        showMarkerInfo(transect?.markers?.last.id ?? 0);
       },
     ));
   }
