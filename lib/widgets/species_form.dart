@@ -30,11 +30,13 @@ class _SpeciesFormState extends State<SpeciesForm> {
   Stratification? _stratification = Stratification.D;
 
   int? _code;
+  bool _isEdit = false;
 
   @override
   void initState() {
     // _spicesFocusNode.requestFocus();
     if (widget.species != null) {
+      _isEdit = true;
       _spicesController.text = widget.species?.species ?? '';
       _countController.text = widget.species!.count.toString();
       _descriptionController.text = widget.species!.description ?? '';
@@ -81,13 +83,15 @@ class _SpeciesFormState extends State<SpeciesForm> {
   }
 
   _clear() {
-    _spicesController.clear();
-    _countController.text = '1';
-    _spicesFocusNode.requestFocus();
-    _descriptionController.clear();
-    _code = null;
-    _direction = null;
-    _stratification = Stratification.D;
+    setState(() {
+      _spicesController.clear();
+      _countController.text = '1';
+      _spicesFocusNode.requestFocus();
+      _descriptionController.clear();
+      _code = null;
+      _direction = null;
+      _stratification = Stratification.D;
+    });
   }
 
   @override
@@ -202,14 +206,16 @@ class _SpeciesFormState extends State<SpeciesForm> {
 
                 /// Enum to radio buttons widget
                 EnumRadio(
+                  key: ValueKey('stratification$_stratification'),
                   enumValues: Stratification.values,
                   value: _stratification,
-                  onChanged: (val) => _stratification = val,
+                  onChanged: (val) => setState(() {_stratification = val;}),
                 ),
                 EnumRadio(
+                  key: ValueKey('direction$_direction'),
                   enumValues: Direction.values,
                   value: _direction,
-                  onChanged: (val) => _direction = val,
+                  onChanged: (val) => setState(() {_direction = val;}),
                 ),
 
                 /// description field
@@ -239,13 +245,13 @@ class _SpeciesFormState extends State<SpeciesForm> {
                           }
                         },
                         child: const Text('Save')),
+                    if (!_isEdit)
                     const SizedBox(width: 10),
+                    if (!_isEdit)
                     ElevatedButton(
                         onPressed: () {
                           if (_save(false)) {
-                            setState(() {
-                              _clear();
-                            });
+                            _clear();
                           }
                         },
                         child: const Text('Save and new')),

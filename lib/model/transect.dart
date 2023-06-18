@@ -46,13 +46,10 @@ class Transect {
   }
   /// get duration in format hh:mm:ss - hh:mm:ss
   String get fromTo {
-    if (startDate != null) {
       if (endDate == null) {
         return DateFormat('hh:mm:ss').format(startDate);
       }
       return '${DateFormat('hh:mm:ss').format(startDate)} - ${DateFormat('hh:mm:ss').format(endDate!)}';
-    }
-    return '';
   }
 
   double get distance {
@@ -94,7 +91,7 @@ class Transect {
   String toCSV() {
     final sb = StringBuffer();
     sb.writeln(
-        'Specie, Date, Time (from - to), Time, Latitude(DMS),Longitude(DMS),Count, Behavior, Stratification, Direction, Code');
+        'Species, Date, Time (from - to), Time, Latitude(DMS),Longitude(DMS),Count, Behavior, Stratification, Direction, Code');
     markers?.forEach((placeMark) {
       placeMark.species?.forEach((species) {
         sb.writeln('${species.species},'
@@ -104,10 +101,10 @@ class Transect {
             '${convertLatLng(placeMark.latitude!, true)},'
             '${convertLatLng(placeMark.longitude!, false)},'
             '${species.count},'
-            '${species.description ?? ''},'
-            '${species.stratification?.toShortString()},'
-            '${species.direction?.toShortString()},'
-            '${species.code}');
+            '"${species.description ?? ''}",'
+            '${species.stratification != null ? species.stratification?.toShortString() : ''},'
+            '${species.direction != null ? species.direction?.toShortString() : ''},'
+            '${species.code ?? ''}');
       });
     });
     return sb.toString();
@@ -122,27 +119,27 @@ class Transect {
   /// share transect as CSV file
   Future<void> shareCSV() async {
     Uint8List? bytes = Uint8List.fromList(toCSV().codeUnits);
-    String path = await storeFileTemporarily(bytes, 'transect-${DateFormat('dd-MM-yyyy').format(startDate)}.csv');
+    String path = await storeFileTemporarily(bytes, '$name-${DateFormat('dd-MM-yyyy').format(startDate)}.csv');
     await Share.shareXFiles(
       [
         XFile(path)
       ],
-      text: 'Transect ${DateFormat('dd/MM/yyyy').format(startDate)}',
-      subject: 'Transect ${DateFormat('dd/MM/yyyy').format(startDate)}',
+      text: '$name ${DateFormat('dd/MM/yyyy').format(startDate)}',
+      subject: '$name ${DateFormat('dd/MM/yyyy').format(startDate)}',
     );
   }
 
   /// share transect as KML file
   Future<void> shareKML() async {
     Uint8List? bytes = Uint8List.fromList(toKML().codeUnits);
-    String path = await storeFileTemporarily(bytes, 'transect-${DateFormat('dd-MM-yyyy').format(startDate)}.kml');
+    String path = await storeFileTemporarily(bytes, '$name-${DateFormat('dd-MM-yyyy').format(startDate)}.kml');
 
     await Share.shareXFiles(
       [
         XFile(path)
       ],
-      text: 'Transect ${DateFormat('dd/MM/yyyy').format(startDate)} as KML',
-      subject: 'Transect ${DateFormat('dd/MM/yyyy').format(startDate)} as KML',
+      text: '$name ${DateFormat('dd/MM/yyyy').format(startDate)} as KML',
+      subject: '$name ${DateFormat('dd/MM/yyyy').format(startDate)} as KML',
     );
   }
 

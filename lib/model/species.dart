@@ -30,7 +30,9 @@ class Species {
     if (test.length < 2) {
       return null;
     }
-    if (test[1].split('; ').length < 5) {
+    /// remove first value from test and join the rest
+    final String data = test.sublist(1).join(': ');
+    if (data.split(', ').length < 5) {
       return null;
     }
     String species = e.split(': ')[0];

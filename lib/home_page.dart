@@ -38,6 +38,7 @@ class _HomePageState extends State<HomePage> {
 
   final Completer<GoogleMapController> _completer = Completer();
   GoogleMapController? controller;
+  Set<Marker> _markers = {};
 // on below line we have specified camera position
   static const CameraPosition _kHome = CameraPosition(
     target: LatLng(44.8, 20.36),
@@ -79,6 +80,10 @@ class _HomePageState extends State<HomePage> {
       await _stopListener();
       await goToCurrentLocation(_serviceEnabled ?? false, location,
           _locationData, controller, _completer);
+      for (final mark in _markers) {
+        await controller?.hideMarkerInfoWindow(mark.markerId);
+      }
+      await DataService().controller?.showMarkerInfoWindow(_markers.last.markerId);
       await _startListener();
     } else {
       await goToCurrentLocation(_serviceEnabled ?? false, location,
@@ -127,7 +132,6 @@ class _HomePageState extends State<HomePage> {
   }
 
   _pauseListener() async {
-    // locationStream?.pause();
     /// Save transect with points and markers
     // transect?.markers = Placemark.fromMarkers(_markers);
     transect?.points = _polyLines?.first.points
@@ -156,6 +160,11 @@ class _HomePageState extends State<HomePage> {
         ..latitude = e.latitude
         ..longitude = e.longitude)
           .toList();
+      /// close last marker if not closed
+      if (transect?.markers?.isNotEmpty ?? false) {
+        Placemark lastMarker = transect!.markers!.last;
+        lastMarker.endDate ??= DateTime.now();
+      }
       IsarService().updateTransect(transect!);
       transect = null;
       DataService().setTransect(null);
@@ -164,6 +173,11 @@ class _HomePageState extends State<HomePage> {
   }
 
   _addMarker() {
+    /// close last marker
+    if (transect?.markers?.isNotEmpty ?? false) {
+      Placemark lastMarker = transect!.markers!.last;
+      lastMarker.endDate ??= DateTime.now();
+    }
     showFullScreenDialog(SpeciesForm(
       onSaved: (species, close) {
         setState(() {
@@ -175,10 +189,7 @@ class _HomePageState extends State<HomePage> {
             Placemark lastMarker = transect!.markers!.last;
             if (lastMarker.endDate == null) {
               lastMarker.species?.add(species);
-              /// if close set to true, close marker
-              if (close) {
-                lastMarker.endDate = DateTime.now();
-              }
+              IsarService().updateTransect(transect!);
               return;
             } else {
               transect?.markers?.add(
@@ -206,8 +217,7 @@ class _HomePageState extends State<HomePage> {
           }
         });
         _goToCurrentLocation();
-        print(transect?.markers?.last.id);
-        showMarkerInfo(transect?.markers?.last.id ?? 0);
+        IsarService().updateTransect(transect!);
       },
     ));
   }
@@ -272,12 +282,13 @@ class _HomePageState extends State<HomePage> {
                   ?.map((e) => LatLng(e.latitude, e.longitude))
                   .toList() ??
               []);
+          _markers = Set<Marker>.of(
+              transect?.markers?.map((e) => e.toMarker()) ?? []);
           return GoogleMap(
             // on below line setting camera position
             initialCameraPosition: _kHome,
             // on below line we are setting markers on the map
-            markers: Set<Marker>.of(
-                transect?.markers?.map((e) => e.toMarker()) ?? []),
+            markers: _markers,
             polylines: _polyLines ?? {},
             // on below line specifying map type.
             mapType: dataService.mapType ?? MapType.hybrid,
@@ -298,6 +309,7 @@ class _HomePageState extends State<HomePage> {
             // on below line specifying controller on map complete.
             onMapCreated: (GoogleMapController controller) {
               _completer.complete(controller);
+              DataService().controller = controller;
             },
           );
         }),

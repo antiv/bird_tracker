@@ -126,7 +126,7 @@ showSnackBar(String message, {int duration = 1}) {
   );
 }
 
-showFullScreenDialog(Widget widget) {
+showFullScreenDialog(Widget widget, {String? title}) {
   showGeneralDialog(
     context: ContextHolder.currentContext,
     // barrierColor: Colors.white, // Background color
@@ -139,7 +139,7 @@ showFullScreenDialog(Widget widget) {
         appBar: AppBar(
           toolbarHeight: 30,
           elevation: 0,
-          title: const Text('Add Species'),
+          title: Text(title ?? 'Add Species'),
           actions: [
             IconButton(
               onPressed: () => Navigator.of(ContextHolder.currentContext).pop(),

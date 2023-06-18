@@ -23,7 +23,16 @@ class KMLUtils {
       builder.attribute('xmlns', 'http://www.opengis.net/kml/2.2');
       builder.element('Document', nest: () {
         builder.element('name', nest: () {
-          builder.text('Transect ${transect.startDate}');
+          builder.text('${transect.name}');
+        });
+        /// Add TimePrimitive
+        builder.element('TimeSpan', nest: () {
+          builder.element('begin', nest: () {
+            builder.text(transect.startDate.toIso8601String());
+          });
+          builder.element('end', nest: () {
+            builder.text(transect.endDate?.toIso8601String() ?? '');
+          });
         });
         builder.element('description', nest: () {
           builder.text('Transect ${transect.description}');
@@ -111,7 +120,22 @@ class KMLUtils {
   Transect kmlToTransect(String kml, DateTime fileDate) {
     final document = XmlDocument.parse(kml);
     final transect = Transect();
-    transect.startDate = fileDate;
+    final elDocument = document.findAllElements('Document').first;
+    transect.name = elDocument.findAllElements('name').first.innerText;
+    /// check if element TimeStamp exists
+    if (elDocument.findAllElements('TimeStamp').isNotEmpty) {
+      final timeStamp = elDocument.findAllElements('TimeStamp').first;
+      transect.startDate = DateTime.parse(timeStamp.findAllElements('when').first.innerText);
+      transect.endDate = DateTime.parse(timeStamp.findAllElements('when').first.innerText);
+    } else {
+      transect.startDate = fileDate;
+    }
+    if (elDocument.findAllElements('description').isNotEmpty) {
+      transect.description = elDocument
+          .findAllElements('description')
+          .first
+          .innerText;
+    }
     final markers = <Placemark>[];
     final points = <Point>[];
     final placemarks = document.findAllElements('Placemark');
@@ -127,7 +151,7 @@ class KMLUtils {
           ..id = markers.length
           ..latitude = double.parse(pointString[1])
           ..longitude = double.parse(pointString[0])
-          ..description = species?.split('<br/>').join('\n')
+          ..description = 'Pint ${markers.length + 1}'
           ..species = getSpeciesFromDescription(species));
       }
       /// Find path
@@ -157,7 +181,7 @@ class KMLUtils {
     if (description == null) {
       return null;
     }
-    final species = description.split('\n');
+    final species = description.split(';');
     if (species.isEmpty) {
       return null;
     } else {

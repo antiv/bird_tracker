@@ -56,10 +56,7 @@ class _MarkerInfoState extends State<MarkerInfo> {
               Text('${widget.selected?.species?.length} species'),
             ],
           ),
-          SizedBox(
-            height: speciesLength * 80 > 340
-                ? 340
-                : speciesLength * 80 < 200 ? 200 : speciesLength * 80,
+          Expanded(
             child: speciesLength > 0 ? ListView.builder(
               itemCount: speciesLength,
               itemBuilder: (context, index) {
@@ -86,15 +83,14 @@ class _MarkerInfoState extends State<MarkerInfo> {
                   onTap: () {
                     showFullScreenDialog(SpeciesForm(
                       species: widget.selected?.species?[revIdx],
-                      onSaved: (species) {
+                      onSaved: (species, _) {
                         setState(() {
-                          widget.selected?.endDate = DateTime.now();
                           widget.selected?.species?[revIdx] = species;
                         });
                         DataService().transect?.updateMarker(widget.selected!);
                         IsarService().updateTransect(DataService().transect!);
                       },
-                    ));
+                    ), title: 'Edit species',);
                   }
                 ),
               );},
