@@ -26,14 +26,13 @@ To use the Bird Tracker App, follow these steps:
 
 Include a few screenshots of your app to showcase its user interface and functionality. For example:
 
-<img src="/antiv/bird_tracker/raw/main/screenshots/screenshot1.png" width="50%" height="50%">
+<img src="/screenshots/screenshot1.png" width="50%" height="50%">
 
 ![Screenshot 1](screenshots/screenshot1.png){: width="50%"}
 _Main screen._
-<div style="width:60px ; height:60px">
+
 ![Screenshot 2](screenshots/screenshot2.png)
 _Track info._
-</div>
 
 ![Screenshot 3](screenshots/screenshot3.png)
 _Options._
