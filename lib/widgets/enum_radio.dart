@@ -1,24 +1,12 @@
 import 'package:flutter/material.dart';
 
-class EnumRadio extends StatefulWidget {
-  const EnumRadio({Key? key, this.enumValues, this.value, this.onChanged }) : super(key: key);
+class EnumRadio extends StatelessWidget {
+  const EnumRadio({Key? key, this.enumValues, this.value, this.onChanged})
+      : super(key: key);
 
   final List<dynamic>? enumValues;
   final dynamic value;
   final Function(dynamic)? onChanged;
-
-  @override
-  State<EnumRadio> createState() => _EnumRadioState();
-}
-
-class _EnumRadioState extends State<EnumRadio> {
-  dynamic enumValue;
-
-  @override
-  void initState() {
-    enumValue = widget.value;
-    super.initState();
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -34,36 +22,30 @@ class _EnumRadioState extends State<EnumRadio> {
           ),
           child: Wrap(
             alignment: WrapAlignment.spaceEvenly,
-            children: widget.enumValues
-                ?.map((e) => InkWell(
-                  onTap: () {
-                    setState(() {
-                      enumValue = e;
-                      if (widget.onChanged != null) {
-                        widget.onChanged!(e);
-                      }
-                    });
-                  },
-                  child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                  Radio(
-                    value: e,
-                    groupValue: enumValue,
-                    onChanged: (value) {
-                      setState(() {
-                        enumValue = value;
-                        if (widget.onChanged != null) {
-                          widget.onChanged!(value);
-                        }
-                      });
-                    },
-                  ),
-                  Text(e.toString().split('.').last),
-              ],
-            ),
-                ))
-                .toList() ??
+            children: enumValues
+                    ?.map((e) => InkWell(
+                          onTap: () {
+                            if (onChanged != null) {
+                              onChanged!(e);
+                            }
+                          },
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Radio(
+                                value: e,
+                                groupValue: value,
+                                onChanged: (value) {
+                                  if (onChanged != null) {
+                                    onChanged!(value);
+                                  }
+                                },
+                              ),
+                              Text(e.toString().split('.').last),
+                            ],
+                          ),
+                        ))
+                    .toList() ??
                 [],
           ),
         ),
@@ -73,12 +55,10 @@ class _EnumRadioState extends State<EnumRadio> {
           child: Container(
             padding: const EdgeInsets.only(left: 5, right: 5),
             color: Colors.white,
-            child: Text(
-              widget.enumValues!.first.toString().split('.').first,
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                color: Colors.grey,
-              )
-            ),
+            child: Text(enumValues!.first.toString().split('.').first,
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: Colors.grey,
+                    )),
           ),
         ),
         Positioned(
@@ -101,12 +81,9 @@ class _EnumRadioState extends State<EnumRadio> {
                   ),
                 ),
                 onPressed: () {
-                  setState(() {
-                    enumValue = null;
-                    if (widget.onChanged != null) {
-                      widget.onChanged!(null);
-                    }
-                  });
+                  if (onChanged != null) {
+                    onChanged!(null);
+                  }
                 },
               ),
             ),
