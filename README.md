@@ -28,17 +28,11 @@ Include a few screenshots of your app to showcase its user interface and functio
 
 <img src="/screenshots/screenshot1.png" width="50%" height="50%">
 
-![Screenshot 1](screenshots/screenshot1.png){: width="50%"}
-_Main screen._
+<img src="/screenshots/screenshot2.png" width="50%" height="50%">
 
-![Screenshot 2](screenshots/screenshot2.png)
-_Track info._
+<img src="/screenshots/screenshot3.png" width="50%" height="50%">
 
-![Screenshot 3](screenshots/screenshot3.png)
-_Options._
-
-![Screenshot 4](screenshots/screenshot4.png)
-_Add spices form._
+<img src="/screenshots/screenshot4.png" width="50%" height="50%">
 
 ## Contributing
 
