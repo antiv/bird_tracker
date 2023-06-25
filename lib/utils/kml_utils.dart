@@ -151,7 +151,7 @@ class KMLUtils {
           ..id = markers.length
           ..latitude = double.parse(pointString[1])
           ..longitude = double.parse(pointString[0])
-          ..description = 'Pint ${markers.length + 1}'
+          ..description = 'Point ${markers.length + 1}'
           ..species = getSpeciesFromDescription(species));
       }
       /// Find path
