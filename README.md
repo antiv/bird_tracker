@@ -30,9 +30,11 @@ Include a few screenshots of your app to showcase its user interface and functio
 
 <img src="/screenshots/screenshot2.png" width="50%" height="50%">
 
+<img src="/screenshots/screenshot4.png" width="50%" height="50%">
+
 <img src="/screenshots/screenshot3.png" width="50%" height="50%">
 
-<img src="/screenshots/screenshot4.png" width="50%" height="50%">
+<img src="/screenshots/screenshot5.png" width="50%" height="50%">
 
 ## Contributing
 
