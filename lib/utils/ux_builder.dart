@@ -137,8 +137,9 @@ showFullScreenDialog(Widget widget, {String? title}) {
       return Scaffold(
         backgroundColor: Theme.of(ContextHolder.currentContext).cardColor,
         appBar: AppBar(
-          toolbarHeight: 30,
+          // toolbarHeight: 30,
           elevation: 0,
+          backgroundColor: Theme.of(ContextHolder.currentContext).primaryColor,
           title: Text(title ?? 'Add Species'),
           actions: [
             IconButton(

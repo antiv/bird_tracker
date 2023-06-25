@@ -52,9 +52,9 @@ class Species {
 }
 
 enum Stratification {
-  D,
-  S,
   G,
+  S,
+  D,
 }
 
 extension StratificationExt on Stratification {
@@ -65,17 +65,27 @@ extension StratificationExt on Stratification {
 
 enum Direction {
   N,
+  NNE,
   NE,
+  ENE,
   E,
+  ESE,
   SE,
+  SSE,
   S,
+  SSW,
   SW,
+  WSW,
   W,
+  WNW,
   NW,
+  NNW,
 }
 
 extension DirectionExt on Direction {
   String toShortString() {
     return toString().split('.').last;
   }
+
+  bool isSub() => toShortString().length > 2;
 }

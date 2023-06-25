@@ -261,10 +261,14 @@ class _HomePageState extends State<HomePage> {
           onTap: () {
             _key.currentState!.openDrawer();
           },
-          child: SvgPicture.asset(
-            kAppIcon,
-            semanticsLabel: 'Bird Tracker Logo',
-            colorFilter: const ColorFilter.mode(Colors.white, BlendMode.srcIn),
+          child: Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: SvgPicture.asset(
+              kAppIcon,
+              fit: BoxFit.scaleDown,
+              semanticsLabel: 'Bird Tracker Logo',
+              colorFilter: const ColorFilter.mode(Colors.white, BlendMode.srcIn),
+            ),
           ),
         ),
       ),

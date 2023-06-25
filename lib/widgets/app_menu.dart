@@ -49,7 +49,7 @@ class AppMenu extends StatelessWidget {
                       Navigator.pop(context);
                     },
                     child: SvgPicture.asset(
-                      kAppIcon2,
+                      kAppIcon,
                       semanticsLabel: 'Bird Tracker Logo',
                       colorFilter: const ColorFilter.mode(Colors.white, BlendMode.srcIn),
                     ),

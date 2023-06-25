@@ -2,6 +2,7 @@ import 'package:bird_tracker/configuration/codes.dart';
 import 'package:bird_tracker/configuration/species.dart';
 import 'package:bird_tracker/model/species.dart';
 import 'package:bird_tracker/widgets/enum_radio.dart';
+import 'package:bird_tracker/widgets/world_side_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
@@ -182,7 +183,8 @@ class _SpeciesFormState extends State<SpeciesForm> {
                           prefixIcon: InkWell(
                             child: const Icon(Icons.remove),
                             onTap: () {
-                              if (_countController.text.isNotEmpty) {
+                              if (_countController.text.isNotEmpty &&
+                                  int.parse(_countController.text) > 0) {
                                 _countController.text =
                                     (int.parse(_countController.text) - 1)
                                         .toString();
@@ -203,21 +205,29 @@ class _SpeciesFormState extends State<SpeciesForm> {
                     ),
                   ],
                 ),
-
-                /// Enum to radio buttons widget
-                EnumRadio(
-                  key: ValueKey('stratification$_stratification'),
-                  enumValues: Stratification.values,
-                  value: _stratification,
-                  onChanged: (val) => setState(() {_stratification = val;}),
+                const SizedBox(height: 10),
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    WorldSidePicker(
+                      key: ValueKey('dir$_direction'),
+                      selectedSide: _direction,
+                      onChanged: (val) => setState(() {_direction = val;}),
+                      color: Theme.of(context).primaryColor,
+                      radius: 80,
+                    ),
+                    SizedBox(
+                      width: 130,
+                      child: EnumRadio(
+                        key: ValueKey('stratification$_stratification'),
+                        enumValues: Stratification.values,
+                        value: _stratification,
+                        onChanged: (val) => setState(() {_stratification = val;}),
+                      ),
+                    ),
+                  ],
                 ),
-                EnumRadio(
-                  key: ValueKey('direction$_direction'),
-                  enumValues: Direction.values,
-                  value: _direction,
-                  onChanged: (val) => setState(() {_direction = val;}),
-                ),
-
                 /// description field
                 TextFormField(
                   controller: _descriptionController,

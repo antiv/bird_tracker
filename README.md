@@ -32,6 +32,12 @@ _Main screen._
 ![Screenshot 2](screenshots/screenshot2.png)
 _Track info._
 
+![Screenshot 3](screenshots/screenshot3.png)
+_Options._
+
+![Screenshot 4](screenshots/screenshot4.png)
+_Add spices form._
+
 ## Contributing
 
 Contributions to the Bird Tracker App are welcome! If you have any ideas, suggestions, or bug reports, please open an issue or submit a pull request.

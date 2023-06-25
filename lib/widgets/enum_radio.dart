@@ -20,33 +20,37 @@ class EnumRadio extends StatelessWidget {
             border: Border.all(color: Colors.grey),
             borderRadius: BorderRadius.circular(15),
           ),
-          child: Wrap(
-            alignment: WrapAlignment.spaceEvenly,
-            children: enumValues
-                    ?.map((e) => InkWell(
-                          onTap: () {
-                            if (onChanged != null) {
-                              onChanged!(e);
-                            }
-                          },
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Radio(
-                                value: e,
-                                groupValue: value,
-                                onChanged: (value) {
-                                  if (onChanged != null) {
-                                    onChanged!(value);
-                                  }
-                                },
-                              ),
-                              Text(e.toString().split('.').last),
-                            ],
-                          ),
-                        ))
-                    .toList() ??
-                [],
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 20.0),
+            child: Wrap(
+              alignment: WrapAlignment.spaceEvenly,
+              runSpacing: 20,
+              children: enumValues
+                      ?.map((e) => InkWell(
+                            onTap: () {
+                              if (onChanged != null) {
+                                onChanged!(e);
+                              }
+                            },
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Radio(
+                                  value: e,
+                                  groupValue: value,
+                                  onChanged: (value) {
+                                    if (onChanged != null) {
+                                      onChanged!(value);
+                                    }
+                                  },
+                                ),
+                                Text(e.toString().split('.').last),
+                              ],
+                            ),
+                          ))
+                      .toList() ??
+                  [],
+            ),
           ),
         ),
         Positioned(
