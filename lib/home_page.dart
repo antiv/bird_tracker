@@ -97,7 +97,7 @@ class _HomePageState extends State<HomePage> {
       // points.add(LatLng(_locationData!.latitude!, _locationData!.longitude!));
       _polyLines?.add(Polyline(
           polylineId: const PolylineId('1'),
-          points: _polyLines?.first.points ?? []
+          points: _polyLines.first.points
             ..add(LatLng(_locationData!.latitude!, _locationData!.longitude!)),
           color: Colors.red,
           width: 5));
@@ -289,6 +289,7 @@ class _HomePageState extends State<HomePage> {
           _markers = Set<Marker>.of(
               transect?.markers?.map((e) => e.toMarker()) ?? []);
           return GoogleMap(
+            key: const Key('map'),
             // on below line setting camera position
             initialCameraPosition: _kHome,
             // on below line we are setting markers on the map
