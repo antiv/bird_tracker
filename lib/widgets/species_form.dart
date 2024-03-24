@@ -218,7 +218,7 @@ class _SpeciesFormState extends State<SpeciesForm> {
                       radius: 80,
                     ),
                     SizedBox(
-                      width: 130,
+                      width: 110,
                       child: EnumRadio(
                         key: ValueKey('stratification$_stratification'),
                         enumValues: Stratification.values,
