@@ -1,9 +1,9 @@
+import 'dart:convert';
 import 'dart:typed_data';
 
-import 'package:bird_tracker/model/placemark.dart';
-import 'package:bird_tracker/model/point.dart';
-import 'package:bird_tracker/model/species.dart';
-import 'package:bird_tracker/utils/kml_utils.dart';
+import 'package:ciconia_tracker/model/placemark.dart';
+import 'package:ciconia_tracker/model/species.dart';
+import 'package:ciconia_tracker/utils/kml_utils.dart';
 import 'package:intl/intl.dart';
 import 'package:isar/isar.dart';
 import 'package:share_plus/share_plus.dart';
@@ -21,7 +21,7 @@ class Transect {
   String? name;
   DateTime? endDate;
   String? description;
-  List<Point>? points;
+  // List<Point>? points;
   List<Placemark>? markers;
 
   void addMarker(Placemark marker) {
@@ -52,17 +52,17 @@ class Transect {
       return '${DateFormat('hh:mm:ss').format(startDate)} - ${DateFormat('hh:mm:ss').format(endDate!)}';
   }
 
-  double get distance {
-    if (points != null) {
-      return calculateDistance(points!.map((e) => e.latLng).toList());
-    }
-    return 0;
-  }
+  // double get distance {
+  //   if (points != null) {
+  //     return calculateDistance(points!.map((e) => e.latLng).toList());
+  //   }
+  //   return 0;
+  // }
 
   /// distance in KM, m
-  String get distanceString {
-    return '${distance.toStringAsFixed(2)} km';
-  }
+  // String get distanceString {
+  //   return '${distance.toStringAsFixed(2)} km';
+  // }
 
   /// get the total number of species recorded
   int get speciesCount {
@@ -89,23 +89,31 @@ class Transect {
 
   /// convert transect to CSV
   String toCSV() {
+    String name = DataService().getNamePreference() ?? '';
+    String email = DataService().getEmailPreference() ?? '';
+    String phone = DataService().getPhonePreference() ?? '';
     final sb = StringBuffer();
     sb.writeln(
-        'Species, Date, Time (from - to), Time, Latitude(DMS),Longitude(DMS),Count, Behavior, Stratification, Direction, Code');
+        'Datum obilaska, Vreme, Latitude(DMS), Longitude(DMS), Polozaj gnezda, Stanje u gnezdu, Broj mladunaca, Atlas kod, Mesto, Opstina, Napomena, Popisivac, Email, Telefon');
     markers?.forEach((placeMark) {
-      placeMark.species?.forEach((species) {
-        sb.writeln('${species.species},'
+      // placeMark.species?.forEach((species) {
+        sb.writeln(
             '${DateFormat('dd/MM/yyyy').format(placeMark.startDate!)},'
-            '${placeMark.duration},'
-            '${species.time},'
+            '${placeMark.species?.time},'
             '${convertLatLng(placeMark.latitude!, true)},'
             '${convertLatLng(placeMark.longitude!, false)},'
-            '${species.count},'
-            '"${species.description ?? ''}",'
-            '${species.stratification != null ? species.stratification?.toShortString() : ''},'
-            '${species.direction != null ? species.direction?.toShortString() : ''},'
-            '${species.code ?? ''}');
-      });
+            '"${placeMark.species?.position}",'
+            '"${placeMark.species?.state}",'
+            '${placeMark.species?.count},'
+            '${placeMark.species?.code ?? ''},'
+            '"${placeMark.species?.place ?? ''}",'
+            '"${placeMark.species?.municipality ?? ''}",'
+            '"${placeMark.species?.description ?? ''}",'
+            '"$name",'
+            '"$email",'
+            '"$phone"'
+            );
+      // });
     });
     return sb.toString();
   }
@@ -118,7 +126,7 @@ class Transect {
 
   /// share transect as CSV file
   Future<void> shareCSV() async {
-    Uint8List? bytes = Uint8List.fromList(toCSV().codeUnits);
+    Uint8List? bytes = Uint8List.fromList(utf8.encode(toCSV()));
     String path = await storeFileTemporarily(bytes, '$name-${DateFormat('dd-MM-yyyy').format(startDate)}.csv');
     await Share.shareXFiles(
       [
@@ -131,7 +139,7 @@ class Transect {
 
   /// share transect as KML file
   Future<void> shareKML() async {
-    Uint8List? bytes = Uint8List.fromList(toKML().codeUnits);
+    Uint8List? bytes = Uint8List.fromList(utf8.encode(toKML()));
     String path = await storeFileTemporarily(bytes, '$name-${DateFormat('dd-MM-yyyy').format(startDate)}.kml');
 
     await Share.shareXFiles(
@@ -144,18 +152,18 @@ class Transect {
   }
 
   void goToFirst() {
-    if (points?.isNotEmpty ?? false) {
-      goToLocation(
-          points!.first.latLng, DataService().controller,
-          DataService().completer
-      );
-    } else {
+    // if (points?.isNotEmpty ?? false) {
+    //   goToLocation(
+    //       points!.first.latLng, DataService().controller,
+    //       DataService().completer
+    //   );
+    // } else {
       if (markers?.isNotEmpty ?? false) {
         goToLocation(
             markers!.first.latLng, DataService().controller,
             DataService().completer
         );
       }
-    }
+    // }
   }
 }

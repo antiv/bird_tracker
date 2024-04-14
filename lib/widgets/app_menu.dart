@@ -1,5 +1,7 @@
-import 'package:bird_tracker/widgets/transect_info.dart';
-import 'package:bird_tracker/widgets/transects_history.dart';
+import 'package:ciconia_tracker/widgets/transect_info.dart';
+import 'package:ciconia_tracker/widgets/transects_history.dart';
+import 'package:ciconia_tracker/widgets/user_details_form.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -9,7 +11,7 @@ import '../service/data_service.dart';
 import '../utils/ux_builder.dart';
 
 class AppMenu extends StatelessWidget {
-  const AppMenu({Key? key}) : super(key: key);
+  const AppMenu({super.key});
 
   _showTracksHistory() =>
     showBottomModal(const TransectsHistory());
@@ -18,20 +20,19 @@ class AppMenu extends StatelessWidget {
     if (DataService().transect != null) {
       showBottomModal(const TransectInfo());
     } else {
-      showSnackBar('No transect selected');
+      showSnackBar('Ne postoji trenutni popis',);
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return Drawer(
-      backgroundColor: Theme.of(context).cardColor,
         child: ListView(
       // Important: Remove any padding from the ListView.
       padding: EdgeInsets.zero,
       children: [
         SizedBox(
-          height: 110,
+          height: 120,
           child: DrawerHeader(
             decoration: BoxDecoration(
               color: Theme.of(context).primaryColor,
@@ -43,15 +44,13 @@ class AppMenu extends StatelessWidget {
               children: [
                 SizedBox(
                   width: 40,
-                  height: 48,
                   child: InkWell(
                     onTap: () {
                       Navigator.pop(context);
                     },
                     child: SvgPicture.asset(
                       kAppIcon,
-                      semanticsLabel: 'Bird Tracker Logo',
-                      colorFilter: const ColorFilter.mode(Colors.white, BlendMode.srcIn),
+                      semanticsLabel: 'Ciconia Tracker Logo',
                     ),
                   ),
                 ),
@@ -67,9 +66,10 @@ class AppMenu extends StatelessWidget {
             ),
           ),
         ),
+        if (DataService().transect != null)
         ListTile(
           leading: const Icon(Icons.fmd_bad_outlined),
-          title: const Text('Current track'),
+          title: const Text('Current track').tr(),
           onTap: () {
             Navigator.pop(context);
             _showTrackInfo();
@@ -77,7 +77,7 @@ class AppMenu extends StatelessWidget {
         ),
         ListTile(
           leading: const Icon(Icons.history),
-          title: const Text('Saved tracks'),
+          title: const Text('Saved tracks').tr(),
           onTap: () {
             Navigator.pop(context);
             _showTracksHistory();
@@ -85,42 +85,47 @@ class AppMenu extends StatelessWidget {
         ),
         ExpansionTile(
           leading: const Icon(Icons.tune),
-          title: const Text('Settings'),
+          title: const Text('Settings').tr(),
           // subtitle: Text(''),
           children: <Widget>[
             ListTile(
-              title: const Text('Select map type'),
+              title: const Text('Select map type').tr(),
               leading: const Icon(Icons.layers_outlined,),
               subtitle: Row(
                 children: [
                   TextButton(onPressed: () {
                     DataService().setMapType(MapType.normal);
                     Navigator.pop(context);
-                  }, child: const Text('Map')),
+                  }, child: Text('Map',
+                      style: TextStyle(color: DataService().mapType == MapType.normal
+                          ? Theme.of(context).primaryColor
+                          : Theme.of(context).textTheme.bodyMedium?.color)).tr(),
+                  ),
                   TextButton(onPressed: () {
                     DataService().setMapType(MapType.satellite);
                     Navigator.pop(context);
-                  }, child: const Text('Satellite')),
+                  }, child: Text('Satellite',
+                      style: TextStyle(color: DataService().mapType == MapType.satellite
+                      ? Theme.of(context).primaryColor
+                      : Theme.of(context).textTheme.bodyMedium?.color)).tr()),
                   TextButton(onPressed: () {
                     DataService().setMapType(MapType.hybrid);
                     Navigator.pop(context);
-                  }, child: const Text('Hybrid'))
+                  }, child: Text('Hybrid',
+                      style: TextStyle(color: DataService().mapType == MapType.hybrid
+                          ? Theme.of(context).primaryColor
+                          : Theme.of(context).textTheme.bodyMedium?.color)).tr())
                 ],
               ),
             ),
             ListTile(
-                title: const Text('Set email address'),
+                title: const Text('Podaci o popisivaču').tr(),
               leading: const Icon(Icons.email_outlined,),
               onTap: () {
                   Navigator.pop(context);
-                  showTextInputDialog(
-                    'Enter email address to send track data',
-                    'Enter email address',
-                    DataService().getEmailPreference(),
-                      (value) {
-                        DataService().setEmailPreference(value);
-                        // Navigator.pop(context);
-                      }
+                  showFullScreenDialog(
+                    const UserDetailsForm(),
+                    title: 'Podaci o popisivaču',
                   );
               },
             ),
@@ -128,7 +133,7 @@ class AppMenu extends StatelessWidget {
         ),
         ListTile(
           leading: const Icon(Icons.file_open_outlined),
-          title: const Text('Import KML'),
+          title: const Text('Import KML').tr(),
           onTap: () {
             Navigator.pop(context);
             showImportKMLDialog();
@@ -155,7 +160,7 @@ class MenuIcon extends StatelessWidget {
       'assets/icons/${asset ?? 'eagle'}.svg',
       height: height ?? 24,
       semanticsLabel: 'Bird Tracker Logo',
-      colorFilter: const ColorFilter.mode(Colors.black, BlendMode.srcIn),
+      // colorFilter: const ColorFilter.mode(Colors.black, BlendMode.srcIn),
     );
   }
 }

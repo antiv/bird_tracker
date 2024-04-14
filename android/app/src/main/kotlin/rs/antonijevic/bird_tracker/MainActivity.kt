@@ -1,4 +1,4 @@
-package rs.antonijevic.bird_tracker
+package rs.antonijevic.ciconia_tracker
 
 import io.flutter.embedding.android.FlutterActivity
 

@@ -1,13 +1,12 @@
 import 'dart:async';
-import 'package:bird_tracker/configuration/constants.dart';
-import 'package:bird_tracker/model/point.dart';
-import 'package:bird_tracker/model/transect.dart';
-import 'package:bird_tracker/service/data_service.dart';
-import 'package:bird_tracker/service/isar_service.dart';
-import 'package:bird_tracker/utils/location_helper.dart';
-import 'package:bird_tracker/utils/ux_builder.dart';
-import 'package:bird_tracker/widgets/app_menu.dart';
-import 'package:bird_tracker/widgets/species_form.dart';
+import 'package:ciconia_tracker/configuration/constants.dart';
+import 'package:ciconia_tracker/model/transect.dart';
+import 'package:ciconia_tracker/service/data_service.dart';
+import 'package:ciconia_tracker/service/isar_service.dart';
+import 'package:ciconia_tracker/utils/location_helper.dart';
+import 'package:ciconia_tracker/utils/ux_builder.dart';
+import 'package:ciconia_tracker/widgets/app_menu.dart';
+import 'package:ciconia_tracker/widgets/species_form.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_speed_dial/flutter_speed_dial.dart';
 import 'package:flutter_svg/svg.dart';
@@ -34,7 +33,7 @@ class _HomePageState extends State<HomePage> {
   bool? _serviceEnabled;
   LocationData? _locationData;
 
-  StreamSubscription<LocationData>? locationStream;
+  // StreamSubscription<LocationData>? locationStream;
 
   final Completer<GoogleMapController> _completer = Completer();
   GoogleMapController? controller;
@@ -45,23 +44,23 @@ class _HomePageState extends State<HomePage> {
     zoom: 14.4746,
   );
 
-  late final Set<Polyline>? _polyLines;
+  // late final Set<Polyline>? _polyLines;
 
   ValueNotifier<bool> isOpen = ValueNotifier<bool>(false);
 
   @override
   void initState() {
     IsarService().init();
-    _polyLines = {
-      Polyline(
-          polylineId: const PolylineId('1'),
-          points: transect?.points
-                  ?.map((e) => LatLng(e.latitude, e.longitude))
-                  .toList() ??
-              [],
-          color: Colors.red,
-          width: 5)
-    };
+    // _polyLines = {
+    //   Polyline(
+    //       polylineId: const PolylineId('1'),
+    //       points: transect?.points
+    //               ?.map((e) => LatLng(e.latitude, e.longitude))
+    //               .toList() ??
+    //           [],
+    //       color: Colors.red,
+    //       width: 5)
+    // };
 
     DataService().initPreferences();
     DataService().completer = _completer;
@@ -76,90 +75,23 @@ class _HomePageState extends State<HomePage> {
   }
 
   _goToCurrentLocation() async {
-    if (locationStream != null) {
-      await _stopListener();
+    _locationData = await location.getLocation();
       await goToCurrentLocation(_serviceEnabled ?? false, location,
           _locationData, controller, _completer);
-      for (final mark in _markers) {
-        await controller?.hideMarkerInfoWindow(mark.markerId);
-      }
-      await DataService().controller?.showMarkerInfoWindow(_markers.last.markerId);
-      await _startListener();
-    } else {
-      await goToCurrentLocation(_serviceEnabled ?? false, location,
-          _locationData, controller, _completer);
-    }
-  }
-
-  onLocationChange(LocationData currentLocation) {
-    setState(() {
-      _locationData = currentLocation;
-      // points.add(LatLng(_locationData!.latitude!, _locationData!.longitude!));
-      _polyLines?.add(Polyline(
-          polylineId: const PolylineId('1'),
-          points: _polyLines.first.points
-            ..add(LatLng(_locationData!.latitude!, _locationData!.longitude!)),
-          color: Colors.red,
-          width: 5));
-      transect?.points = transect?.points?.toList(growable: true) ?? [];
-      transect?.points?.add(Point()
-        ..latitude = _locationData!.latitude!
-        ..longitude = _locationData!.longitude!);
-
-      /// get current camera zum
-      controller?.getZoomLevel().then((value) {
-        /// change camera position
-        CameraPosition cameraPosition = CameraPosition(
-          target: LatLng(_locationData!.latitude!, _locationData!.longitude!),
-          zoom: value,
-        );
-        controller
-            ?.animateCamera(CameraUpdate.newCameraPosition(cameraPosition));
-      });
-    });
-  }
-
-  _startListener() async {
-    if (locationStream == null) {
-      location.changeSettings(
-          accuracy: LocationAccuracy.high, interval: 1000, distanceFilter: 10);
-      isOpen.value = false;
-      locationStream =
-          location.onLocationChanged.listen((LocationData currentLocation) {
-        onLocationChange(currentLocation);
-      });
-    }
-  }
-
-  _pauseListener() async {
-    /// Save transect with points and markers
-    // transect?.markers = Placemark.fromMarkers(_markers);
-    transect?.points = _polyLines?.first.points
-        .map((e) => Point()
-          ..latitude = e.latitude
-          ..longitude = e.longitude)
-        .toList();
-    await IsarService().updateTransect(transect!);
-    _stopListener();
-  }
-
-  _stopListener() async {
-    locationStream?.cancel();
-    locationStream = null;
   }
 
   _stopTransect() async {
     /// showTextInputDialog to enter transect name
     await showTextInputDialog(
-        'Enter transect name', 'Transect name', 'Transect ${DateFormat('dd.MM.yyyy').format(DateTime.now())}', (name) {
-      _stopListener();
+        'Unesi naziv popisa', 'Naziv popisa', 'Popis od ${DateFormat('dd.MM.yyyy').format(DateTime.now())}', (name) {
+      // _stopListener();
       transect?.endDate = DateTime.now();
       transect?.name = name;
-      transect?.points = _polyLines?.first.points
-          .map((e) => Point()
-        ..latitude = e.latitude
-        ..longitude = e.longitude)
-          .toList();
+      // transect?.points = _polyLines?.first.points
+      //     .map((e) => Point()
+      //   ..latitude = e.latitude
+      //   ..longitude = e.longitude)
+      //     .toList();
       /// close last marker if not closed
       if (transect?.markers?.isNotEmpty ?? false) {
         Placemark lastMarker = transect!.markers!.last;
@@ -172,11 +104,20 @@ class _HomePageState extends State<HomePage> {
     });
   }
 
-  _addMarker() {
+  _addMarker(LatLng? latLng) async {
     /// close last marker
     if (transect?.markers?.isNotEmpty ?? false) {
       Placemark lastMarker = transect!.markers!.last;
       lastMarker.endDate ??= DateTime.now();
+    }
+    /// open transect if not started
+    if (transect == null) {
+      _startTransect();
+    }
+    if (latLng == null) {
+      /// get current location
+      _locationData = await location.getLocation();
+      latLng = LatLng(_locationData!.latitude!, _locationData!.longitude!);
     }
     showFullScreenDialog(SpeciesForm(
       onSaved: (species, close) {
@@ -188,30 +129,30 @@ class _HomePageState extends State<HomePage> {
           if (transect?.markers?.isNotEmpty ?? false) {
             Placemark lastMarker = transect!.markers!.last;
             if (lastMarker.endDate == null) {
-              lastMarker.species?.add(species);
+              lastMarker.species = species;
               IsarService().updateTransect(transect!);
               return;
             } else {
               transect?.markers?.add(
                 Placemark(
-                  latitude: _locationData!.latitude!,
-                  longitude: _locationData!.longitude!,
+                  latitude: latLng?.latitude,
+                  longitude: latLng?.longitude,
                   startDate: DateTime.now(),
                   endDate: null,
                   id: transect?.markers?.length ?? 0,
-                  species: [species],
+                  species: species,
                 ),
               );
             }
           } else {
             transect?.markers?.add(
               Placemark(
-                latitude: _locationData!.latitude!,
-                longitude: _locationData!.longitude!,
+                latitude: latLng?.latitude,
+                longitude: latLng?.longitude,
                 startDate: DateTime.now(),
                 endDate: null,
                 id: transect?.markers?.length ?? 0,
-                species: [species],
+                species: species,
               ),
             );
           }
@@ -226,7 +167,7 @@ class _HomePageState extends State<HomePage> {
     if (transect != null) {
       /// ask to continue or open new transect
       showYesNoDialog(() {
-        _startListener();
+        // _startListener();
       }, () {
         _startNewTransect();
       },
@@ -242,12 +183,12 @@ class _HomePageState extends State<HomePage> {
   _startNewTransect() {
     transect = Transect()
       ..startDate = DateTime.now()
-      ..points = List<Point>.empty(growable: true)
+      // ..points = List<Point>.empty(growable: true)
       ..markers = List<Placemark>.empty(growable: true);
     DataService().setTransect(transect);
     /// insert transect to db
     IsarService().addTransect(transect!);
-    _startListener();
+    // _startListener();
   }
 
   @override
@@ -266,8 +207,8 @@ class _HomePageState extends State<HomePage> {
             child: SvgPicture.asset(
               kAppIcon,
               fit: BoxFit.scaleDown,
-              semanticsLabel: 'Bird Tracker Logo',
-              colorFilter: const ColorFilter.mode(Colors.white, BlendMode.srcIn),
+              semanticsLabel: 'Ciconia Logo',
+              // colorFilter: const ColorFilter.mode(Colors.white, BlendMode.srcIn),
             ),
           ),
         ),
@@ -281,11 +222,11 @@ class _HomePageState extends State<HomePage> {
           debugPrint(
               '============================================= reBuild =============================================');
           transect = dataService.transect;
-          _polyLines?.first.points.clear();
-          _polyLines?.first.points.addAll(transect?.points
-                  ?.map((e) => LatLng(e.latitude, e.longitude))
-                  .toList() ??
-              []);
+          // _polyLines?.first.points.clear();
+          // _polyLines?.first.points.addAll(transect?.points
+          //         ?.map((e) => LatLng(e.latitude, e.longitude))
+          //         .toList() ??
+          //     []);
           _markers = Set<Marker>.of(
               transect?.markers?.map((e) => e.toMarker()) ?? []);
           return GoogleMap(
@@ -294,9 +235,9 @@ class _HomePageState extends State<HomePage> {
             initialCameraPosition: _kHome,
             // on below line we are setting markers on the map
             markers: _markers,
-            polylines: _polyLines ?? {},
+            // polylines: _polyLines ?? {},
             // on below line specifying map type.
-            mapType: dataService.mapType ?? MapType.hybrid,
+            mapType: dataService.mapType ?? MapType.normal,
             // on below line setting user location enabled.
             myLocationEnabled: true,
             myLocationButtonEnabled: false,
@@ -315,6 +256,13 @@ class _HomePageState extends State<HomePage> {
             onMapCreated: (GoogleMapController controller) {
               _completer.complete(controller);
               DataService().controller = controller;
+              setState(() {
+                _markers = Set<Marker>.of(
+                    transect?.markers?.map((e) => e.toMarker()) ?? []);
+              });
+            },
+            onLongPress: (LatLng latLng) {
+              _addMarker(latLng);
             },
           );
         }),
@@ -341,7 +289,7 @@ class _HomePageState extends State<HomePage> {
               openCloseDial: isOpen,
               icon: Icons.directions_walk,
               backgroundColor:
-                  locationStream != null ? Colors.red.shade700 : null,
+                  transect != null ? Colors.red.shade700 : null,
               activeIcon: Icons.close,
               spacing: 3,
               mini: false,
@@ -351,7 +299,7 @@ class _HomePageState extends State<HomePage> {
               renderOverlay: false,
               onOpen: () {
                 setState(() {
-                  if (locationStream == null) {
+                  if (transect == null) {
                     isOpen.value = false;
                     _startTransect();
                   }
@@ -361,16 +309,16 @@ class _HomePageState extends State<HomePage> {
                 setState(() {});
               },
               children: [
-                SpeedDialChild(
-                  child: const Icon(Icons.pause),
-                  backgroundColor: Colors.red.shade700,
-                  foregroundColor: Colors.white,
-                  label: 'Pause',
-                  onTap: () async {
-                    await _pauseListener();
-                    setState(() {});
-                  },
-                ),
+                // SpeedDialChild(
+                //   child: const Icon(Icons.pause),
+                //   backgroundColor: Colors.red.shade700,
+                //   foregroundColor: Colors.white,
+                //   label: 'Pause',
+                //   onTap: () async {
+                //     await _pauseListener();
+                //     setState(() {});
+                //   },
+                // ),
                 SpeedDialChild(
                   child: const Icon(Icons.stop),
                   backgroundColor: Colors.red.shade700,
@@ -384,9 +332,7 @@ class _HomePageState extends State<HomePage> {
             ),
             SizedBox(height: isOpen.value ? 130 : 10),
             FloatingActionButton(
-                onPressed: locationStream != null
-                    ? _addMarker
-                    : () => showSnackBar('Start transect first'),
+                onPressed: () => _addMarker(null),
                 backgroundColor: Colors.orangeAccent,
                 child: const Icon(Icons.add_location_alt_outlined)),
           ],

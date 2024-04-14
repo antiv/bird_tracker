@@ -1,9 +1,10 @@
 import 'dart:io';
 
-import 'package:bird_tracker/service/data_service.dart';
-import 'package:bird_tracker/service/isar_service.dart';
-import 'package:bird_tracker/utils/kml_utils.dart';
+import 'package:ciconia_tracker/service/data_service.dart';
+import 'package:ciconia_tracker/service/isar_service.dart';
+import 'package:ciconia_tracker/utils/kml_utils.dart';
 import 'package:context_holder/context_holder.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 
@@ -58,9 +59,9 @@ showAlertDialog(Widget content, List<Widget> actions) {
 showYesNoDialog(
   Function yesFunction,
   Function noFunction, {
-  String title = 'Are you sure?',
-  String yesText = 'Yes',
-  String noText = 'No',
+  String title = 'Da li ste sigurni?',
+  String yesText = 'Da',
+  String noText = 'Ne',
 }) {
   showAlertDialog(
     Text(title),
@@ -105,13 +106,13 @@ showTextInputDialog(String title, String hint, String? defaultValue,
           Navigator.of(ContextHolder.currentContext).pop();
           onConfirm(value);
         },
-        child: const Text('Confirm'),
+        child: const Text('Confirm').tr(),
       ),
       TextButton(
         onPressed: () {
           Navigator.of(ContextHolder.currentContext).pop();
         },
-        child: const Text('Cancel'),
+        child: const Text('Cancel').tr(),
       ),
     ],
   ));
@@ -140,7 +141,7 @@ showFullScreenDialog(Widget widget, {String? title}) {
           // toolbarHeight: 30,
           elevation: 0,
           backgroundColor: Theme.of(ContextHolder.currentContext).primaryColor,
-          title: Text(title ?? 'Add Species'),
+          title: Text(title ?? 'Dodaj gnezdo'),
           actions: [
             IconButton(
               onPressed: () => Navigator.of(ContextHolder.currentContext).pop(),

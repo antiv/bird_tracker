@@ -51,7 +51,7 @@ const PlacemarkSchema = Schema(
     r'species': PropertySchema(
       id: 7,
       name: r'species',
-      type: IsarType.objectList,
+      type: IsarType.object,
       target: r'Species',
     ),
     r'speciesString': PropertySchema(
@@ -86,16 +86,10 @@ int _placemarkEstimateSize(
   bytesCount += 3 + object.duration.length * 3;
   bytesCount += 3 + object.durationWithDay.length * 3;
   {
-    final list = object.species;
-    if (list != null) {
-      bytesCount += 3 + list.length * 3;
-      {
-        final offsets = allOffsets[Species]!;
-        for (var i = 0; i < list.length; i++) {
-          final value = list[i];
-          bytesCount += SpeciesSchema.estimateSize(value, offsets, allOffsets);
-        }
-      }
+    final value = object.species;
+    if (value != null) {
+      bytesCount += 3 +
+          SpeciesSchema.estimateSize(value, allOffsets[Species]!, allOffsets);
     }
   }
   bytesCount += 3 + object.speciesString.length * 3;
@@ -115,7 +109,7 @@ void _placemarkSerialize(
   writer.writeLong(offsets[4], object.id);
   writer.writeDouble(offsets[5], object.latitude);
   writer.writeDouble(offsets[6], object.longitude);
-  writer.writeObjectList<Species>(
+  writer.writeObject<Species>(
     offsets[7],
     allOffsets,
     SpeciesSchema.serialize,
@@ -137,11 +131,10 @@ Placemark _placemarkDeserialize(
     id: reader.readLongOrNull(offsets[4]),
     latitude: reader.readDoubleOrNull(offsets[5]),
     longitude: reader.readDoubleOrNull(offsets[6]),
-    species: reader.readObjectList<Species>(
+    species: reader.readObjectOrNull<Species>(
       offsets[7],
       SpeciesSchema.deserialize,
       allOffsets,
-      Species(),
     ),
     startDate: reader.readDateTimeOrNull(offsets[9]),
   );
@@ -170,11 +163,10 @@ P _placemarkDeserializeProp<P>(
     case 6:
       return (reader.readDoubleOrNull(offset)) as P;
     case 7:
-      return (reader.readObjectList<Species>(
+      return (reader.readObjectOrNull<Species>(
         offset,
         SpeciesSchema.deserialize,
         allOffsets,
-        Species(),
       )) as P;
     case 8:
       return (reader.readString(offset)) as P;
@@ -920,94 +912,6 @@ extension PlacemarkQueryFilter
   }
 
   QueryBuilder<Placemark, Placemark, QAfterFilterCondition>
-      speciesLengthEqualTo(int length) {
-    return QueryBuilder.apply(this, (query) {
-      return query.listLength(
-        r'species',
-        length,
-        true,
-        length,
-        true,
-      );
-    });
-  }
-
-  QueryBuilder<Placemark, Placemark, QAfterFilterCondition> speciesIsEmpty() {
-    return QueryBuilder.apply(this, (query) {
-      return query.listLength(
-        r'species',
-        0,
-        true,
-        0,
-        true,
-      );
-    });
-  }
-
-  QueryBuilder<Placemark, Placemark, QAfterFilterCondition>
-      speciesIsNotEmpty() {
-    return QueryBuilder.apply(this, (query) {
-      return query.listLength(
-        r'species',
-        0,
-        false,
-        999999,
-        true,
-      );
-    });
-  }
-
-  QueryBuilder<Placemark, Placemark, QAfterFilterCondition>
-      speciesLengthLessThan(
-    int length, {
-    bool include = false,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.listLength(
-        r'species',
-        0,
-        true,
-        length,
-        include,
-      );
-    });
-  }
-
-  QueryBuilder<Placemark, Placemark, QAfterFilterCondition>
-      speciesLengthGreaterThan(
-    int length, {
-    bool include = false,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.listLength(
-        r'species',
-        length,
-        include,
-        999999,
-        true,
-      );
-    });
-  }
-
-  QueryBuilder<Placemark, Placemark, QAfterFilterCondition>
-      speciesLengthBetween(
-    int lower,
-    int upper, {
-    bool includeLower = true,
-    bool includeUpper = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.listLength(
-        r'species',
-        lower,
-        includeLower,
-        upper,
-        includeUpper,
-      );
-    });
-  }
-
-  QueryBuilder<Placemark, Placemark, QAfterFilterCondition>
       speciesStringEqualTo(
     String value, {
     bool caseSensitive = true,
@@ -1217,7 +1121,7 @@ extension PlacemarkQueryFilter
 
 extension PlacemarkQueryObject
     on QueryBuilder<Placemark, Placemark, QFilterCondition> {
-  QueryBuilder<Placemark, Placemark, QAfterFilterCondition> speciesElement(
+  QueryBuilder<Placemark, Placemark, QAfterFilterCondition> species(
       FilterQuery<Species> q) {
     return QueryBuilder.apply(this, (query) {
       return query.object(q, r'species');

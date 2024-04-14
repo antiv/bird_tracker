@@ -27,55 +27,39 @@ const TransectSchema = CollectionSchema(
       name: r'description',
       type: IsarType.string,
     ),
-    r'distance': PropertySchema(
-      id: 2,
-      name: r'distance',
-      type: IsarType.double,
-    ),
-    r'distanceString': PropertySchema(
-      id: 3,
-      name: r'distanceString',
-      type: IsarType.string,
-    ),
     r'duration': PropertySchema(
-      id: 4,
+      id: 2,
       name: r'duration',
       type: IsarType.string,
     ),
     r'endDate': PropertySchema(
-      id: 5,
+      id: 3,
       name: r'endDate',
       type: IsarType.dateTime,
     ),
     r'fromTo': PropertySchema(
-      id: 6,
+      id: 4,
       name: r'fromTo',
       type: IsarType.string,
     ),
     r'markers': PropertySchema(
-      id: 7,
+      id: 5,
       name: r'markers',
       type: IsarType.objectList,
       target: r'Placemark',
     ),
     r'name': PropertySchema(
-      id: 8,
+      id: 6,
       name: r'name',
       type: IsarType.string,
     ),
-    r'points': PropertySchema(
-      id: 9,
-      name: r'points',
-      type: IsarType.objectList,
-      target: r'Point',
-    ),
     r'speciesCount': PropertySchema(
-      id: 10,
+      id: 7,
       name: r'speciesCount',
       type: IsarType.long,
     ),
     r'startDate': PropertySchema(
-      id: 11,
+      id: 8,
       name: r'startDate',
       type: IsarType.dateTime,
     )
@@ -87,11 +71,7 @@ const TransectSchema = CollectionSchema(
   idName: r'id',
   indexes: {},
   links: {},
-  embeddedSchemas: {
-    r'Point': PointSchema,
-    r'Placemark': PlacemarkSchema,
-    r'Species': SpeciesSchema
-  },
+  embeddedSchemas: {r'Placemark': PlacemarkSchema, r'Species': SpeciesSchema},
   getId: _transectGetId,
   getLinks: _transectGetLinks,
   attach: _transectAttach,
@@ -111,7 +91,6 @@ int _transectEstimateSize(
       bytesCount += 3 + value.length * 3;
     }
   }
-  bytesCount += 3 + object.distanceString.length * 3;
   bytesCount += 3 + object.duration.length * 3;
   bytesCount += 3 + object.fromTo.length * 3;
   {
@@ -134,19 +113,6 @@ int _transectEstimateSize(
       bytesCount += 3 + value.length * 3;
     }
   }
-  {
-    final list = object.points;
-    if (list != null) {
-      bytesCount += 3 + list.length * 3;
-      {
-        final offsets = allOffsets[Point]!;
-        for (var i = 0; i < list.length; i++) {
-          final value = list[i];
-          bytesCount += PointSchema.estimateSize(value, offsets, allOffsets);
-        }
-      }
-    }
-  }
   return bytesCount;
 }
 
@@ -158,26 +124,18 @@ void _transectSerialize(
 ) {
   writer.writeString(offsets[0], object.dateRange);
   writer.writeString(offsets[1], object.description);
-  writer.writeDouble(offsets[2], object.distance);
-  writer.writeString(offsets[3], object.distanceString);
-  writer.writeString(offsets[4], object.duration);
-  writer.writeDateTime(offsets[5], object.endDate);
-  writer.writeString(offsets[6], object.fromTo);
+  writer.writeString(offsets[2], object.duration);
+  writer.writeDateTime(offsets[3], object.endDate);
+  writer.writeString(offsets[4], object.fromTo);
   writer.writeObjectList<Placemark>(
-    offsets[7],
+    offsets[5],
     allOffsets,
     PlacemarkSchema.serialize,
     object.markers,
   );
-  writer.writeString(offsets[8], object.name);
-  writer.writeObjectList<Point>(
-    offsets[9],
-    allOffsets,
-    PointSchema.serialize,
-    object.points,
-  );
-  writer.writeLong(offsets[10], object.speciesCount);
-  writer.writeDateTime(offsets[11], object.startDate);
+  writer.writeString(offsets[6], object.name);
+  writer.writeLong(offsets[7], object.speciesCount);
+  writer.writeDateTime(offsets[8], object.startDate);
 }
 
 Transect _transectDeserialize(
@@ -188,22 +146,16 @@ Transect _transectDeserialize(
 ) {
   final object = Transect();
   object.description = reader.readStringOrNull(offsets[1]);
-  object.endDate = reader.readDateTimeOrNull(offsets[5]);
+  object.endDate = reader.readDateTimeOrNull(offsets[3]);
   object.id = id;
   object.markers = reader.readObjectList<Placemark>(
-    offsets[7],
+    offsets[5],
     PlacemarkSchema.deserialize,
     allOffsets,
     Placemark(),
   );
-  object.name = reader.readStringOrNull(offsets[8]);
-  object.points = reader.readObjectList<Point>(
-    offsets[9],
-    PointSchema.deserialize,
-    allOffsets,
-    Point(),
-  );
-  object.startDate = reader.readDateTime(offsets[11]);
+  object.name = reader.readStringOrNull(offsets[6]);
+  object.startDate = reader.readDateTime(offsets[8]);
   return object;
 }
 
@@ -219,34 +171,23 @@ P _transectDeserializeProp<P>(
     case 1:
       return (reader.readStringOrNull(offset)) as P;
     case 2:
-      return (reader.readDouble(offset)) as P;
-    case 3:
       return (reader.readString(offset)) as P;
+    case 3:
+      return (reader.readDateTimeOrNull(offset)) as P;
     case 4:
       return (reader.readString(offset)) as P;
     case 5:
-      return (reader.readDateTimeOrNull(offset)) as P;
-    case 6:
-      return (reader.readString(offset)) as P;
-    case 7:
       return (reader.readObjectList<Placemark>(
         offset,
         PlacemarkSchema.deserialize,
         allOffsets,
         Placemark(),
       )) as P;
-    case 8:
+    case 6:
       return (reader.readStringOrNull(offset)) as P;
-    case 9:
-      return (reader.readObjectList<Point>(
-        offset,
-        PointSchema.deserialize,
-        allOffsets,
-        Point(),
-      )) as P;
-    case 10:
+    case 7:
       return (reader.readLong(offset)) as P;
-    case 11:
+    case 8:
       return (reader.readDateTime(offset)) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
@@ -617,203 +558,6 @@ extension TransectQueryFilter
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.greaterThan(
         property: r'description',
-        value: '',
-      ));
-    });
-  }
-
-  QueryBuilder<Transect, Transect, QAfterFilterCondition> distanceEqualTo(
-    double value, {
-    double epsilon = Query.epsilon,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'distance',
-        value: value,
-        epsilon: epsilon,
-      ));
-    });
-  }
-
-  QueryBuilder<Transect, Transect, QAfterFilterCondition> distanceGreaterThan(
-    double value, {
-    bool include = false,
-    double epsilon = Query.epsilon,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.greaterThan(
-        include: include,
-        property: r'distance',
-        value: value,
-        epsilon: epsilon,
-      ));
-    });
-  }
-
-  QueryBuilder<Transect, Transect, QAfterFilterCondition> distanceLessThan(
-    double value, {
-    bool include = false,
-    double epsilon = Query.epsilon,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.lessThan(
-        include: include,
-        property: r'distance',
-        value: value,
-        epsilon: epsilon,
-      ));
-    });
-  }
-
-  QueryBuilder<Transect, Transect, QAfterFilterCondition> distanceBetween(
-    double lower,
-    double upper, {
-    bool includeLower = true,
-    bool includeUpper = true,
-    double epsilon = Query.epsilon,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.between(
-        property: r'distance',
-        lower: lower,
-        includeLower: includeLower,
-        upper: upper,
-        includeUpper: includeUpper,
-        epsilon: epsilon,
-      ));
-    });
-  }
-
-  QueryBuilder<Transect, Transect, QAfterFilterCondition> distanceStringEqualTo(
-    String value, {
-    bool caseSensitive = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'distanceString',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<Transect, Transect, QAfterFilterCondition>
-      distanceStringGreaterThan(
-    String value, {
-    bool include = false,
-    bool caseSensitive = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.greaterThan(
-        include: include,
-        property: r'distanceString',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<Transect, Transect, QAfterFilterCondition>
-      distanceStringLessThan(
-    String value, {
-    bool include = false,
-    bool caseSensitive = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.lessThan(
-        include: include,
-        property: r'distanceString',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<Transect, Transect, QAfterFilterCondition> distanceStringBetween(
-    String lower,
-    String upper, {
-    bool includeLower = true,
-    bool includeUpper = true,
-    bool caseSensitive = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.between(
-        property: r'distanceString',
-        lower: lower,
-        includeLower: includeLower,
-        upper: upper,
-        includeUpper: includeUpper,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<Transect, Transect, QAfterFilterCondition>
-      distanceStringStartsWith(
-    String value, {
-    bool caseSensitive = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.startsWith(
-        property: r'distanceString',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<Transect, Transect, QAfterFilterCondition>
-      distanceStringEndsWith(
-    String value, {
-    bool caseSensitive = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.endsWith(
-        property: r'distanceString',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<Transect, Transect, QAfterFilterCondition>
-      distanceStringContains(String value, {bool caseSensitive = true}) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.contains(
-        property: r'distanceString',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<Transect, Transect, QAfterFilterCondition> distanceStringMatches(
-      String pattern,
-      {bool caseSensitive = true}) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.matches(
-        property: r'distanceString',
-        wildcard: pattern,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<Transect, Transect, QAfterFilterCondition>
-      distanceStringIsEmpty() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'distanceString',
-        value: '',
-      ));
-    });
-  }
-
-  QueryBuilder<Transect, Transect, QAfterFilterCondition>
-      distanceStringIsNotEmpty() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.greaterThan(
-        property: r'distanceString',
         value: '',
       ));
     });
@@ -1447,107 +1191,6 @@ extension TransectQueryFilter
     });
   }
 
-  QueryBuilder<Transect, Transect, QAfterFilterCondition> pointsIsNull() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(const FilterCondition.isNull(
-        property: r'points',
-      ));
-    });
-  }
-
-  QueryBuilder<Transect, Transect, QAfterFilterCondition> pointsIsNotNull() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(const FilterCondition.isNotNull(
-        property: r'points',
-      ));
-    });
-  }
-
-  QueryBuilder<Transect, Transect, QAfterFilterCondition> pointsLengthEqualTo(
-      int length) {
-    return QueryBuilder.apply(this, (query) {
-      return query.listLength(
-        r'points',
-        length,
-        true,
-        length,
-        true,
-      );
-    });
-  }
-
-  QueryBuilder<Transect, Transect, QAfterFilterCondition> pointsIsEmpty() {
-    return QueryBuilder.apply(this, (query) {
-      return query.listLength(
-        r'points',
-        0,
-        true,
-        0,
-        true,
-      );
-    });
-  }
-
-  QueryBuilder<Transect, Transect, QAfterFilterCondition> pointsIsNotEmpty() {
-    return QueryBuilder.apply(this, (query) {
-      return query.listLength(
-        r'points',
-        0,
-        false,
-        999999,
-        true,
-      );
-    });
-  }
-
-  QueryBuilder<Transect, Transect, QAfterFilterCondition> pointsLengthLessThan(
-    int length, {
-    bool include = false,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.listLength(
-        r'points',
-        0,
-        true,
-        length,
-        include,
-      );
-    });
-  }
-
-  QueryBuilder<Transect, Transect, QAfterFilterCondition>
-      pointsLengthGreaterThan(
-    int length, {
-    bool include = false,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.listLength(
-        r'points',
-        length,
-        include,
-        999999,
-        true,
-      );
-    });
-  }
-
-  QueryBuilder<Transect, Transect, QAfterFilterCondition> pointsLengthBetween(
-    int lower,
-    int upper, {
-    bool includeLower = true,
-    bool includeUpper = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.listLength(
-        r'points',
-        lower,
-        includeLower,
-        upper,
-        includeUpper,
-      );
-    });
-  }
-
   QueryBuilder<Transect, Transect, QAfterFilterCondition> speciesCountEqualTo(
       int value) {
     return QueryBuilder.apply(this, (query) {
@@ -1664,13 +1307,6 @@ extension TransectQueryObject
       return query.object(q, r'markers');
     });
   }
-
-  QueryBuilder<Transect, Transect, QAfterFilterCondition> pointsElement(
-      FilterQuery<Point> q) {
-    return QueryBuilder.apply(this, (query) {
-      return query.object(q, r'points');
-    });
-  }
 }
 
 extension TransectQueryLinks
@@ -1698,30 +1334,6 @@ extension TransectQuerySortBy on QueryBuilder<Transect, Transect, QSortBy> {
   QueryBuilder<Transect, Transect, QAfterSortBy> sortByDescriptionDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'description', Sort.desc);
-    });
-  }
-
-  QueryBuilder<Transect, Transect, QAfterSortBy> sortByDistance() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'distance', Sort.asc);
-    });
-  }
-
-  QueryBuilder<Transect, Transect, QAfterSortBy> sortByDistanceDesc() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'distance', Sort.desc);
-    });
-  }
-
-  QueryBuilder<Transect, Transect, QAfterSortBy> sortByDistanceString() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'distanceString', Sort.asc);
-    });
-  }
-
-  QueryBuilder<Transect, Transect, QAfterSortBy> sortByDistanceStringDesc() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'distanceString', Sort.desc);
     });
   }
 
@@ -1821,30 +1433,6 @@ extension TransectQuerySortThenBy
   QueryBuilder<Transect, Transect, QAfterSortBy> thenByDescriptionDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'description', Sort.desc);
-    });
-  }
-
-  QueryBuilder<Transect, Transect, QAfterSortBy> thenByDistance() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'distance', Sort.asc);
-    });
-  }
-
-  QueryBuilder<Transect, Transect, QAfterSortBy> thenByDistanceDesc() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'distance', Sort.desc);
-    });
-  }
-
-  QueryBuilder<Transect, Transect, QAfterSortBy> thenByDistanceString() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'distanceString', Sort.asc);
-    });
-  }
-
-  QueryBuilder<Transect, Transect, QAfterSortBy> thenByDistanceStringDesc() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'distanceString', Sort.desc);
     });
   }
 
@@ -1949,20 +1537,6 @@ extension TransectQueryWhereDistinct
     });
   }
 
-  QueryBuilder<Transect, Transect, QDistinct> distinctByDistance() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addDistinctBy(r'distance');
-    });
-  }
-
-  QueryBuilder<Transect, Transect, QDistinct> distinctByDistanceString(
-      {bool caseSensitive = true}) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addDistinctBy(r'distanceString',
-          caseSensitive: caseSensitive);
-    });
-  }
-
   QueryBuilder<Transect, Transect, QDistinct> distinctByDuration(
       {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
@@ -2023,18 +1597,6 @@ extension TransectQueryProperty
     });
   }
 
-  QueryBuilder<Transect, double, QQueryOperations> distanceProperty() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addPropertyName(r'distance');
-    });
-  }
-
-  QueryBuilder<Transect, String, QQueryOperations> distanceStringProperty() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addPropertyName(r'distanceString');
-    });
-  }
-
   QueryBuilder<Transect, String, QQueryOperations> durationProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'duration');
@@ -2062,12 +1624,6 @@ extension TransectQueryProperty
   QueryBuilder<Transect, String?, QQueryOperations> nameProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'name');
-    });
-  }
-
-  QueryBuilder<Transect, List<Point>?, QQueryOperations> pointsProperty() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addPropertyName(r'points');
     });
   }
 

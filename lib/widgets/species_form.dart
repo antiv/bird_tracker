@@ -1,8 +1,6 @@
-import 'package:bird_tracker/configuration/codes.dart';
-import 'package:bird_tracker/configuration/species.dart';
-import 'package:bird_tracker/model/species.dart';
-import 'package:bird_tracker/widgets/enum_radio.dart';
-import 'package:bird_tracker/widgets/world_side_picker.dart';
+import 'package:ciconia_tracker/configuration/codes.dart';
+import 'package:ciconia_tracker/configuration/constants.dart';
+import 'package:ciconia_tracker/model/species.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
@@ -21,55 +19,64 @@ class SpeciesForm extends StatefulWidget {
 
 class _SpeciesFormState extends State<SpeciesForm> {
   final _formKey = GlobalKey<FormState>();
-  final TextEditingController _spicesController = TextEditingController();
+  final TextEditingController _positionController = TextEditingController();
+  final TextEditingController _stateController = TextEditingController();
   final TextEditingController _countController =
-      TextEditingController(text: '1');
+      TextEditingController(text: '0');
+  final TextEditingController _placeController = TextEditingController();
+  final TextEditingController _municipalityController = TextEditingController();
   final TextEditingController _descriptionController = TextEditingController();
-  final FocusNode _spicesFocusNode = FocusNode();
-
-  Direction? _direction;
-  Stratification? _stratification = Stratification.D;
+  final FocusNode _positionFocusNode = FocusNode();
+  final FocusNode _stateFocusNode = FocusNode();
 
   int? _code;
-  bool _isEdit = false;
 
   @override
   void initState() {
     // _spicesFocusNode.requestFocus();
     if (widget.species != null) {
-      _isEdit = true;
-      _spicesController.text = widget.species?.species ?? '';
+      _positionController.text = widget.species?.position ?? '';
+      _stateController.text = widget.species?.state ?? '';
       _countController.text = widget.species!.count.toString();
       _descriptionController.text = widget.species!.description ?? '';
-      _direction = widget.species?.direction;
-      _stratification = widget.species?.stratification ?? Stratification.D;
+      _placeController.text = widget.species?.place ?? '';
+      _municipalityController.text = widget.species?.municipality ?? '';
+      // _direction = widget.species?.direction;
+      // _stratification = widget.species?.stratification ?? Stratification.D;
       _code = widget.species?.code;
     } else {
-      _spicesFocusNode.requestFocus();
+      _positionFocusNode.requestFocus();
     }
     super.initState();
   }
 
   @override
   void dispose() {
-    _spicesController.dispose();
+    _positionController.dispose();
     _countController.dispose();
-    _spicesFocusNode.dispose();
+    _positionFocusNode.dispose();
     _descriptionController.dispose();
+    _stateController.dispose();
+    _stateFocusNode.dispose();
+    _placeController.dispose();
+    _municipalityController.dispose();
     super.dispose();
   }
 
   _save(bool close) {
     if (_formKey.currentState!.validate()) {
       final species = Species()
-        ..species = _spicesController.text
+        // ..species = _spicesController.text
         ..code = _code
         ..count = int.parse(_countController.text)
+        ..position = _positionController.text.trim()
+        ..state = _stateController.text.trim()
+        ..place = _placeController.text.trim()
+        ..municipality = _municipalityController.text.trim()
         ..time = DateFormat.Hms().format(DateTime.now())
-        ..direction = _direction
-        ..stratification = _stratification
         ..description = _descriptionController.text;
       if (widget.onSaved != null) {
+        print('save species: ${species.count}');
         widget.onSaved!(species, close);
       }
       return true;
@@ -83,17 +90,18 @@ class _SpeciesFormState extends State<SpeciesForm> {
     }
   }
 
-  _clear() {
-    setState(() {
-      _spicesController.clear();
-      _countController.text = '1';
-      _spicesFocusNode.requestFocus();
-      _descriptionController.clear();
-      _code = null;
-      _direction = null;
-      _stratification = Stratification.D;
-    });
-  }
+  // _clear() {
+  //   setState(() {
+  //     _positionController.clear();
+  //     _countController.text = '0';
+  //     _positionFocusNode.requestFocus();
+  //     _descriptionController.clear();
+  //     _code = null;
+  //     _position = '';
+  //     _placeController.clear();
+  //     _municipalityController.clear();
+  //   });
+  // }
 
   @override
   Widget build(BuildContext context) {
@@ -109,24 +117,33 @@ class _SpeciesFormState extends State<SpeciesForm> {
               mainAxisSize: MainAxisSize.min,
               children: [
                 BtAutocomplete(
-                  spicesFocusNode: _spicesFocusNode,
-                  spicesController: _spicesController,
-                  kOptions: kSpecies,
+                  btFocusNode: _positionFocusNode,
+                  btController: _positionController,
+                  kOptions: kPositions,
+                  label: 'Položaj gnezda',
                 ),
+                const SizedBox(height: 10,),
+                BtAutocomplete(
+                  btFocusNode: _stateFocusNode,
+                  btController: _stateController,
+                  kOptions: kStates,
+                  label: 'Stanje u gnezdu',
+                ),
+                const SizedBox(height: 10,),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   mainAxisSize: MainAxisSize.max,
                   children: [
                     Row(
                       mainAxisSize: MainAxisSize.min,
-                      children:[ TextButton(
+                      children:[ ElevatedButton(
                           onPressed: () {
                             /// show poput to select atlas code
                             showDialogBox(
                               AlertDialog(
                                 // icon: const Icon(Icons.code),
                                 backgroundColor: Theme.of(context).cardColor,
-                                title: const Text('Select atlas code'),
+                                title: const Text('Izaberi Atlas kod'),
                                 contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 20),
                                 content: SingleChildScrollView(
                                   child: Column(
@@ -153,8 +170,8 @@ class _SpeciesFormState extends State<SpeciesForm> {
                           },
                           child: Text(
                             _code != null
-                                ? 'Select code: $_code'
-                                : 'Select atlas code',
+                                ? 'Izabran kod: $_code'
+                                : 'Izaberi Atlas kod',
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                           )),
@@ -168,7 +185,11 @@ class _SpeciesFormState extends State<SpeciesForm> {
                       child: TextFormField(
                         controller: _countController,
                         decoration: InputDecoration(
-                          labelText: 'Count',
+                          border: const OutlineInputBorder(),
+                          enabledBorder: const OutlineInputBorder(
+                            borderSide: BorderSide(color: Colors.grey),
+                          ),
+                          labelText: 'Mladunaca',
                           suffixIcon: InkWell(
                               onTap: () {
                                 if (_countController.text.isNotEmpty) {
@@ -206,34 +227,54 @@ class _SpeciesFormState extends State<SpeciesForm> {
                   ],
                 ),
                 const SizedBox(height: 10),
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    WorldSidePicker(
-                      key: ValueKey('dir$_direction'),
-                      selectedSide: _direction,
-                      onChanged: (val) => setState(() {_direction = val;}),
-                      color: Theme.of(context).primaryColor,
-                      radius: 80,
+                /// description field
+                TextFormField(
+                  controller: _placeController,
+                  decoration: InputDecoration(
+                    border: const OutlineInputBorder(),
+                    enabledBorder: const OutlineInputBorder(
+                      borderSide: BorderSide(color: Colors.grey),
                     ),
-                    SizedBox(
-                      width: 110,
-                      child: EnumRadio(
-                        key: ValueKey('stratification$_stratification'),
-                        enumValues: Stratification.values,
-                        value: _stratification,
-                        onChanged: (val) => setState(() {_stratification = val;}),
-                      ),
+                    labelText: 'Naselje',
+                    // prefixIcon: const Icon(Icons.location),
+                    suffixIcon: InkWell(
+                      child: const Icon(Icons.clear),
+                      onTap: () {
+                        _placeController.clear();
+                      },
                     ),
-                  ],
+                  ),
                 ),
+                const SizedBox(height: 10),
+                /// description field
+                TextFormField(
+                  controller: _municipalityController,
+                  decoration: InputDecoration(
+                    border: const OutlineInputBorder(),
+                    enabledBorder: const OutlineInputBorder(
+                      borderSide: BorderSide(color: Colors.grey),
+                    ),
+                    labelText: 'Opština',
+                    // prefixIcon: const Icon(Icons.description),
+                    suffixIcon: InkWell(
+                      child: const Icon(Icons.clear),
+                      onTap: () {
+                        _municipalityController.clear();
+                      },
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 10),
                 /// description field
                 TextFormField(
                   controller: _descriptionController,
                   decoration: InputDecoration(
-                    labelText: 'Behavior',
-                    prefixIcon: const Icon(Icons.description),
+                    border: const OutlineInputBorder(),
+                    enabledBorder: const OutlineInputBorder(
+                      borderSide: BorderSide(color: Colors.grey),
+                    ),
+                    labelText: 'Napomena',
+                    // prefixIcon: const Icon(Icons.description),
                     suffixIcon: InkWell(
                       child: const Icon(Icons.clear),
                       onTap: () {
@@ -241,10 +282,12 @@ class _SpeciesFormState extends State<SpeciesForm> {
                       },
                     ),
                   ),
-                  maxLines: 2,
+                  minLines: 1,
+                  maxLines: 3,
                   keyboardType: TextInputType.multiline,
                   textInputAction: TextInputAction.newline,
                 ),
+                const SizedBox(height: 10),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
@@ -254,17 +297,15 @@ class _SpeciesFormState extends State<SpeciesForm> {
                             Navigator.pop(context);
                           }
                         },
-                        child: const Text('Save')),
-                    if (!_isEdit)
+                        child: const Text('Sačuvaj')),
+                    // if (!_isEdit)
                     const SizedBox(width: 10),
-                    if (!_isEdit)
+                    // if (!_isEdit)
                     ElevatedButton(
                         onPressed: () {
-                          if (_save(false)) {
-                            _clear();
-                          }
+                            Navigator.pop(context);
                         },
-                        child: const Text('Save and new')),
+                        child: const Text('Odustani')),
                     // const SizedBox(width: 10),
                     // ElevatedButton(onPressed: () => Navigator.pop(context), child: const Text('Cancel')),
                   ],

@@ -28,30 +28,33 @@ const SpeciesSchema = Schema(
       name: r'description',
       type: IsarType.string,
     ),
-    r'direction': PropertySchema(
+    r'municipality': PropertySchema(
       id: 3,
-      name: r'direction',
-      type: IsarType.int,
-      enumMap: _SpeciesdirectionEnumValueMap,
+      name: r'municipality',
+      type: IsarType.string,
     ),
-    r'species': PropertySchema(
+    r'place': PropertySchema(
       id: 4,
-      name: r'species',
+      name: r'place',
+      type: IsarType.string,
+    ),
+    r'position': PropertySchema(
+      id: 5,
+      name: r'position',
       type: IsarType.string,
     ),
     r'speciesString': PropertySchema(
-      id: 5,
+      id: 6,
       name: r'speciesString',
       type: IsarType.string,
     ),
-    r'stratification': PropertySchema(
-      id: 6,
-      name: r'stratification',
-      type: IsarType.int,
-      enumMap: _SpeciesstratificationEnumValueMap,
+    r'state': PropertySchema(
+      id: 7,
+      name: r'state',
+      type: IsarType.string,
     ),
     r'time': PropertySchema(
-      id: 7,
+      id: 8,
       name: r'time',
       type: IsarType.string,
     )
@@ -74,8 +77,26 @@ int _speciesEstimateSize(
       bytesCount += 3 + value.length * 3;
     }
   }
-  bytesCount += 3 + object.species.length * 3;
+  {
+    final value = object.municipality;
+    if (value != null) {
+      bytesCount += 3 + value.length * 3;
+    }
+  }
+  {
+    final value = object.place;
+    if (value != null) {
+      bytesCount += 3 + value.length * 3;
+    }
+  }
+  bytesCount += 3 + object.position.length * 3;
   bytesCount += 3 + object.speciesString.length * 3;
+  {
+    final value = object.state;
+    if (value != null) {
+      bytesCount += 3 + value.length * 3;
+    }
+  }
   bytesCount += 3 + object.time.length * 3;
   return bytesCount;
 }
@@ -89,11 +110,12 @@ void _speciesSerialize(
   writer.writeLong(offsets[0], object.code);
   writer.writeLong(offsets[1], object.count);
   writer.writeString(offsets[2], object.description);
-  writer.writeInt(offsets[3], object.direction?.index);
-  writer.writeString(offsets[4], object.species);
-  writer.writeString(offsets[5], object.speciesString);
-  writer.writeInt(offsets[6], object.stratification?.index);
-  writer.writeString(offsets[7], object.time);
+  writer.writeString(offsets[3], object.municipality);
+  writer.writeString(offsets[4], object.place);
+  writer.writeString(offsets[5], object.position);
+  writer.writeString(offsets[6], object.speciesString);
+  writer.writeString(offsets[7], object.state);
+  writer.writeString(offsets[8], object.time);
 }
 
 Species _speciesDeserialize(
@@ -106,12 +128,11 @@ Species _speciesDeserialize(
   object.code = reader.readLongOrNull(offsets[0]);
   object.count = reader.readLong(offsets[1]);
   object.description = reader.readStringOrNull(offsets[2]);
-  object.direction =
-      _SpeciesdirectionValueEnumMap[reader.readIntOrNull(offsets[3])];
-  object.species = reader.readString(offsets[4]);
-  object.stratification =
-      _SpeciesstratificationValueEnumMap[reader.readIntOrNull(offsets[6])];
-  object.time = reader.readString(offsets[7]);
+  object.municipality = reader.readStringOrNull(offsets[3]);
+  object.place = reader.readStringOrNull(offsets[4]);
+  object.position = reader.readString(offsets[5]);
+  object.state = reader.readStringOrNull(offsets[7]);
+  object.time = reader.readString(offsets[8]);
   return object;
 }
 
@@ -129,51 +150,21 @@ P _speciesDeserializeProp<P>(
     case 2:
       return (reader.readStringOrNull(offset)) as P;
     case 3:
-      return (_SpeciesdirectionValueEnumMap[reader.readIntOrNull(offset)]) as P;
+      return (reader.readStringOrNull(offset)) as P;
     case 4:
-      return (reader.readString(offset)) as P;
+      return (reader.readStringOrNull(offset)) as P;
     case 5:
       return (reader.readString(offset)) as P;
     case 6:
-      return (_SpeciesstratificationValueEnumMap[reader.readIntOrNull(offset)])
-          as P;
+      return (reader.readString(offset)) as P;
     case 7:
+      return (reader.readStringOrNull(offset)) as P;
+    case 8:
       return (reader.readString(offset)) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
   }
 }
-
-const _SpeciesdirectionEnumValueMap = {
-  'N': 0,
-  'NE': 1,
-  'E': 2,
-  'SE': 3,
-  'S': 4,
-  'SW': 5,
-  'W': 6,
-  'NW': 7,
-};
-const _SpeciesdirectionValueEnumMap = {
-  0: Direction.N,
-  1: Direction.NE,
-  2: Direction.E,
-  3: Direction.SE,
-  4: Direction.S,
-  5: Direction.SW,
-  6: Direction.W,
-  7: Direction.NW,
-};
-const _SpeciesstratificationEnumValueMap = {
-  'D': 0,
-  'S': 1,
-  'G': 2,
-};
-const _SpeciesstratificationValueEnumMap = {
-  0: Stratification.D,
-  1: Stratification.S,
-  2: Stratification.G,
-};
 
 extension SpeciesQueryFilter
     on QueryBuilder<Species, Species, QFilterCondition> {
@@ -446,89 +437,314 @@ extension SpeciesQueryFilter
     });
   }
 
-  QueryBuilder<Species, Species, QAfterFilterCondition> directionIsNull() {
+  QueryBuilder<Species, Species, QAfterFilterCondition> municipalityIsNull() {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(const FilterCondition.isNull(
-        property: r'direction',
+        property: r'municipality',
       ));
     });
   }
 
-  QueryBuilder<Species, Species, QAfterFilterCondition> directionIsNotNull() {
+  QueryBuilder<Species, Species, QAfterFilterCondition>
+      municipalityIsNotNull() {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(const FilterCondition.isNotNull(
-        property: r'direction',
+        property: r'municipality',
       ));
     });
   }
 
-  QueryBuilder<Species, Species, QAfterFilterCondition> directionEqualTo(
-      Direction? value) {
+  QueryBuilder<Species, Species, QAfterFilterCondition> municipalityEqualTo(
+    String? value, {
+    bool caseSensitive = true,
+  }) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'direction',
+        property: r'municipality',
         value: value,
+        caseSensitive: caseSensitive,
       ));
     });
   }
 
-  QueryBuilder<Species, Species, QAfterFilterCondition> directionGreaterThan(
-    Direction? value, {
+  QueryBuilder<Species, Species, QAfterFilterCondition> municipalityGreaterThan(
+    String? value, {
     bool include = false,
+    bool caseSensitive = true,
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.greaterThan(
         include: include,
-        property: r'direction',
+        property: r'municipality',
         value: value,
+        caseSensitive: caseSensitive,
       ));
     });
   }
 
-  QueryBuilder<Species, Species, QAfterFilterCondition> directionLessThan(
-    Direction? value, {
+  QueryBuilder<Species, Species, QAfterFilterCondition> municipalityLessThan(
+    String? value, {
     bool include = false,
+    bool caseSensitive = true,
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.lessThan(
         include: include,
-        property: r'direction',
+        property: r'municipality',
         value: value,
+        caseSensitive: caseSensitive,
       ));
     });
   }
 
-  QueryBuilder<Species, Species, QAfterFilterCondition> directionBetween(
-    Direction? lower,
-    Direction? upper, {
+  QueryBuilder<Species, Species, QAfterFilterCondition> municipalityBetween(
+    String? lower,
+    String? upper, {
     bool includeLower = true,
     bool includeUpper = true,
+    bool caseSensitive = true,
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.between(
-        property: r'direction',
+        property: r'municipality',
         lower: lower,
         includeLower: includeLower,
         upper: upper,
         includeUpper: includeUpper,
+        caseSensitive: caseSensitive,
       ));
     });
   }
 
-  QueryBuilder<Species, Species, QAfterFilterCondition> speciesEqualTo(
+  QueryBuilder<Species, Species, QAfterFilterCondition> municipalityStartsWith(
     String value, {
     bool caseSensitive = true,
   }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'species',
+      return query.addFilterCondition(FilterCondition.startsWith(
+        property: r'municipality',
         value: value,
         caseSensitive: caseSensitive,
       ));
     });
   }
 
-  QueryBuilder<Species, Species, QAfterFilterCondition> speciesGreaterThan(
+  QueryBuilder<Species, Species, QAfterFilterCondition> municipalityEndsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.endsWith(
+        property: r'municipality',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Species, Species, QAfterFilterCondition> municipalityContains(
+      String value,
+      {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.contains(
+        property: r'municipality',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Species, Species, QAfterFilterCondition> municipalityMatches(
+      String pattern,
+      {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.matches(
+        property: r'municipality',
+        wildcard: pattern,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Species, Species, QAfterFilterCondition> municipalityIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'municipality',
+        value: '',
+      ));
+    });
+  }
+
+  QueryBuilder<Species, Species, QAfterFilterCondition>
+      municipalityIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        property: r'municipality',
+        value: '',
+      ));
+    });
+  }
+
+  QueryBuilder<Species, Species, QAfterFilterCondition> placeIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNull(
+        property: r'place',
+      ));
+    });
+  }
+
+  QueryBuilder<Species, Species, QAfterFilterCondition> placeIsNotNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNotNull(
+        property: r'place',
+      ));
+    });
+  }
+
+  QueryBuilder<Species, Species, QAfterFilterCondition> placeEqualTo(
+    String? value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'place',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Species, Species, QAfterFilterCondition> placeGreaterThan(
+    String? value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'place',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Species, Species, QAfterFilterCondition> placeLessThan(
+    String? value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'place',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Species, Species, QAfterFilterCondition> placeBetween(
+    String? lower,
+    String? upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'place',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Species, Species, QAfterFilterCondition> placeStartsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.startsWith(
+        property: r'place',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Species, Species, QAfterFilterCondition> placeEndsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.endsWith(
+        property: r'place',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Species, Species, QAfterFilterCondition> placeContains(
+      String value,
+      {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.contains(
+        property: r'place',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Species, Species, QAfterFilterCondition> placeMatches(
+      String pattern,
+      {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.matches(
+        property: r'place',
+        wildcard: pattern,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Species, Species, QAfterFilterCondition> placeIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'place',
+        value: '',
+      ));
+    });
+  }
+
+  QueryBuilder<Species, Species, QAfterFilterCondition> placeIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        property: r'place',
+        value: '',
+      ));
+    });
+  }
+
+  QueryBuilder<Species, Species, QAfterFilterCondition> positionEqualTo(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'position',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Species, Species, QAfterFilterCondition> positionGreaterThan(
     String value, {
     bool include = false,
     bool caseSensitive = true,
@@ -536,14 +752,14 @@ extension SpeciesQueryFilter
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.greaterThan(
         include: include,
-        property: r'species',
+        property: r'position',
         value: value,
         caseSensitive: caseSensitive,
       ));
     });
   }
 
-  QueryBuilder<Species, Species, QAfterFilterCondition> speciesLessThan(
+  QueryBuilder<Species, Species, QAfterFilterCondition> positionLessThan(
     String value, {
     bool include = false,
     bool caseSensitive = true,
@@ -551,14 +767,14 @@ extension SpeciesQueryFilter
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.lessThan(
         include: include,
-        property: r'species',
+        property: r'position',
         value: value,
         caseSensitive: caseSensitive,
       ));
     });
   }
 
-  QueryBuilder<Species, Species, QAfterFilterCondition> speciesBetween(
+  QueryBuilder<Species, Species, QAfterFilterCondition> positionBetween(
     String lower,
     String upper, {
     bool includeLower = true,
@@ -567,7 +783,7 @@ extension SpeciesQueryFilter
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.between(
-        property: r'species',
+        property: r'position',
         lower: lower,
         includeLower: includeLower,
         upper: upper,
@@ -577,69 +793,69 @@ extension SpeciesQueryFilter
     });
   }
 
-  QueryBuilder<Species, Species, QAfterFilterCondition> speciesStartsWith(
+  QueryBuilder<Species, Species, QAfterFilterCondition> positionStartsWith(
     String value, {
     bool caseSensitive = true,
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.startsWith(
-        property: r'species',
+        property: r'position',
         value: value,
         caseSensitive: caseSensitive,
       ));
     });
   }
 
-  QueryBuilder<Species, Species, QAfterFilterCondition> speciesEndsWith(
+  QueryBuilder<Species, Species, QAfterFilterCondition> positionEndsWith(
     String value, {
     bool caseSensitive = true,
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.endsWith(
-        property: r'species',
+        property: r'position',
         value: value,
         caseSensitive: caseSensitive,
       ));
     });
   }
 
-  QueryBuilder<Species, Species, QAfterFilterCondition> speciesContains(
+  QueryBuilder<Species, Species, QAfterFilterCondition> positionContains(
       String value,
       {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.contains(
-        property: r'species',
+        property: r'position',
         value: value,
         caseSensitive: caseSensitive,
       ));
     });
   }
 
-  QueryBuilder<Species, Species, QAfterFilterCondition> speciesMatches(
+  QueryBuilder<Species, Species, QAfterFilterCondition> positionMatches(
       String pattern,
       {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.matches(
-        property: r'species',
+        property: r'position',
         wildcard: pattern,
         caseSensitive: caseSensitive,
       ));
     });
   }
 
-  QueryBuilder<Species, Species, QAfterFilterCondition> speciesIsEmpty() {
+  QueryBuilder<Species, Species, QAfterFilterCondition> positionIsEmpty() {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'species',
+        property: r'position',
         value: '',
       ));
     });
   }
 
-  QueryBuilder<Species, Species, QAfterFilterCondition> speciesIsNotEmpty() {
+  QueryBuilder<Species, Species, QAfterFilterCondition> positionIsNotEmpty() {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.greaterThan(
-        property: r'species',
+        property: r'position',
         value: '',
       ));
     });
@@ -777,73 +993,148 @@ extension SpeciesQueryFilter
     });
   }
 
-  QueryBuilder<Species, Species, QAfterFilterCondition> stratificationIsNull() {
+  QueryBuilder<Species, Species, QAfterFilterCondition> stateIsNull() {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(const FilterCondition.isNull(
-        property: r'stratification',
+        property: r'state',
       ));
     });
   }
 
-  QueryBuilder<Species, Species, QAfterFilterCondition>
-      stratificationIsNotNull() {
+  QueryBuilder<Species, Species, QAfterFilterCondition> stateIsNotNull() {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(const FilterCondition.isNotNull(
-        property: r'stratification',
+        property: r'state',
       ));
     });
   }
 
-  QueryBuilder<Species, Species, QAfterFilterCondition> stratificationEqualTo(
-      Stratification? value) {
+  QueryBuilder<Species, Species, QAfterFilterCondition> stateEqualTo(
+    String? value, {
+    bool caseSensitive = true,
+  }) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'stratification',
+        property: r'state',
         value: value,
+        caseSensitive: caseSensitive,
       ));
     });
   }
 
-  QueryBuilder<Species, Species, QAfterFilterCondition>
-      stratificationGreaterThan(
-    Stratification? value, {
+  QueryBuilder<Species, Species, QAfterFilterCondition> stateGreaterThan(
+    String? value, {
     bool include = false,
+    bool caseSensitive = true,
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.greaterThan(
         include: include,
-        property: r'stratification',
+        property: r'state',
         value: value,
+        caseSensitive: caseSensitive,
       ));
     });
   }
 
-  QueryBuilder<Species, Species, QAfterFilterCondition> stratificationLessThan(
-    Stratification? value, {
+  QueryBuilder<Species, Species, QAfterFilterCondition> stateLessThan(
+    String? value, {
     bool include = false,
+    bool caseSensitive = true,
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.lessThan(
         include: include,
-        property: r'stratification',
+        property: r'state',
         value: value,
+        caseSensitive: caseSensitive,
       ));
     });
   }
 
-  QueryBuilder<Species, Species, QAfterFilterCondition> stratificationBetween(
-    Stratification? lower,
-    Stratification? upper, {
+  QueryBuilder<Species, Species, QAfterFilterCondition> stateBetween(
+    String? lower,
+    String? upper, {
     bool includeLower = true,
     bool includeUpper = true,
+    bool caseSensitive = true,
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.between(
-        property: r'stratification',
+        property: r'state',
         lower: lower,
         includeLower: includeLower,
         upper: upper,
         includeUpper: includeUpper,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Species, Species, QAfterFilterCondition> stateStartsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.startsWith(
+        property: r'state',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Species, Species, QAfterFilterCondition> stateEndsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.endsWith(
+        property: r'state',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Species, Species, QAfterFilterCondition> stateContains(
+      String value,
+      {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.contains(
+        property: r'state',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Species, Species, QAfterFilterCondition> stateMatches(
+      String pattern,
+      {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.matches(
+        property: r'state',
+        wildcard: pattern,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Species, Species, QAfterFilterCondition> stateIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'state',
+        value: '',
+      ));
+    });
+  }
+
+  QueryBuilder<Species, Species, QAfterFilterCondition> stateIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        property: r'state',
+        value: '',
       ));
     });
   }

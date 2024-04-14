@@ -27,6 +27,14 @@ class DataService with ChangeNotifier{
     prefs?.setString('email', email);
   }
 
+  void setNamePreference(String name) {
+    prefs?.setString('name', name);
+  }
+
+  void setPhonePreference(String phone) {
+    prefs?.setString('phone', phone);
+  }
+
   DataService._internal();
 
   Transect? transect;
@@ -59,5 +67,11 @@ class DataService with ChangeNotifier{
 
   String? getEmailPreference() {
     return prefs?.getString('email');
+  }
+  String? getNamePreference() {
+    return prefs?.getString('name');
+  }
+  String? getPhonePreference() {
+    return prefs?.getString('phone');
   }
 }

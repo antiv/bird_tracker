@@ -1,6 +1,6 @@
-import 'package:bird_tracker/service/data_service.dart';
-import 'package:bird_tracker/service/isar_service.dart';
-import 'package:bird_tracker/widgets/species_form.dart';
+import 'package:ciconia_tracker/service/data_service.dart';
+import 'package:ciconia_tracker/service/isar_service.dart';
+import 'package:ciconia_tracker/widgets/species_form.dart';
 import 'package:context_holder/context_holder.dart';
 import 'package:flutter/material.dart';
 
@@ -20,25 +20,25 @@ class MarkerInfo extends StatefulWidget {
 }
 
 class _MarkerInfoState extends State<MarkerInfo> {
-  _addSpecies() {
-    showFullScreenDialog(SpeciesForm(
-      onSaved: (species, close) {
-        setState(() {
-          widget.selected?.endDate = DateTime.now();
-          widget.selected?.species =
-              widget.selected?.species?.toList(growable: true) ?? [];
-          widget.selected?.species?.add(
-            species,
-          );
-        });
-        IsarService().updateTransect(DataService().transect!);
-      },
-    ));
-  }
+  // _addSpecies() {
+  //   showFullScreenDialog(SpeciesForm(
+  //     onSaved: (species, close) {
+  //       setState(() {
+  //         widget.selected?.endDate = DateTime.now();
+  //         widget.selected?.species =
+  //             widget.selected?.species?.toList(growable: true) ?? [];
+  //         widget.selected?.species?.add(
+  //           species,
+  //         );
+  //       });
+  //       IsarService().updateTransect(DataService().transect!);
+  //     },
+  //   ));
+  // }
 
   @override
   Widget build(BuildContext context) {
-    final speciesLength = widget.selected?.species?.length ?? 0;
+    // final speciesLength = widget.selected?.species?.length ?? 0;
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 15.0),
       child: Column(
@@ -53,39 +53,41 @@ class _MarkerInfoState extends State<MarkerInfo> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(widget.selected?.durationWithDay ?? ''),
-              Text('${widget.selected?.species?.length} species'),
+              // Text('${widget.selected?.species?.length} species'),
             ],
           ),
           Expanded(
-            child: speciesLength > 0 ? ListView.builder(
-              itemCount: speciesLength,
+            ///TODO: remove list
+            child: ListView.builder(
+              itemCount: widget.selected?.species != null ? 1 : 0,
               itemBuilder: (context, index) {
-                int revIdx = speciesLength - index - 1;
+                // int revIdx = speciesLength - index - 1;
                 return Card(
                 child: ListTile(
-                  title: Text('${widget.selected?.species?[revIdx].species}'),
+                  // title: Text('${widget.selected?.species?[revIdx].species}'),
                   subtitle: Text(
-                      'Count: ${widget.selected?.species?[revIdx].count} '
-                      'Time: ${widget.selected?.species?[revIdx].time} '
-                      'Direction: ${widget.selected?.species?[revIdx].direction?.toString().split('.').last ?? '-'} '
-                      'Strat.: ${widget.selected?.species?[revIdx].stratification?.toString().split('.').last ?? '-'}'),
+                      'Count: ${widget.selected?.species?.count} '
+                      'Time: ${widget.selected?.species?.time} '
+                      // 'Direction: ${widget.selected?.species?[revIdx].direction?.toString().split('.').last ?? '-'} '
+                      // 'Strat.: ${widget.selected?.species?[revIdx].stratification?.toString().split('.').last ?? '-'}'
+                  ),
                   trailing: IconButton(
                     icon: const Icon(Icons.delete),
                     onPressed: () {
                       showYesNoDialog(() => setState(() {
-                        widget.selected?.species =
-                            widget.selected?.species?.toList(growable: true) ?? [];
-                        widget.selected?.species?.removeAt(revIdx);
+                        // widget.selected?.species =
+                        //     widget.selected?.species?.toList(growable: true) ?? [];
+                        widget.selected?.species = null;
                       }), () {});
 
                     },
                   ),
                   onTap: () {
                     showFullScreenDialog(SpeciesForm(
-                      species: widget.selected?.species?[revIdx],
+                      species: widget.selected?.species,
                       onSaved: (species, _) {
                         setState(() {
-                          widget.selected?.species?[revIdx] = species;
+                          widget.selected?.species = species;
                         });
                         DataService().transect?.updateMarker(widget.selected!);
                         IsarService().updateTransect(DataService().transect!);
@@ -94,18 +96,18 @@ class _MarkerInfoState extends State<MarkerInfo> {
                   }
                 ),
               );},
-            ) : Text(widget.selected?.description ?? ''),
+            ),
           ),
           Row(
             mainAxisAlignment: MainAxisAlignment.end,
             children: [
-              TextButton(
-                onPressed: () => _addSpecies(),
-                child: const Text('ADD SPECIES'),
-              ),
-              const SizedBox(
-                width: 10,
-              ),
+              // TextButton(
+              //   onPressed: () => _addSpecies(),
+              //   child: const Text('ADD SPECIES'),
+              // ),
+              // const SizedBox(
+              //   width: 10,
+              // ),
               TextButton(
                 onPressed: () => Navigator.of(
                   ContextHolder.currentContext,

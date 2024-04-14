@@ -1,7 +1,7 @@
 /// Class to create .kml file from a transect, using xml package
 
-import 'package:bird_tracker/model/species.dart';
-import 'package:bird_tracker/model/transect.dart';
+import 'package:ciconia_tracker/model/species.dart';
+import 'package:ciconia_tracker/model/transect.dart';
 import 'package:xml/xml.dart';
 
 import '../model/placemark.dart';
@@ -41,7 +41,7 @@ class KMLUtils {
           builder.attribute('id', 'redLineRedPoly');
           builder.element('LineStyle', nest: () {
             builder.element('color', nest: () {
-              builder.text('ff0051e6');
+              builder.text('ff0f9d58');
             });
             builder.element('width', nest: () {
               builder.text('4');
@@ -59,7 +59,7 @@ class KMLUtils {
           builder.attribute('id', 'markerPlacemark');
           builder.element('IconStyle', nest: () {
            builder.element('Color', nest: () {
-              builder.text('ff0051e6');
+              builder.text('ff0f9d58');
             });
             builder.element('scale', nest: () {
               builder.text('1.0');
@@ -75,7 +75,7 @@ class KMLUtils {
               builder.text('#markerPlacemark');
             });
             builder.element('name', nest: () {
-              builder.text('Point ${marker.id! + 1}');
+              builder.text('Gnezdo ${marker.id! + 1}');
             });
             builder.element('description', nest: () {
               // builder.text('<![CDATA[  ${marker.speciesString ?? ''} ]]>');
@@ -104,12 +104,12 @@ class KMLUtils {
             builder.element('tessellate', nest: () {
               builder.text('1');
             });
-            builder.element('coordinates', nest: () {
-              builder.text(transect.points
-                      ?.map((e) => '${e.longitude},${e.latitude},0')
-                      .join(' ') ??
-                  '');
-            });
+            // builder.element('coordinates', nest: () {
+            //   builder.text(transect.points
+            //           ?.map((e) => '${e.longitude},${e.latitude},0')
+            //           .join(' ') ??
+            //       '');
+            // });
           });
         }); // end document
       }); // end kml
@@ -173,20 +173,20 @@ class KMLUtils {
 
     }
     transect.markers = markers;
-    transect.points = points;
+    // transect.points = points;
     return transect;
   }
 
-  List<Species>? getSpeciesFromDescription(String? description) {
+  Species? getSpeciesFromDescription(String? description) {
     if (description == null) {
       return null;
     }
-    final species = description.split(';');
-    if (species.isEmpty) {
+    // final species = description.split(';');
+    if (description.isEmpty) {
       return null;
     } else {
       /// return Species().listFromString(species) and remove nulls
-      return Species().listFromString(species)?.toList();
+      return Species.fromSpeciesString(description);
     }
   }
 }

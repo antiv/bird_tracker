@@ -3,23 +3,23 @@ import 'package:flutter/material.dart';
 class BtAutocomplete extends StatelessWidget {
   const BtAutocomplete({
     super.key,
-    required this.spicesFocusNode,
-    required this.spicesController,
     required this.kOptions,
-  }) : _btFocusNode = spicesFocusNode, _btController = spicesController;
+    this.label = '',
+    required this.btFocusNode,
+    required this.btController,
+  });
 
-  final FocusNode _btFocusNode;
-  final TextEditingController _btController;
-  final TextEditingController spicesController;
-  final FocusNode spicesFocusNode;
+  final FocusNode btFocusNode;
+  final TextEditingController btController;
   final List<String> kOptions;
+  final String label;
 
   @override
   Widget build(BuildContext context) {
     return RawAutocomplete(
       key: const ValueKey('autocomplete_text_field'),
-      focusNode: _btFocusNode,
-      textEditingController: _btController,
+      focusNode: btFocusNode,
+      textEditingController: btController,
       fieldViewBuilder: (BuildContext context,
           TextEditingController textEditingController,
           FocusNode focusNode,
@@ -31,18 +31,22 @@ class BtAutocomplete extends StatelessWidget {
             onFieldSubmitted();
           },
           decoration: InputDecoration(
-            labelText: 'Species',
-            prefixIcon: const Icon(Icons.search),
+            border: const OutlineInputBorder(),
+            enabledBorder: const OutlineInputBorder(
+              borderSide: BorderSide(color: Colors.grey),
+            ),
+            labelText: label,
+            // prefixIcon: const Icon(Icons.search),
             suffixIcon: InkWell(
               child: const Icon(Icons.clear),
               onTap: () {
-                _btController.clear();
+                btController.clear();
               },
             ),
           ),
           validator: (value) {
             if (value == null || value.isEmpty) {
-              return 'Please enter a value';
+              return 'Polje je obavezno';
             }
             return null;
           },
@@ -66,6 +70,7 @@ class BtAutocomplete extends StatelessWidget {
                   },
                   child: ListTile(
                     title: Text(option),
+                    focusColor: Colors.grey[300],
                   ),
                 ))
                     .toList(),

@@ -2,12 +2,13 @@ import 'dart:async';
 import 'dart:developer';
 import 'dart:math' as math;
 
-import 'package:bird_tracker/service/data_service.dart';
-import 'package:bird_tracker/utils/ux_builder.dart';
+import 'package:ciconia_tracker/model/species.dart';
+import 'package:ciconia_tracker/service/data_service.dart';
+import 'package:ciconia_tracker/service/isar_service.dart';
+import 'package:ciconia_tracker/utils/ux_builder.dart';
+import 'package:ciconia_tracker/widgets/species_form.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:location/location.dart';
-
-import '../widgets/marker_info.dart';
 
 goToCurrentLocation(
     bool serviceEnabled,
@@ -15,13 +16,13 @@ goToCurrentLocation(
     LocationData? locationData,
     GoogleMapController? controller,
     Completer<GoogleMapController> completer) async {
-  serviceEnabled = await location.serviceEnabled();
-  if (!serviceEnabled) {
-    serviceEnabled = await location.requestService();
-    if (!serviceEnabled) {
-      return;
-    }
-  }
+  // serviceEnabled = await location.serviceEnabled();
+  // if (!serviceEnabled) {
+  //   serviceEnabled = await location.requestService();
+  //   if (!serviceEnabled) {
+  //     return;
+  //   }
+  // }
 
   locationData = await location.getLocation();
 
@@ -30,7 +31,7 @@ goToCurrentLocation(
     target: LatLng(locationData.latitude!, locationData.longitude!),
     zoom: 16,
   );
-  enableBackgroundMode(location);
+  // enableBackgroundMode(location);
 
   /// if controller is not initialized, wait for it
   // if (!_controller.isCompleted) {
@@ -87,7 +88,15 @@ Marker getNewMarker(String id, LocationData locationData, Function onTap) {
 void showMarkerInfo(int index) {
   final selected =
       DataService().transect?.markers?.firstWhere((m) => m.id == index);
-  showBottomModal(MarkerInfo(selected: selected));
+  // showBottomModal(MarkerInfo(selected: selected));
+  showFullScreenDialog(SpeciesForm(
+    species: selected?.species,
+    onSaved: (Species species, _) {
+      selected?.species = species;
+      DataService().transect?.updateMarker(selected!);
+      IsarService().updateTransect(DataService().transect!);
+    },
+  ), title: 'Izmeni podatke',);
 }
 
 double calculateDistance(List<LatLng> polyline) {

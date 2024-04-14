@@ -1,4 +1,4 @@
-import 'package:bird_tracker/model/species.dart';
+import 'package:ciconia_tracker/model/species.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:intl/intl.dart';
 import 'package:isar/isar.dart';
@@ -15,7 +15,8 @@ class Placemark {
   double? latitude;
   double? longitude;
   String? description;
-  List<Species>? species = [];
+  // List<Species>? species = [];
+  Species? species;
 
   Placemark({
     this.id,
@@ -47,7 +48,7 @@ class Placemark {
       markerId: MarkerId(id.toString()),
       position: LatLng(latitude!, longitude!),
       infoWindow: InfoWindow(
-        title: description ?? 'Point ${(id ?? 0) + 1}',
+        title: description ?? 'Gnezdo ${(id ?? 0) + 1}',
       ),
       onTap: () => showMarkerInfo(id ?? 0),
     );
@@ -78,11 +79,7 @@ class Placemark {
     /// return all species in format: species1, species2, species3
     /// if no species, return 'No species recorded'
     if (species != null) {
-      if (species!.isNotEmpty) {
-        return species!.map((e) => e.speciesString).join('\n');
-      } else {
-        return 'No species recorded';
-      }
+       return species!.speciesString;
     } else {
       return 'No species recorded';
     }
