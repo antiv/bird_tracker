@@ -12,6 +12,7 @@ val newBuildDir: Directory =
 subprojects {
     afterEvaluate {
         project.extensions.findByType<com.android.build.gradle.LibraryExtension>()?.apply {
+            compileSdk = 34
             if (namespace == null) {
                 var extractedNamespace = "com.example.namespace"
                 val manifestFile = file("src/main/AndroidManifest.xml")
