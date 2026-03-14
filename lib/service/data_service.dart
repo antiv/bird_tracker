@@ -19,7 +19,7 @@ class DataService with ChangeNotifier{
 
   SharedPreferences? prefs;
 
-  initPreferences() async {
+  Future<void> initPreferences() async {
     prefs = await SharedPreferences.getInstance();
   }
 

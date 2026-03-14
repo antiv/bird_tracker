@@ -1,5 +1,4 @@
-/// Class to create .kml file from a transect, using xml package
-
+// Class to create .kml file from a transect, using xml package
 import 'package:bird_tracker/model/species.dart';
 import 'package:bird_tracker/model/transect.dart';
 import 'package:xml/xml.dart';

@@ -19,7 +19,7 @@ import 'package:provider/provider.dart';
 import 'model/placemark.dart';
 
 class HomePage extends StatefulWidget {
-  const HomePage({Key? key}) : super(key: key);
+  const HomePage({super.key});
 
   @override
   State<HomePage> createState() => _HomePageState();
@@ -71,11 +71,11 @@ class _HomePageState extends State<HomePage> {
   }
 
   @override
-  dispose() {
+  void dispose() {
     super.dispose();
   }
 
-  _goToCurrentLocation() async {
+  Future<void> _goToCurrentLocation() async {
     if (locationStream != null) {
       await _stopListener();
       await goToCurrentLocation(_serviceEnabled ?? false, location,
@@ -91,7 +91,7 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
-  onLocationChange(LocationData currentLocation) {
+  void onLocationChange(LocationData currentLocation) {
     setState(() {
       _locationData = currentLocation;
       // points.add(LatLng(_locationData!.latitude!, _locationData!.longitude!));
@@ -119,7 +119,7 @@ class _HomePageState extends State<HomePage> {
     });
   }
 
-  _startListener() async {
+  Future<void> _startListener() async {
     if (locationStream == null) {
       location.changeSettings(
           accuracy: LocationAccuracy.high, interval: 1000, distanceFilter: 10);
@@ -131,7 +131,7 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
-  _pauseListener() async {
+  Future<void> _pauseListener() async {
     /// Save transect with points and markers
     // transect?.markers = Placemark.fromMarkers(_markers);
     transect?.points = _polyLines?.first.points
@@ -143,14 +143,14 @@ class _HomePageState extends State<HomePage> {
     _stopListener();
   }
 
-  _stopListener() async {
+  Future<void> _stopListener() async {
     locationStream?.cancel();
     locationStream = null;
   }
 
-  _stopTransect() async {
+  Future<void> _stopTransect() async {
     /// showTextInputDialog to enter transect name
-    await showTextInputDialog(
+    showTextInputDialog(
         'Enter transect name', 'Transect name', 'Transect ${DateFormat('dd.MM.yyyy').format(DateTime.now())}', (name) {
       _stopListener();
       transect?.endDate = DateTime.now();
@@ -172,7 +172,7 @@ class _HomePageState extends State<HomePage> {
     });
   }
 
-  _addMarker() {
+  void _addMarker() {
     /// close last marker
     if (transect?.markers?.isNotEmpty ?? false) {
       Placemark lastMarker = transect!.markers!.last;
@@ -222,7 +222,7 @@ class _HomePageState extends State<HomePage> {
     ));
   }
 
-  _startTransect() async {
+  Future<void> _startTransect() async {
     if (transect != null) {
       /// ask to continue or open new transect
       showYesNoDialog(() {
@@ -239,7 +239,7 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
-  _startNewTransect() {
+  void _startNewTransect() {
     transect = Transect()
       ..startDate = DateTime.now()
       ..points = List<Point>.empty(growable: true)

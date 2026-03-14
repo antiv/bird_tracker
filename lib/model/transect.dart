@@ -120,13 +120,11 @@ class Transect {
   Future<void> shareCSV() async {
     Uint8List? bytes = Uint8List.fromList(toCSV().codeUnits);
     String path = await storeFileTemporarily(bytes, '$name-${DateFormat('dd-MM-yyyy').format(startDate)}.csv');
-    await Share.shareXFiles(
-      [
-        XFile(path)
-      ],
+    await SharePlus.instance.share(ShareParams(
+      files: [XFile(path)],
       text: '$name ${DateFormat('dd/MM/yyyy').format(startDate)}',
       subject: '$name ${DateFormat('dd/MM/yyyy').format(startDate)}',
-    );
+    ));
   }
 
   /// share transect as KML file
@@ -134,13 +132,11 @@ class Transect {
     Uint8List? bytes = Uint8List.fromList(toKML().codeUnits);
     String path = await storeFileTemporarily(bytes, '$name-${DateFormat('dd-MM-yyyy').format(startDate)}.kml');
 
-    await Share.shareXFiles(
-      [
-        XFile(path)
-      ],
+    await SharePlus.instance.share(ShareParams(
+      files: [XFile(path)],
       text: '$name ${DateFormat('dd/MM/yyyy').format(startDate)} as KML',
       subject: '$name ${DateFormat('dd/MM/yyyy').format(startDate)} as KML',
-    );
+    ));
   }
 
   void goToFirst() {

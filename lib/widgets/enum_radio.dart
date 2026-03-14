@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 
 class EnumRadio extends StatelessWidget {
-  const EnumRadio({Key? key, this.enumValues, this.value, this.onChanged})
-      : super(key: key);
+  const EnumRadio({super.key, this.enumValues, this.value, this.onChanged});
 
   final List<dynamic>? enumValues;
   final dynamic value;
@@ -22,10 +21,17 @@ class EnumRadio extends StatelessWidget {
           ),
           child: Padding(
             padding: const EdgeInsets.symmetric(vertical: 20.0),
-            child: Wrap(
-              alignment: WrapAlignment.spaceEvenly,
-              runSpacing: 20,
-              children: enumValues
+            child: RadioGroup<dynamic>(
+              groupValue: value,
+              onChanged: (dynamic val) {
+                if (onChanged != null) {
+                  onChanged!(val);
+                }
+              },
+              child: Wrap(
+                alignment: WrapAlignment.spaceEvenly,
+                runSpacing: 20,
+                children: enumValues
                       ?.map((e) => InkWell(
                             onTap: () {
                               if (onChanged != null) {
@@ -35,14 +41,8 @@ class EnumRadio extends StatelessWidget {
                             child: Row(
                               mainAxisSize: MainAxisSize.min,
                               children: [
-                                Radio(
+                                Radio<dynamic>(
                                   value: e,
-                                  groupValue: value,
-                                  onChanged: (value) {
-                                    if (onChanged != null) {
-                                      onChanged!(value);
-                                    }
-                                  },
                                 ),
                                 Text(e.toString().split('.').last),
                               ],
@@ -50,6 +50,7 @@ class EnumRadio extends StatelessWidget {
                           ))
                       .toList() ??
                   [],
+              ),
             ),
           ),
         ),
@@ -77,10 +78,10 @@ class EnumRadio extends StatelessWidget {
               child: IconButton(
                 icon: const Icon(Icons.clear, size: 18, color: Colors.red),
                 style: ButtonStyle(
-                  padding: MaterialStateProperty.all<EdgeInsetsGeometry>(
+                  padding: WidgetStateProperty.all<EdgeInsetsGeometry>(
                     const EdgeInsets.all(0),
                   ),
-                  backgroundColor: MaterialStateProperty.all<Color>(
+                  backgroundColor: WidgetStateProperty.all<Color>(
                     Colors.grey.shade300,
                   ),
                 ),

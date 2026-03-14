@@ -7,7 +7,7 @@ import '../utils/location_helper.dart';
 import '../utils/ux_builder.dart';
 
 class TransectInfo extends StatefulWidget {
-  const TransectInfo({Key? key}) : super(key: key);
+  const TransectInfo({super.key});
 
   @override
   State<TransectInfo> createState() => _TransectInfoState();
