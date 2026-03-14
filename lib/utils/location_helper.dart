@@ -9,7 +9,7 @@ import 'package:location/location.dart';
 
 import '../widgets/marker_info.dart';
 
-goToCurrentLocation(
+Future<void> goToCurrentLocation(
     bool serviceEnabled,
     Location location,
     LocationData? locationData,
@@ -41,7 +41,7 @@ goToCurrentLocation(
   // });
 }
 
-goToLocation(
+Future<void> goToLocation(
     LatLng locationData, GoogleMapController? controller, Completer<GoogleMapController> completer) async {
   CameraPosition cameraPosition = CameraPosition(
     target: locationData,
@@ -105,10 +105,10 @@ double calculateDistance(List<LatLng> polyline) {
   return totalDistance;
 }
 
-double getStraightLineDistance(lat1, lon1, lat2, lon2) {
-  const R = 6371; // Radius of the earth in km
-  final dLat = deg2rad(lat2 - lat1);
-  final dLon = deg2rad(lon2 - lon1);
+double getStraightLineDistance(double lat1, double lon1, double lat2, double lon2) {
+  const int R = 6371; // Radius of the earth in km
+  final double dLat = deg2rad(lat2 - lat1);
+  final double dLon = deg2rad(lon2 - lon1);
   final a = math.sin(dLat / 2) * math.sin(dLat / 2) +
       math.cos(deg2rad(lat1)) *
           math.cos(deg2rad(lat2)) *
@@ -119,11 +119,11 @@ double getStraightLineDistance(lat1, lon1, lat2, lon2) {
   return d;
 }
 
-dynamic deg2rad(deg) {
+double deg2rad(double deg) {
   return deg * (math.pi / 180);
 }
 
-getTimeDifference(DateTime? startDate, DateTime? endDate) {
+String getTimeDifference(DateTime? startDate, DateTime? endDate) {
   if (startDate == null || endDate == null) {
     return '';
   }

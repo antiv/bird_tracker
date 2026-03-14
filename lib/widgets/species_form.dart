@@ -10,7 +10,7 @@ import '../utils/ux_builder.dart';
 import 'bt_autocomplete.dart';
 
 class SpeciesForm extends StatefulWidget {
-  const SpeciesForm({Key? key, this.onSaved, this.species}) : super(key: key);
+  const SpeciesForm({super.key, this.onSaved, this.species});
 
   final Function? onSaved;
   final Species? species;
@@ -28,7 +28,7 @@ class _SpeciesFormState extends State<SpeciesForm> {
   final FocusNode _spicesFocusNode = FocusNode();
 
   Direction? _direction;
-  Stratification? _stratification = Stratification.D;
+  Stratification? _stratification = Stratification.d;
 
   int? _code;
   bool _isEdit = false;
@@ -42,7 +42,7 @@ class _SpeciesFormState extends State<SpeciesForm> {
       _countController.text = widget.species!.count.toString();
       _descriptionController.text = widget.species!.description ?? '';
       _direction = widget.species?.direction;
-      _stratification = widget.species?.stratification ?? Stratification.D;
+      _stratification = widget.species?.stratification ?? Stratification.d;
       _code = widget.species?.code;
     } else {
       _spicesFocusNode.requestFocus();
@@ -59,7 +59,7 @@ class _SpeciesFormState extends State<SpeciesForm> {
     super.dispose();
   }
 
-  _save(bool close) {
+  bool _save(bool close) {
     if (_formKey.currentState!.validate()) {
       final species = Species()
         ..species = _spicesController.text
@@ -83,7 +83,7 @@ class _SpeciesFormState extends State<SpeciesForm> {
     }
   }
 
-  _clear() {
+  void _clear() {
     setState(() {
       _spicesController.clear();
       _countController.text = '1';
@@ -91,7 +91,7 @@ class _SpeciesFormState extends State<SpeciesForm> {
       _descriptionController.clear();
       _code = null;
       _direction = null;
-      _stratification = Stratification.D;
+      _stratification = Stratification.d;
     });
   }
 

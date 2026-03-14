@@ -29,7 +29,7 @@ import '../model/transect.dart';
 //         ),
 //       ],
 //     ));
-showBottomModal(Widget widget) {
+void showBottomModal(Widget widget) {
   showModalBottomSheet(
     context: ContextHolder.currentContext,
     builder: (BuildContext context) {
@@ -38,7 +38,7 @@ showBottomModal(Widget widget) {
   );
 }
 
-showDialogBox(Widget widget) {
+void showDialogBox(Widget widget) {
   showDialog(
     context: ContextHolder.currentContext,
     builder: (BuildContext context) {
@@ -47,7 +47,7 @@ showDialogBox(Widget widget) {
   );
 }
 
-showAlertDialog(Widget content, List<Widget> actions) {
+void showAlertDialog(Widget content, List<Widget> actions) {
   showDialogBox(AlertDialog(
     content: content,
     actions: actions,
@@ -55,9 +55,9 @@ showAlertDialog(Widget content, List<Widget> actions) {
   ));
 }
 
-showYesNoDialog(
-  Function yesFunction,
-  Function noFunction, {
+void showYesNoDialog(
+  VoidCallback yesFunction,
+  VoidCallback noFunction, {
   String title = 'Are you sure?',
   String yesText = 'Yes',
   String noText = 'No',
@@ -83,7 +83,7 @@ showYesNoDialog(
   );
 }
 
-showTextInputDialog(String title, String hint, String? defaultValue,
+void showTextInputDialog(String title, String hint, String? defaultValue,
     Function(String) onConfirm) {
   // final TextEditingController controller = TextEditingController(text: defaultValue);
   String value = defaultValue ?? '';
@@ -117,7 +117,7 @@ showTextInputDialog(String title, String hint, String? defaultValue,
   ));
 }
 
-showSnackBar(String message, {int duration = 1}) {
+void showSnackBar(String message, {int duration = 1}) {
   ScaffoldMessenger.of(ContextHolder.currentContext).showSnackBar(
     SnackBar(
       content: Text(message),
@@ -126,7 +126,7 @@ showSnackBar(String message, {int duration = 1}) {
   );
 }
 
-showFullScreenDialog(Widget widget, {String? title}) {
+void showFullScreenDialog(Widget widget, {String? title}) {
   showGeneralDialog(
     context: ContextHolder.currentContext,
     // barrierColor: Colors.white, // Background color
@@ -157,7 +157,7 @@ showFullScreenDialog(Widget widget, {String? title}) {
   );
 }
 
-showImportKMLDialog() async {
+Future<void> showImportKMLDialog() async {
   /// Use File picker lib to get KML file path,
   /// then convert data to Transect and save to DB
   /// than, show it on map

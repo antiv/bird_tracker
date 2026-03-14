@@ -9,12 +9,12 @@ import '../service/data_service.dart';
 import '../utils/ux_builder.dart';
 
 class AppMenu extends StatelessWidget {
-  const AppMenu({Key? key}) : super(key: key);
+  const AppMenu({super.key});
 
-  _showTracksHistory() =>
+  void _showTracksHistory() =>
     showBottomModal(const TransectsHistory());
 
-  _showTrackInfo() {
+  void _showTrackInfo() {
     if (DataService().transect != null) {
       showBottomModal(const TransectInfo());
     } else {

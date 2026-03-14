@@ -20,7 +20,7 @@ class MarkerInfo extends StatefulWidget {
 }
 
 class _MarkerInfoState extends State<MarkerInfo> {
-  _addSpecies() {
+  void _addSpecies() {
     showFullScreenDialog(SpeciesForm(
       onSaved: (species, close) {
         setState(() {

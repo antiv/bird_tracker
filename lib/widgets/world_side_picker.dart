@@ -90,10 +90,10 @@ class WorldSidePicker extends StatelessWidget {
                 child: IconButton(
                   icon: const Icon(Icons.clear, size: 18, color: Colors.red),
                   style: ButtonStyle(
-                    padding: MaterialStateProperty.all<EdgeInsetsGeometry>(
+                    padding: WidgetStateProperty.all<EdgeInsetsGeometry>(
                       const EdgeInsets.all(0),
                     ),
-                    backgroundColor: MaterialStateProperty.all<Color>(
+                    backgroundColor: WidgetStateProperty.all<Color>(
                       Colors.grey.shade300,
                     ),
                   ),

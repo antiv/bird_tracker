@@ -27,7 +27,7 @@ class _TransectsHistoryState extends State<TransectsHistory> {
     super.initState();
   }
 
-  _getTransects() async {
+  Future<void> _getTransects() async {
     final List<Transect?> transects = await IsarService().getAllTransects();
     setState(() {
       this.transects = transects;
