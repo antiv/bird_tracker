@@ -65,7 +65,7 @@ class _SpeciesFormState extends State<SpeciesForm> {
         ..species = _spicesController.text
         ..code = _code
         ..count = int.parse(_countController.text)
-        ..time = DateFormat.Hms().format(DateTime.now())
+        ..time = _isEdit ? (widget.species?.time ?? DateFormat.Hms().format(DateTime.now())) : DateFormat.Hms().format(DateTime.now())
         ..direction = _direction
         ..stratification = _stratification
         ..description = _descriptionController.text;

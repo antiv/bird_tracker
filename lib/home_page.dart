@@ -47,7 +47,7 @@ class _HomePageState extends State<HomePage> {
 
   late final Set<Polyline>? _polyLines;
 
-  ValueNotifier<bool> isOpen = ValueNotifier<bool>(false);
+
 
   @override
   void initState() {
@@ -83,7 +83,9 @@ class _HomePageState extends State<HomePage> {
       for (final mark in _markers) {
         await controller?.hideMarkerInfoWindow(mark.markerId);
       }
-      await DataService().controller?.showMarkerInfoWindow(_markers.last.markerId);
+      await DataService()
+          .controller
+          ?.showMarkerInfoWindow(_markers.last.markerId);
       await _startListener();
     } else {
       await goToCurrentLocation(_serviceEnabled ?? false, location,
@@ -123,7 +125,7 @@ class _HomePageState extends State<HomePage> {
     if (locationStream == null) {
       location.changeSettings(
           accuracy: LocationAccuracy.high, interval: 1000, distanceFilter: 10);
-      isOpen.value = false;
+      DataService().isOpen.value = false;
       locationStream =
           location.onLocationChanged.listen((LocationData currentLocation) {
         onLocationChange(currentLocation);
@@ -150,16 +152,17 @@ class _HomePageState extends State<HomePage> {
 
   Future<void> _stopTransect() async {
     /// showTextInputDialog to enter transect name
-    showTextInputDialog(
-        'Enter transect name', 'Transect name', 'Transect ${DateFormat('dd.MM.yyyy').format(DateTime.now())}', (name) {
+    showTextInputDialog('Enter transect name', 'Transect name',
+        'Transect ${DateFormat('dd.MM.yyyy').format(DateTime.now())}', (name) {
       _stopListener();
       transect?.endDate = DateTime.now();
       transect?.name = name;
       transect?.points = _polyLines?.first.points
           .map((e) => Point()
-        ..latitude = e.latitude
-        ..longitude = e.longitude)
+            ..latitude = e.latitude
+            ..longitude = e.longitude)
           .toList();
+
       /// close last marker if not closed
       if (transect?.markers?.isNotEmpty ?? false) {
         Placemark lastMarker = transect!.markers!.last;
@@ -173,6 +176,8 @@ class _HomePageState extends State<HomePage> {
   }
 
   void _addMarker() {
+    DataService().isOpen.value = false;
+    setState(() {});
     /// close last marker
     if (transect?.markers?.isNotEmpty ?? false) {
       Placemark lastMarker = transect!.markers!.last;
@@ -182,6 +187,7 @@ class _HomePageState extends State<HomePage> {
       onSaved: (species, close) {
         setState(() {
           transect?.markers = transect?.markers?.toList(growable: true) ?? [];
+
           /// Find last marker
           /// if this marker is not closed, add species to it
           /// else create new marker
@@ -232,8 +238,7 @@ class _HomePageState extends State<HomePage> {
       },
           title: 'Continue transect or start new one?',
           yesText: 'Continue',
-          noText: 'New transect'
-      );
+          noText: 'New transect');
     } else {
       _startNewTransect();
     }
@@ -245,6 +250,7 @@ class _HomePageState extends State<HomePage> {
       ..points = List<Point>.empty(growable: true)
       ..markers = List<Placemark>.empty(growable: true);
     DataService().setTransect(transect);
+
     /// insert transect to db
     IsarService().addTransect(transect!);
     _startListener();
@@ -267,7 +273,8 @@ class _HomePageState extends State<HomePage> {
               kAppIcon,
               fit: BoxFit.scaleDown,
               semanticsLabel: 'Bird Tracker Logo',
-              colorFilter: const ColorFilter.mode(Colors.white, BlendMode.srcIn),
+              colorFilter:
+                  const ColorFilter.mode(Colors.white, BlendMode.srcIn),
             ),
           ),
         ),
@@ -278,16 +285,14 @@ class _HomePageState extends State<HomePage> {
       body: SafeArea(
         // on below line creating google maps
         child: Consumer<DataService>(builder: (context, dataService, _) {
-          debugPrint(
-              '============================================= reBuild =============================================');
           transect = dataService.transect;
           _polyLines?.first.points.clear();
           _polyLines?.first.points.addAll(transect?.points
                   ?.map((e) => LatLng(e.latitude, e.longitude))
                   .toList() ??
               []);
-          _markers = Set<Marker>.of(
-              transect?.markers?.map((e) => e.toMarker()) ?? []);
+          _markers =
+              Set<Marker>.of(transect?.markers?.map((e) => e.toMarker()) ?? []);
           return GoogleMap(
             key: const Key('map'),
             // on below line setting camera position
@@ -326,7 +331,7 @@ class _HomePageState extends State<HomePage> {
             /// Calculate position somehow
             top: (Theme.of(context).appBarTheme.toolbarHeight ?? 56) +
                 150 +
-                (isOpen.value ? 130 : 10)),
+                (DataService().isOpen.value ? 130 : 10)),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.start,
           mainAxisSize: MainAxisSize.min,
@@ -338,7 +343,7 @@ class _HomePageState extends State<HomePage> {
                 child: const Icon(Icons.location_searching)),
             const SizedBox(height: 10),
             SpeedDial(
-              openCloseDial: isOpen,
+              openCloseDial: DataService().isOpen,
               icon: Icons.directions_walk,
               backgroundColor:
                   locationStream != null ? Colors.red.shade700 : null,
@@ -352,7 +357,7 @@ class _HomePageState extends State<HomePage> {
               onOpen: () {
                 setState(() {
                   if (locationStream == null) {
-                    isOpen.value = false;
+                    DataService().isOpen.value = false;
                     _startTransect();
                   }
                 });
@@ -382,7 +387,7 @@ class _HomePageState extends State<HomePage> {
                 ),
               ],
             ),
-            SizedBox(height: isOpen.value ? 130 : 10),
+            SizedBox(height: DataService().isOpen.value ? 130 : 10),
             FloatingActionButton(
                 onPressed: locationStream != null
                     ? _addMarker

@@ -1,12 +1,15 @@
 import 'package:bird_tracker/service/data_service.dart';
 import 'package:context_holder/context_holder.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:provider/provider.dart';
 
 import 'configuration/constants.dart';
 import 'home_page.dart';
 
-void main() {
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await dotenv.load(fileName: '.env');
   runApp(ChangeNotifierProvider(create: (BuildContext context) => DataService(),
   child: const MyApp()));
 }

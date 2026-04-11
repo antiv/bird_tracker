@@ -33,6 +33,8 @@ class DataService with ChangeNotifier{
 
   MapType? mapType;
 
+  ValueNotifier<bool> isOpen = ValueNotifier<bool>(false);
+
   Completer<GoogleMapController> completer = Completer();
   GoogleMapController? controller;
 

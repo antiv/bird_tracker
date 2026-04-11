@@ -47,3 +47,7 @@ hidde
 
 # FVM Version Cache
 .fvm/
+
+# Environment
+.env
+android/key.properties

@@ -23,6 +23,17 @@ Future<void> goToCurrentLocation(
     }
   }
 
+  PermissionStatus permissionGranted = await location.hasPermission();
+  if (permissionGranted == PermissionStatus.denied) {
+    bool ok = await showPermissionInfoDialog();
+    if (!ok) return;
+
+    permissionGranted = await location.requestPermission();
+    if (permissionGranted != PermissionStatus.granted) {
+      return;
+    }
+  }
+
   locationData = await location.getLocation();
 
   // specified current users location
@@ -59,16 +70,11 @@ Future<bool> enableBackgroundMode(
     return true;
   } else {
     try {
-      await location.enableBackgroundMode();
-    } catch (e) {
-      log('====================================================${e.toString()}====================================================');
-    }
-    try {
       bgModeEnabled = await location.enableBackgroundMode();
     } catch (e) {
-      log('====================================================${e.toString()}====================================================');
+      log('Error enabling background mode: ${e.toString()}');
+      bgModeEnabled = false;
     }
-    log('=============================================$bgModeEnabled================================================='); //True!
     return bgModeEnabled;
   }
 }

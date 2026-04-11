@@ -1,8 +1,10 @@
 import 'package:bird_tracker/widgets/transect_info.dart';
 import 'package:bird_tracker/widgets/transects_history.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../configuration/constants.dart';
 import '../service/data_service.dart';
@@ -19,6 +21,13 @@ class AppMenu extends StatelessWidget {
       showBottomModal(const TransectInfo());
     } else {
       showSnackBar('No transect selected');
+    }
+  }
+
+  void _openPrivacyPolicy() async {
+    final url = dotenv.env['PRIVACY_POLICY_URL'];
+    if (url != null) {
+      await launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication);
     }
   }
 
@@ -132,6 +141,15 @@ class AppMenu extends StatelessWidget {
           onTap: () {
             Navigator.pop(context);
             showImportKMLDialog();
+          },
+        ),
+        const Divider(),
+        ListTile(
+          leading: const Icon(Icons.privacy_tip_outlined),
+          title: const Text('Privacy Policy'),
+          onTap: () {
+            Navigator.pop(context);
+            _openPrivacyPolicy();
           },
         ),
       ],

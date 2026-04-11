@@ -63,6 +63,7 @@ class BtAutocomplete extends StatelessWidget {
                     .map((String option) => GestureDetector(
                   onTap: () {
                     onSelected(option);
+                    _btFocusNode.unfocus();
                   },
                   child: ListTile(
                     title: Text(option),

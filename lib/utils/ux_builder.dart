@@ -127,6 +127,7 @@ void showSnackBar(String message, {int duration = 1}) {
 }
 
 void showFullScreenDialog(Widget widget, {String? title}) {
+  DataService().isOpen.value = false;
   showGeneralDialog(
     context: ContextHolder.currentContext,
     // barrierColor: Colors.white, // Background color
@@ -176,4 +177,37 @@ Future<void> showImportKMLDialog() async {
   } else {
     // User canceled the picker
   }
+}
+
+Future<bool> showPermissionInfoDialog() async {
+  bool result = false;
+  await showDialog(
+    context: ContextHolder.currentContext,
+    builder: (BuildContext context) {
+      return AlertDialog(
+        title: const Text('Location Permission'),
+        backgroundColor: Theme.of(context).cardColor,
+        content: const Text(
+            'Bird Tracker needs your location to track your route and record where you see birds.\n\n'
+            'We will first ask for regular location access, and then we will need "Allow all the time" permission to keep tracking even when the app is in the background or your screen is locked. Please allow both to make sure your transects are stored properly.'),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+              result = false;
+            },
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+              result = true;
+            },
+            child: const Text('Continue'),
+          ),
+        ],
+      );
+    },
+  );
+  return result;
 }
