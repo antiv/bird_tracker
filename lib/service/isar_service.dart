@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:isar/isar.dart';
 import 'package:path_provider/path_provider.dart';
@@ -50,5 +51,26 @@ class IsarService with ChangeNotifier {
 
   Future<Transect?> getTransectById(int id) async {
     return await _isar.transects.get(id);
+  }
+
+  Future<String> createBackupPath() async {
+    final tempDir = await getTemporaryDirectory();
+    final backupFile = File('${tempDir.path}/bird_tracker_backup.isar');
+    if (backupFile.existsSync()) {
+      backupFile.deleteSync();
+    }
+    await _isar.copyToFile(backupFile.path);
+    return backupFile.path;
+  }
+
+  Future<void> restoreBackup(String backupFilePath) async {
+    final dbPath = _isar.path;
+    await _isar.close();
+    
+    final backupFile = File(backupFilePath);
+    await backupFile.copy(dbPath!);
+    
+    await init();
+    notifyListeners();
   }
 }

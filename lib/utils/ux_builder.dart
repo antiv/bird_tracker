@@ -6,6 +6,7 @@ import 'package:bird_tracker/utils/kml_utils.dart';
 import 'package:context_holder/context_holder.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:share_plus/share_plus.dart';
 
 import '../model/transect.dart';
 
@@ -162,7 +163,10 @@ Future<void> showImportKMLDialog() async {
   /// Use File picker lib to get KML file path,
   /// then convert data to Transect and save to DB
   /// than, show it on map
-  FilePickerResult? result = await FilePicker.platform.pickFiles();
+  FilePickerResult? result = await FilePicker.pickFiles(
+    type: FileType.custom,
+    allowedExtensions: ['kml'],
+  );
 
   if (result != null) {
     File file = File(result.files.single.path?? '' );
@@ -210,4 +214,35 @@ Future<bool> showPermissionInfoDialog() async {
     },
   );
   return result;
+}
+
+Future<void> backupData() async {
+  try {
+    String backupPath = await IsarService().createBackupPath();
+    await SharePlus.instance.share(
+      ShareParams(
+        files: [XFile(backupPath)],
+        text: 'Bird Tracker Backup',
+      ),
+    );
+  } catch (e) {
+    showSnackBar('Error creating backup: ${e.toString()}');
+  }
+}
+
+Future<void> restoreData() async {
+  FilePickerResult? result = await FilePicker.pickFiles(
+    type: FileType.custom,
+    allowedExtensions: ['isar'], // isar doesn't always have extension, but we can default to any
+  );
+  if (result != null) {
+    try {
+      showSnackBar('Restoring backup...', duration: 2);
+      await IsarService().restoreBackup(result.files.single.path ?? '');
+      showSnackBar('Data restored successfully!');
+      DataService().setTransect(null); 
+    } catch (e) {
+      showSnackBar('Error restoring data: ${e.toString()}');
+    }
+  }
 }
