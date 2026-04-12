@@ -32,6 +32,58 @@ class AppMenu extends StatelessWidget {
     }
   }
 
+  void _showAboutDialog(BuildContext context) async {
+    final packageInfo = await PackageInfo.fromPlatform();
+    if (!context.mounted) return;
+
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Image.asset(
+              'assets/images/ant-biocode.png',
+              height: 80,
+            ),
+            const SizedBox(height: 16),
+            Text(
+              'app_title'.tr(),
+              style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+            ),
+            Text(
+              'app_version'.tr(args: [packageInfo.version]),
+              style: Theme.of(context).textTheme.bodySmall,
+            ),
+            const SizedBox(height: 16),
+            Text(
+              'about_description'.tr(),
+              textAlign: TextAlign.center,
+              style: Theme.of(context).textTheme.bodyMedium,
+            ),
+            const Divider(height: 32),
+            Text(
+              'copyright'.tr(),
+              style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                    color: Colors.grey,
+                  ),
+              textAlign: TextAlign.center,
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text('close'.tr()),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Drawer(
@@ -45,7 +97,8 @@ class AppMenu extends StatelessWidget {
               children: [
                 _buildSectionHeader(context, 'field_work'.tr()),
                 ListTile(
-                  leading: const Icon(Icons.fmd_bad_outlined, color: Colors.green),
+                  leading:
+                      const Icon(Icons.fmd_bad_outlined, color: Colors.green),
                   title: Text('current_track'.tr()),
                   onTap: () {
                     Navigator.pop(context);
@@ -63,7 +116,8 @@ class AppMenu extends StatelessWidget {
                 const Divider(indent: 16, endIndent: 16),
                 _buildSectionHeader(context, 'data_management'.tr()),
                 ListTile(
-                  leading: const Icon(Icons.file_open_outlined, color: Colors.green),
+                  leading:
+                      const Icon(Icons.file_open_outlined, color: Colors.green),
                   title: Text('import_kml'.tr()),
                   onTap: () {
                     Navigator.pop(context);
@@ -71,7 +125,8 @@ class AppMenu extends StatelessWidget {
                   },
                 ),
                 ListTile(
-                  leading: const Icon(Icons.backup_outlined, color: Colors.green),
+                  leading:
+                      const Icon(Icons.backup_outlined, color: Colors.green),
                   title: Text('backup_data'.tr()),
                   onTap: () {
                     Navigator.pop(context);
@@ -79,7 +134,8 @@ class AppMenu extends StatelessWidget {
                   },
                 ),
                 ListTile(
-                  leading: const Icon(Icons.restore_outlined, color: Colors.green),
+                  leading: const Icon(Icons.cloud_download_outlined,
+                      color: Colors.green),
                   title: Text('restore_data'.tr()),
                   onTap: () {
                     Navigator.pop(context);
@@ -100,8 +156,10 @@ class AppMenu extends StatelessWidget {
                         child: Row(
                           children: [
                             _mapTypeButton(context, MapType.normal, 'map'.tr()),
-                            _mapTypeButton(context, MapType.satellite, 'satellite'.tr()),
-                            _mapTypeButton(context, MapType.hybrid, 'hybrid'.tr()),
+                            _mapTypeButton(
+                                context, MapType.satellite, 'satellite'.tr()),
+                            _mapTypeButton(
+                                context, MapType.hybrid, 'hybrid'.tr()),
                           ],
                         ),
                       ),
@@ -124,7 +182,8 @@ class AppMenu extends StatelessWidget {
                   ],
                 ),
                 ListTile(
-                  leading: const Icon(Icons.privacy_tip_outlined, color: Colors.green),
+                  leading: const Icon(Icons.privacy_tip_outlined,
+                      color: Colors.green),
                   title: Text('privacy_policy'.tr()),
                   onTap: () {
                     Navigator.pop(context);
@@ -166,7 +225,8 @@ class AppMenu extends StatelessWidget {
               kAppIcon,
               width: 48,
               height: 48,
-              colorFilter: const ColorFilter.mode(Colors.white, BlendMode.srcIn),
+              colorFilter:
+                  const ColorFilter.mode(Colors.white, BlendMode.srcIn),
             ),
           ),
           const SizedBox(width: 16),
@@ -197,6 +257,11 @@ class AppMenu extends StatelessWidget {
                 ),
               ],
             ),
+          ),
+          IconButton(
+            onPressed: () => _showAboutDialog(context),
+            icon: const Icon(Icons.info_outline, color: Colors.white),
+            tooltip: 'About',
           ),
         ],
       ),

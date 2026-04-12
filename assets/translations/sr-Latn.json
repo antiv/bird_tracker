@@ -425,5 +425,7 @@
   "backup_error": "Greška pri kreiranju rezervne kopije: {}",
   "backup_text": "Bird Tracker rezervna kopija",
   "pause": "Pauza",
-  "stop": "Stop"
+  "stop": "Stop",
+  "about_description": "Univerzalna aplikacija za terensko prikupljanje podataka o pticama.",
+  "copyright": "© 2025 Ant BioCode. Sva prava zadržana."
 }
