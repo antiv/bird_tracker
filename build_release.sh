@@ -42,6 +42,12 @@ else
     echo "Skipping version bump. Pass --bump to update the version."
 fi
 
+echo "Cleaning project..."
+fvm flutter clean
+
+echo "Getting dependencies..."
+fvm flutter pub get
+
 echo "Building Android AppBundle..."
 # I added obfuscation options to reduce the AppBundle size further as we discussed earlier.
 fvm flutter build appbundle --release --obfuscate --split-debug-info=build/app/outputs/symbols
