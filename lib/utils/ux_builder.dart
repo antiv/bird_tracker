@@ -34,6 +34,10 @@ import '../model/transect.dart';
 void showBottomModal(Widget widget) {
   showModalBottomSheet(
     context: ContextHolder.currentContext,
+    shape: const RoundedRectangleBorder(
+      borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+    ),
+    showDragHandle: true,
     builder: (BuildContext context) {
       return widget;
     },
@@ -53,7 +57,6 @@ void showAlertDialog(Widget content, List<Widget> actions) {
   showDialogBox(AlertDialog(
     content: content,
     actions: actions,
-    backgroundColor: Theme.of(ContextHolder.currentContext).cardColor,
   ));
 }
 
@@ -65,21 +68,24 @@ void showYesNoDialog(
   String? noText,
 }) {
   showAlertDialog(
-    Text(title ?? 'are_you_sure'.tr()),
+    Padding(
+      padding: const EdgeInsets.only(top: 8.0),
+      child: Text(title ?? 'are_you_sure'.tr(), style: const TextStyle(fontSize: 16)),
+    ),
     [
-      TextButton(
-        onPressed: () {
-          Navigator.of(ContextHolder.currentContext).pop();
-          yesFunction();
-        },
-        child: Text(yesText ?? 'yes'.tr()),
-      ),
-      TextButton(
+      OutlinedButton(
         onPressed: () {
           Navigator.of(ContextHolder.currentContext).pop();
           noFunction();
         },
         child: Text(noText ?? 'no'.tr()),
+      ),
+      ElevatedButton(
+        onPressed: () {
+          Navigator.of(ContextHolder.currentContext).pop();
+          yesFunction();
+        },
+        child: Text(yesText ?? 'yes'.tr()),
       ),
     ],
   );
@@ -87,33 +93,36 @@ void showYesNoDialog(
 
 void showTextInputDialog(String title, String hint, String? defaultValue,
     Function(String) onConfirm) {
-  // final TextEditingController controller = TextEditingController(text: defaultValue);
   String value = defaultValue ?? '';
   showDialogBox(AlertDialog(
     title: Text(title),
-    backgroundColor: Theme.of(ContextHolder.currentContext).cardColor,
-    content: TextFormField(
-      // controller: controller,
-      decoration: InputDecoration(hintText: hint),
-      autofocus: true,
-      initialValue: defaultValue,
-      onChanged: (String newValue) {
-        value = newValue;
-      },
+    content: Padding(
+      padding: const EdgeInsets.only(top: 8.0),
+      child: TextFormField(
+        decoration: InputDecoration(
+          hintText: hint,
+          labelText: hint,
+        ),
+        autofocus: true,
+        initialValue: defaultValue,
+        onChanged: (String newValue) {
+          value = newValue;
+        },
+      ),
     ),
     actions: [
-      TextButton(
+      OutlinedButton(
+        onPressed: () {
+          Navigator.of(ContextHolder.currentContext).pop();
+        },
+        child: Text('cancel'.tr()),
+      ),
+      ElevatedButton(
         onPressed: () {
           Navigator.of(ContextHolder.currentContext).pop();
           onConfirm(value);
         },
         child: Text('confirm'.tr()),
-      ),
-      TextButton(
-        onPressed: () {
-          Navigator.of(ContextHolder.currentContext).pop();
-        },
-        child: Text('cancel'.tr()),
       ),
     ],
   ));
@@ -124,6 +133,10 @@ void showSnackBar(String message, {int duration = 1}) {
     SnackBar(
       content: Text(message),
       duration: Duration(seconds: duration),
+      behavior: SnackBarBehavior.floating,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      margin: const EdgeInsets.all(8),
+      backgroundColor: Colors.green.shade800,
     ),
   );
 }
@@ -132,27 +145,18 @@ void showFullScreenDialog(Widget widget, {String? title}) {
   DataService().isOpen.value = false;
   showGeneralDialog(
     context: ContextHolder.currentContext,
-    // barrierColor: Colors.white, // Background color
     barrierDismissible: false,
     barrierLabel: 'Dialog',
     transitionDuration: const Duration(milliseconds: 400),
     pageBuilder: (_, __, ___) {
       return Scaffold(
-        backgroundColor: Theme.of(ContextHolder.currentContext).cardColor,
         appBar: AppBar(
-          // toolbarHeight: 30,
           elevation: 0,
-          backgroundColor: Theme.of(ContextHolder.currentContext).primaryColor,
           title: Text(title ?? 'add_species'.tr()),
-          actions: [
-            IconButton(
-              onPressed: () => Navigator.of(ContextHolder.currentContext).pop(),
-              icon: const Icon(
-                Icons.close,
-                color: Colors.black,
-              ),
-            )
-          ],
+          leading: IconButton(
+            onPressed: () => Navigator.of(ContextHolder.currentContext).pop(),
+            icon: const Icon(Icons.close),
+          ),
         ),
         body: widget,
       );
@@ -161,26 +165,19 @@ void showFullScreenDialog(Widget widget, {String? title}) {
 }
 
 Future<void> showImportKMLDialog() async {
-  /// Use File picker lib to get KML file path,
-  /// then convert data to Transect and save to DB
-  /// than, show it on map
   FilePickerResult? result = await FilePicker.pickFiles(
     type: FileType.custom,
     allowedExtensions: ['kml'],
   );
 
   if (result != null) {
-    File file = File(result.files.single.path?? '' );
-    /// get file data as String XML
+    File file = File(result.files.single.path ?? '');
     String fileData = await file.readAsString();
-    /// convert XML to Transect
-    Transect transect = KMLUtils().kmlToTransect(fileData, file.lastModifiedSync());
-    /// save transect to DB
+    Transect transect =
+        KMLUtils().kmlToTransect(fileData, file.lastModifiedSync());
     IsarService().addTransect(transect);
-    /// show transect on map
     DataService().setTransect(transect);
-  } else {
-    // User canceled the picker
+    showSnackBar('import_success'.tr());
   }
 }
 
@@ -191,7 +188,6 @@ Future<bool> showPermissionInfoDialog() async {
     builder: (BuildContext context) {
       return AlertDialog(
         title: Text('location_permission_title'.tr()),
-        backgroundColor: Theme.of(context).cardColor,
         content: Text('location_permission_content'.tr()),
         actions: [
           TextButton(
@@ -201,7 +197,7 @@ Future<bool> showPermissionInfoDialog() async {
             },
             child: Text('cancel'.tr()),
           ),
-          TextButton(
+          ElevatedButton(
             onPressed: () {
               Navigator.of(context).pop();
               result = true;
@@ -232,14 +228,16 @@ Future<void> backupData() async {
 Future<void> restoreData() async {
   FilePickerResult? result = await FilePicker.pickFiles(
     type: FileType.custom,
-    allowedExtensions: ['isar'], // isar doesn't always have extension, but we can default to any
+    allowedExtensions: [
+      'isar'
+    ], // isar doesn't always have extension, but we can default to any
   );
   if (result != null) {
     try {
       showSnackBar('restoring_backup'.tr(), duration: 2);
       await IsarService().restoreBackup(result.files.single.path ?? '');
       showSnackBar('restore_success'.tr());
-      DataService().setTransect(null); 
+      DataService().setTransect(null);
     } catch (e) {
       showSnackBar('restore_error'.tr(args: [e.toString()]));
     }

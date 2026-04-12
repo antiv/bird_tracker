@@ -35,167 +35,203 @@ class AppMenu extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Drawer(
-        backgroundColor: Theme.of(context).cardColor,
-        child: ListView(
-          // Important: Remove any padding from the ListView.
-          padding: EdgeInsets.zero,
-          children: [
-            SizedBox(
-              height: 110,
-              child: DrawerHeader(
-                decoration: BoxDecoration(
-                  color: Theme.of(context).primaryColor,
+      backgroundColor: Theme.of(context).canvasColor,
+      child: Column(
+        children: [
+          _buildHeader(context),
+          Expanded(
+            child: ListView(
+              padding: const EdgeInsets.symmetric(vertical: 8),
+              children: [
+                _buildSectionHeader(context, 'field_work'.tr()),
+                ListTile(
+                  leading: const Icon(Icons.fmd_bad_outlined, color: Colors.green),
+                  title: Text('current_track'.tr()),
+                  onTap: () {
+                    Navigator.pop(context);
+                    _showTrackInfo();
+                  },
                 ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    SizedBox(
-                      width: 40,
-                      height: 48,
-                      child: InkWell(
-                        onTap: () {
-                          Navigator.pop(context);
-                        },
-                        child: SvgPicture.asset(
-                          kAppIcon,
-                          semanticsLabel: 'Bird Tracker Logo',
-                          colorFilter: const ColorFilter.mode(
-                              Colors.white, BlendMode.srcIn),
+                ListTile(
+                  leading: const Icon(Icons.history, color: Colors.green),
+                  title: Text('saved_tracks'.tr()),
+                  onTap: () {
+                    Navigator.pop(context);
+                    _showTracksHistory();
+                  },
+                ),
+                const Divider(indent: 16, endIndent: 16),
+                _buildSectionHeader(context, 'data_management'.tr()),
+                ListTile(
+                  leading: const Icon(Icons.file_open_outlined, color: Colors.green),
+                  title: Text('import_kml'.tr()),
+                  onTap: () {
+                    Navigator.pop(context);
+                    showImportKMLDialog();
+                  },
+                ),
+                ListTile(
+                  leading: const Icon(Icons.backup_outlined, color: Colors.green),
+                  title: Text('backup_data'.tr()),
+                  onTap: () {
+                    Navigator.pop(context);
+                    backupData();
+                  },
+                ),
+                ListTile(
+                  leading: const Icon(Icons.restore_outlined, color: Colors.green),
+                  title: Text('restore_data'.tr()),
+                  onTap: () {
+                    Navigator.pop(context);
+                    restoreData();
+                  },
+                ),
+                const Divider(indent: 16, endIndent: 16),
+                _buildSectionHeader(context, 'configuration'.tr()),
+                ExpansionTile(
+                  leading: const Icon(Icons.tune, color: Colors.green),
+                  title: Text('settings'.tr()),
+                  children: <Widget>[
+                    ListTile(
+                      title: Text('select_map_type'.tr()),
+                      leading: const Icon(Icons.layers_outlined),
+                      subtitle: SingleChildScrollView(
+                        scrollDirection: Axis.horizontal,
+                        child: Row(
+                          children: [
+                            _mapTypeButton(context, MapType.normal, 'map'.tr()),
+                            _mapTypeButton(context, MapType.satellite, 'satellite'.tr()),
+                            _mapTypeButton(context, MapType.hybrid, 'hybrid'.tr()),
+                          ],
                         ),
                       ),
                     ),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.end,
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text('app_title'.tr(),
-                            style: Theme.of(context)
-                                .textTheme
-                                .titleSmall
-                                ?.copyWith(color: Colors.white)),
-                        FutureBuilder<PackageInfo>(
-                            future: PackageInfo.fromPlatform(),
-                            builder: (context, snapshot) {
-                              return Text(
-                                'app_version'.tr(args: [snapshot.hasData ? snapshot.data!.version : '']),
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .bodySmall
-                                    ?.copyWith(
-                                      color: Colors.grey.shade300,
-                                    ),
-                              );
-                            }),
-                      ],
+                    ListTile(
+                      title: Text('set_email'.tr()),
+                      leading: const Icon(Icons.email_outlined),
+                      onTap: () {
+                        Navigator.pop(context);
+                        showTextInputDialog(
+                          'email_dialog_title'.tr(),
+                          'email_dialog_hint'.tr(),
+                          DataService().getEmailPreference(),
+                          (value) {
+                            DataService().setEmailPreference(value);
+                          },
+                        );
+                      },
                     ),
                   ],
                 ),
-              ),
-            ),
-            ListTile(
-              leading: const Icon(Icons.fmd_bad_outlined),
-              title: Text('current_track'.tr()),
-              onTap: () {
-                Navigator.pop(context);
-                _showTrackInfo();
-              },
-            ),
-            ListTile(
-              leading: const Icon(Icons.history),
-              title: Text('saved_tracks'.tr()),
-              onTap: () {
-                Navigator.pop(context);
-                _showTracksHistory();
-              },
-            ),
-            ExpansionTile(
-              leading: const Icon(Icons.tune),
-              title: Text('settings'.tr()),
-              // subtitle: Text(''),
-              children: <Widget>[
                 ListTile(
-                  title: Text('select_map_type'.tr()),
-                  leading: const Icon(
-                    Icons.layers_outlined,
-                  ),
-                  subtitle: Row(
-                    children: [
-                      TextButton(
-                          onPressed: () {
-                            DataService().setMapType(MapType.normal);
-                            Navigator.pop(context);
-                          },
-                          child: Text('map'.tr())),
-                      TextButton(
-                          onPressed: () {
-                            DataService().setMapType(MapType.satellite);
-                            Navigator.pop(context);
-                          },
-                          child: Text('satellite'.tr())),
-                      TextButton(
-                          onPressed: () {
-                            DataService().setMapType(MapType.hybrid);
-                            Navigator.pop(context);
-                          },
-                          child: Text('hybrid'.tr()))
-                    ],
-                  ),
-                ),
-                ListTile(
-                  title: Text('set_email'.tr()),
-                  leading: const Icon(
-                    Icons.email_outlined,
-                  ),
+                  leading: const Icon(Icons.privacy_tip_outlined, color: Colors.green),
+                  title: Text('privacy_policy'.tr()),
                   onTap: () {
                     Navigator.pop(context);
-                    showTextInputDialog(
-                        'email_dialog_title'.tr(),
-                        'email_dialog_hint'.tr(),
-                        DataService().getEmailPreference(), (value) {
-                      DataService().setEmailPreference(value);
-                      // Navigator.pop(context);
-                    });
+                    _openPrivacyPolicy();
                   },
                 ),
               ],
             ),
-            ListTile(
-              leading: const Icon(Icons.file_open_outlined),
-              title: Text('import_kml'.tr()),
-              onTap: () {
-                Navigator.pop(context);
-                showImportKMLDialog();
-              },
-            ),
-            ListTile(
-              leading: const Icon(Icons.backup_outlined),
-              title: Text('backup_data'.tr()),
-              onTap: () {
-                Navigator.pop(context);
-                backupData();
-              },
-            ),
-            ListTile(
-              leading: const Icon(Icons.restore_outlined),
-              title: Text('restore_data'.tr()),
-              onTap: () {
-                Navigator.pop(context);
-                restoreData();
-              },
-            ),
-            const Divider(),
-            ListTile(
-              leading: const Icon(Icons.privacy_tip_outlined),
-              title: Text('privacy_policy'.tr()),
-              onTap: () {
-                Navigator.pop(context);
-                _openPrivacyPolicy();
-              },
-            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildHeader(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      height: 160,
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            Colors.green.shade700,
+            Colors.green.shade400,
           ],
-        ));
+        ),
+      ),
+      padding: const EdgeInsets.only(top: 40, left: 20, right: 20, bottom: 20),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: Colors.white.withValues(alpha: 0.2),
+              borderRadius: BorderRadius.circular(16),
+            ),
+            child: SvgPicture.asset(
+              kAppIcon,
+              width: 48,
+              height: 48,
+              colorFilter: const ColorFilter.mode(Colors.white, BlendMode.srcIn),
+            ),
+          ),
+          const SizedBox(width: 16),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
+                  'app_title'.tr(),
+                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                      ),
+                ),
+                FutureBuilder<PackageInfo>(
+                  future: PackageInfo.fromPlatform(),
+                  builder: (context, snapshot) {
+                    return Text(
+                      'app_version'.tr(args: [
+                        snapshot.hasData ? snapshot.data!.version : ''
+                      ]),
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                            color: Colors.white.withValues(alpha: 0.8),
+                          ),
+                    );
+                  },
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSectionHeader(BuildContext context, String title) {
+    return Padding(
+      padding: const EdgeInsets.only(left: 16, top: 16, bottom: 8),
+      child: Text(
+        title.toUpperCase(),
+        style: Theme.of(context).textTheme.labelSmall?.copyWith(
+              color: Colors.green.shade700,
+              fontWeight: FontWeight.bold,
+              letterSpacing: 1.2,
+            ),
+      ),
+    );
+  }
+
+  Widget _mapTypeButton(BuildContext context, MapType type, String label) {
+    return Padding(
+      padding: const EdgeInsets.only(right: 8.0),
+      child: OutlinedButton(
+        onPressed: () {
+          DataService().setMapType(type);
+          Navigator.pop(context);
+        },
+        style: OutlinedButton.styleFrom(
+          padding: const EdgeInsets.symmetric(horizontal: 12),
+          side: const BorderSide(color: Colors.green),
+        ),
+        child: Text(label, style: const TextStyle(fontSize: 12)),
+      ),
+    );
   }
 }
 

@@ -267,7 +267,9 @@ class _HomePageState extends State<HomePage> {
           DropdownButtonHideUnderline(
             child: DropdownButton<Locale>(
               value: context.locale,
-              icon: const Icon(Icons.arrow_drop_down, color: Colors.white),
+              icon: const SizedBox(
+                width: 20,
+              ), //const Icon(Icons.arrow_drop_down, color: Colors.white),
               dropdownColor: const Color(0xFF0F9D58),
               onChanged: (Locale? newLocale) {
                 if (newLocale != null) {
@@ -365,14 +367,18 @@ class _HomePageState extends State<HomePage> {
             FloatingActionButton(
                 onPressed: _goToCurrentLocation,
                 backgroundColor: Colors.grey.shade400,
+                foregroundColor: Colors.white,
                 child: const Icon(Icons.location_searching)),
             const SizedBox(height: 10),
             SpeedDial(
               openCloseDial: DataService().isOpen,
               icon: Icons.directions_walk,
-              backgroundColor:
-                  locationStream != null ? Colors.red.shade700 : null,
+              backgroundColor: locationStream != null
+                  ? Colors.red.shade700
+                  : Theme.of(context).colorScheme.primary,
+              foregroundColor: Colors.white,
               activeIcon: Icons.close,
+              activeForegroundColor: Colors.white,
               spacing: 3,
               mini: false,
               childPadding: const EdgeInsets.all(5),
@@ -418,6 +424,7 @@ class _HomePageState extends State<HomePage> {
                     ? _addMarker
                     : () => showSnackBar('start_transect_first'.tr()),
                 backgroundColor: Colors.orangeAccent,
+                foregroundColor: Colors.white,
                 child: const Icon(Icons.add_location_alt_outlined)),
           ],
         ),

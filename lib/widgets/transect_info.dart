@@ -24,26 +24,39 @@ class _TransectInfoState extends State<TransectInfo> {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const SizedBox(
-            height: 18,
+          const SizedBox(height: 8),
+          Text(
+            'transect_info'.tr(),
+            style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
           ),
-          Text('transect_info'.tr()),
+          const SizedBox(height: 4),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(current?.dateRange ?? ''),
-              Text('${current?.markers?.length} ${'points'.tr()}'),
+              Text(
+                current?.dateRange ?? '',
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(color: Colors.grey.shade600),
+              ),
+              Text(
+                '${current?.markers?.length} ${'points'.tr()}',
+                style: TextStyle(color: Colors.green.shade700, fontWeight: FontWeight.bold),
+              ),
             ],
           ),
-          Text('${'duration'.tr()}: ${current?.duration ?? ''}'),
-          Text('${'distance'.tr()}: ${current?.distanceString ?? ''}'),
+          const SizedBox(height: 4),
+          Text('${'duration'.tr()}: ${current?.duration ?? ''}', style: const TextStyle(fontSize: 13)),
+          Text('${'distance'.tr()}: ${current?.distanceString ?? ''}', style: const TextStyle(fontSize: 13)),
+          const Divider(height: 16),
           Expanded(
             // height: 340,
             child: ListView.builder(
               itemCount: current?.markers?.length ?? 0,
               itemBuilder: (context, index) {
                 return Card(
+                  margin: const EdgeInsets.symmetric(vertical: 2, horizontal: 4),
                   child: ListTile(
+                      dense: true,
+                      visualDensity: VisualDensity.compact,
                       title: Text(
                           '${'marker'.tr()} ${(current?.markers?[index].id ?? 0) + 1}'),
                       subtitle: Text(
@@ -73,26 +86,30 @@ class _TransectInfoState extends State<TransectInfo> {
               },
             ),
           ),
+          const SizedBox(height: 16),
           Row(
             mainAxisAlignment: MainAxisAlignment.end,
             children: [
-              TextButton(
+              OutlinedButton(
+                onPressed: () => Navigator.of(ContextHolder.currentContext).pop(),
+                child: Text('close'.tr()),
+              ),
+              const SizedBox(width: 12),
+              ElevatedButton.icon(
                 onPressed: () {
-                  Navigator.of(
-                    ContextHolder.currentContext,
-                  ).pop();
+                  Navigator.of(ContextHolder.currentContext).pop();
                   DataService().clearTransect();
                 },
-                child: Text('clear_map'.tr()),
-              ),
-              TextButton(
-                onPressed: () => Navigator.of(
-                  ContextHolder.currentContext,
-                ).pop(),
-                child: Text('close'.tr()),
+                icon: const Icon(Icons.clear_all),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.red.shade50,
+                  foregroundColor: Colors.red.shade900,
+                ),
+                label: Text('clear_map'.tr()),
               ),
             ],
           ),
+          const SizedBox(height: 12),
         ],
       ),
     );

@@ -46,18 +46,26 @@ class _MarkerInfoState extends State<MarkerInfo> {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const SizedBox(
-            height: 20,
+          const SizedBox(height: 8),
+          Text(
+            '${'point'.tr()} ${(widget.selected?.id ?? 0) + 1}',
+            style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
           ),
-          Text('${'point'.tr()} ${(widget.selected?.id ?? 0) + 1}'),
+          const SizedBox(height: 4),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(widget.selected?.durationWithDay ?? ''),
               Text(
-                  '${widget.selected?.species?.length} ${'species_title'.tr()}'),
+                widget.selected?.durationWithDay ?? '',
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(color: Colors.grey.shade600),
+              ),
+              Text(
+                '${widget.selected?.species?.length} ${'species_title'.tr()}',
+                style: TextStyle(color: Colors.green.shade700, fontWeight: FontWeight.bold),
+              ),
             ],
           ),
+          const Divider(height: 16),
           Expanded(
             child: speciesLength > 0
                 ? ListView.builder(
@@ -65,7 +73,10 @@ class _MarkerInfoState extends State<MarkerInfo> {
                     itemBuilder: (context, index) {
                       int revIdx = speciesLength - index - 1;
                       return Card(
+                        margin: const EdgeInsets.symmetric(vertical: 2, horizontal: 4),
                         child: ListTile(
+                            dense: true,
+                            visualDensity: VisualDensity.compact,
                             title: Text(
                                 '${widget.selected?.species?[revIdx].species}'),
                             subtitle: Text(
@@ -112,24 +123,27 @@ class _MarkerInfoState extends State<MarkerInfo> {
                   )
                 : Text(widget.selected?.description ?? ''),
           ),
+          const SizedBox(height: 16),
           Row(
             mainAxisAlignment: MainAxisAlignment.end,
             children: [
-              TextButton(
-                onPressed: () => _addSpecies(),
-                child: Text('add_species_btn'.tr()),
-              ),
-              const SizedBox(
-                width: 10,
-              ),
-              TextButton(
-                onPressed: () => Navigator.of(
-                  ContextHolder.currentContext,
-                ).pop(),
+              OutlinedButton(
+                onPressed: () => Navigator.of(ContextHolder.currentContext).pop(),
                 child: Text('close'.tr()),
+              ),
+              const SizedBox(width: 12),
+              ElevatedButton.icon(
+                onPressed: () => _addSpecies(),
+                icon: const Icon(Icons.add),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.green,
+                  foregroundColor: Colors.white,
+                ),
+                label: Text('add_species_btn'.tr()),
               ),
             ],
           ),
+          const SizedBox(height: 12),
         ],
       ),
     );

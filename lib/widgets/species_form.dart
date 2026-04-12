@@ -6,7 +6,6 @@ import 'package:bird_tracker/widgets/world_side_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
 
-import '../utils/ux_builder.dart';
 import 'bt_autocomplete.dart';
 
 class SpeciesForm extends StatefulWidget {
@@ -104,7 +103,7 @@ class _SpeciesFormState extends State<SpeciesForm> {
     return SingleChildScrollView(
       key: const ValueKey('species_form'),
       child: Padding(
-        padding: const EdgeInsets.all(15.0),
+        padding: const EdgeInsets.all(12.0),
         child: Form(
             key: _formKey,
             child: Column(
@@ -116,107 +115,110 @@ class _SpeciesFormState extends State<SpeciesForm> {
                   speciesController: _speciesController,
                   kOptions: kSpecies,
                 ),
+                const SizedBox(height: 12),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  mainAxisSize: MainAxisSize.max,
                   children: [
-                    Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        TextButton(
-                            onPressed: () {
-                              /// show poput to select atlas code
-                              showDialogBox(
-                                AlertDialog(
-                                  // icon: const Icon(Icons.code),
-                                  backgroundColor: Theme.of(context).cardColor,
-                                  title: Text('select_atlas_code'.tr()),
-                                  contentPadding: const EdgeInsets.symmetric(
-                                      horizontal: 10, vertical: 20),
-                                  content: SingleChildScrollView(
-                                    child: Column(
-                                      children: [
-                                        for (var code in kCodes.keys)
-                                          Card(
-                                            child: ListTile(
-                                              leading: Text('$code.'),
-                                              dense: true,
-                                              title: Text('codes.$code'.tr()),
-                                              onTap: () {
-                                                setState(() {
-                                                  _code = code;
-                                                });
-                                                Navigator.pop(context);
-                                              },
-                                            ),
-                                          ),
-                                      ],
-                                    ),
-                                  ),
+                    Expanded(
+                      flex: 2,
+                      child: OutlinedButton.icon(
+                        onPressed: () {
+                          showDialog(
+                            context: context,
+                            builder: (context) => AlertDialog(
+                              title: Text('select_atlas_code'.tr()),
+                              contentPadding:
+                                  const EdgeInsets.fromLTRB(8, 20, 8, 8),
+                              content: SizedBox(
+                                width: double.maxFinite,
+                                child: ListView.builder(
+                                  shrinkWrap: true,
+                                  itemCount: kCodes.keys.length,
+                                  itemBuilder: (context, index) {
+                                    final code = kCodes.keys.elementAt(index);
+                                    return Card(
+                                      margin: const EdgeInsets.symmetric(
+                                          vertical: 4, horizontal: 8),
+                                      child: ListTile(
+                                        leading: CircleAvatar(
+                                          radius: 14,
+                                          backgroundColor:
+                                              Colors.green.shade100,
+                                          child: Text('$code',
+                                              style: TextStyle(
+                                                  color: Colors.green.shade900,
+                                                  fontSize: 12)),
+                                        ),
+                                        title: Text('codes.$code'.tr(),
+                                            style:
+                                                const TextStyle(fontSize: 14)),
+                                        onTap: () {
+                                          setState(() => _code = code);
+                                          Navigator.pop(context);
+                                        },
+                                      ),
+                                    );
+                                  },
                                 ),
-                              );
-                            },
-                            child: Text(
-                              _code != null
-                                  ? 'select_code'.tr(args: [_code.toString()])
-                                  : 'select_atlas_code'.tr(),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                            )),
-                        InkWell(
-                            onTap: () => setState(() {
-                                  _code = null;
-                                }),
-                            child: const Icon(
-                              Icons.clear,
-                              color: Colors.grey,
-                              size: 20,
-                            )),
-                      ],
+                              ),
+                            ),
+                          );
+                        },
+                        icon: const Icon(Icons.explore, size: 18),
+                        label: Text(
+                          _code != null
+                              ? 'select_code'.tr(args: [_code.toString()])
+                              : 'select_atlas_code'.tr(),
+                        ),
+                        style: OutlinedButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(vertical: 12),
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12)),
+                        ),
+                      ),
                     ),
-                    SizedBox(
-                      width: 160,
+                    if (_code != null)
+                      IconButton(
+                        onPressed: () => setState(() => _code = null),
+                        icon: const Icon(Icons.clear, color: Colors.grey),
+                      ),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      flex: 1,
                       child: TextFormField(
                         controller: _countController,
+                        textAlign: TextAlign.center,
                         decoration: InputDecoration(
                           labelText: 'count'.tr(),
-                          suffixIcon: InkWell(
-                              onTap: () {
-                                if (_countController.text.isNotEmpty) {
-                                  _countController.text =
-                                      (int.parse(_countController.text) + 1)
-                                          .toString();
-                                } else {
-                                  _countController.text = '1';
-                                }
-                              },
-                              child: const Icon(Icons.add)),
-                          prefixIcon: InkWell(
-                            child: const Icon(Icons.remove),
-                            onTap: () {
-                              if (_countController.text.isNotEmpty &&
-                                  int.parse(_countController.text) > 0) {
+                          suffixIcon: IconButton(
+                            icon: const Icon(Icons.add, size: 18),
+                            onPressed: () {
+                              final current =
+                                  int.tryParse(_countController.text) ?? 0;
+                              _countController.text = (current + 1).toString();
+                            },
+                          ),
+                          prefixIcon: IconButton(
+                            icon: const Icon(Icons.remove, size: 18),
+                            onPressed: () {
+                              final current =
+                                  int.tryParse(_countController.text) ?? 0;
+                              if (current > 0) {
                                 _countController.text =
-                                    (int.parse(_countController.text) - 1)
-                                        .toString();
-                              } else {
-                                _countController.text = '0';
+                                    (current - 1).toString();
                               }
                             },
                           ),
                         ),
-                        validator: (value) {
-                          if (value == null || value.isEmpty) {
-                            return 'enter_valid_data'.tr();
-                          }
-                          return null;
-                        },
+                        validator: (value) => (value == null || value.isEmpty)
+                            ? 'enter_valid_data'.tr()
+                            : null,
                         keyboardType: TextInputType.number,
                       ),
                     ),
                   ],
                 ),
-                const SizedBox(height: 10),
+                const SizedBox(height: 12),
                 Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -227,12 +229,12 @@ class _SpeciesFormState extends State<SpeciesForm> {
                       onChanged: (val) => setState(() {
                         _direction = val;
                       }),
-                      color: Theme.of(context).primaryColor,
+                      color: Colors.green.shade700,
                       radius: 80,
                       label: 'direction_label'.tr(),
                     ),
-                    SizedBox(
-                      width: 110,
+                    const SizedBox(width: 16),
+                    Expanded(
                       child: EnumRadio(
                         key: ValueKey('stratification$_stratification'),
                         enumValues: Stratification.values,
@@ -250,45 +252,77 @@ class _SpeciesFormState extends State<SpeciesForm> {
                     ),
                   ],
                 ),
-
-                /// description field
+                const SizedBox(height: 12),
                 TextFormField(
                   controller: _descriptionController,
                   decoration: InputDecoration(
                     labelText: 'behavior'.tr(),
-                    prefixIcon: const Icon(Icons.description),
-                    suffixIcon: InkWell(
-                      child: const Icon(Icons.clear),
-                      onTap: () {
-                        _descriptionController.clear();
-                      },
-                    ),
+                    prefixIcon: const Icon(Icons.notes),
+                    alignLabelWithHint: true,
                   ),
-                  maxLines: 2,
+                  maxLines: 3,
+                  minLines: 1,
                   keyboardType: TextInputType.multiline,
                   textInputAction: TextInputAction.newline,
                 ),
+                const SizedBox(height: 16),
                 Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
+                  crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    ElevatedButton(
-                        onPressed: () {
-                          if (_save(false)) {
-                            Navigator.pop(context);
-                          }
-                        },
-                        child: Text('save'.tr())),
-                    if (!_isEdit) const SizedBox(width: 10),
+                    Expanded(
+                      child: OutlinedButton(
+                        onPressed: () => Navigator.pop(context),
+                        style: OutlinedButton.styleFrom(
+                          minimumSize: const Size.fromHeight(40),
+                          padding: const EdgeInsets.symmetric(horizontal: 8),
+                        ),
+                        child: FittedBox(
+                          fit: BoxFit.scaleDown,
+                          child: Text('cancel'.tr()),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
                     if (!_isEdit)
-                      ElevatedButton(
+                      Expanded(
+                        child: ElevatedButton(
                           onPressed: () {
                             if (_save(false)) {
                               _clear();
                             }
                           },
-                          child: Text('save_and_new'.tr())),
-                    // const SizedBox(width: 10),
-                    // ElevatedButton(onPressed: () => Navigator.pop(context), child: const Text('Cancel')),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.green.shade50,
+                            foregroundColor: Colors.green.shade900,
+                            minimumSize: const Size.fromHeight(40),
+                            padding: const EdgeInsets.symmetric(horizontal: 8),
+                          ),
+                          child: FittedBox(
+                            fit: BoxFit.scaleDown,
+                            child: Text('save_and_new'.tr()),
+                          ),
+                        ),
+                      ),
+                    if (!_isEdit) const SizedBox(width: 12),
+                    Expanded(
+                      child: ElevatedButton(
+                        onPressed: () {
+                          if (_save(false)) {
+                            Navigator.pop(context);
+                          }
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.green,
+                          foregroundColor: Colors.white,
+                          minimumSize: const Size.fromHeight(40),
+                          padding: const EdgeInsets.symmetric(horizontal: 8),
+                        ),
+                        child: FittedBox(
+                          fit: BoxFit.scaleDown,
+                          child: Text('save'.tr()),
+                        ),
+                      ),
+                    ),
                   ],
                 ),
               ],
