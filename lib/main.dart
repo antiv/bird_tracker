@@ -47,7 +47,6 @@ class MyApp extends StatelessWidget {
         ),
         scaffoldBackgroundColor: Colors.white,
         cardColor: Colors.white,
-        dialogBackgroundColor: Colors.white,
         appBarTheme: const AppBarTheme(
           centerTitle: true,
           elevation: 0,
