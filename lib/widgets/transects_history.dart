@@ -39,13 +39,12 @@ class _TransectsHistoryState extends State<TransectsHistory> {
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        const SizedBox(
-          height: 20,
+        const SizedBox(height: 8),
+        Text(
+          'history_title'.tr(),
+          style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
         ),
-        Text('history_title'.tr()),
-        const SizedBox(
-          height: 20,
-        ),
+        const SizedBox(height: 4),
         Expanded(
           child: transects.isNotEmpty
               ? ListView.builder(
@@ -53,16 +52,22 @@ class _TransectsHistoryState extends State<TransectsHistory> {
                   itemCount: transects.length,
                   itemBuilder: (BuildContext context, int index) {
                     return Card(
+                      margin: const EdgeInsets.symmetric(vertical: 2, horizontal: 8),
                       child: ListTile(
+                          dense: true,
+                          visualDensity: VisualDensity.compact,
                           onTap: () {
                             DataService().setTransect(transects[index]!);
                             Navigator.pop(ContextHolder.currentContext);
                           },
                           // leading: const Icon(Icons.map_outlined),
-                          title: Text(transects[index]?.name ??
-                              'Transect ${transects[index]?.id}: '
-                                  '${DateFormat('dd.MM.yyyy HH:mm').format(transects[index]!.startDate)} - '
-                                  '${transects[index]?.endDate != null ? DateFormat('HH:mm').format(transects[index]!.endDate!) : 'in_progress'.tr()}'),
+                          title: Text(
+                            transects[index]?.name ??
+                                'Transect ${transects[index]?.id}: '
+                                    '${DateFormat('dd.MM.yyyy HH:mm').format(transects[index]!.startDate)} - '
+                                    '${transects[index]?.endDate != null ? DateFormat('HH:mm').format(transects[index]!.endDate!) : 'in_progress'.tr()}',
+                            style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold),
+                          ),
                           // onTap: () {
                           //   Navigator.of(context).pop();
                           // },
@@ -70,26 +75,33 @@ class _TransectsHistoryState extends State<TransectsHistory> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                  '${'markers'.tr()}: ${transects[index]?.markers?.length ?? 0} '
-                                  '${'distance'.tr()}: ${calculateDistance(transects[index]?.points?.map((e) => LatLng(e.latitude, e.longitude)).toList() ?? []).toStringAsFixed(2)}km '
-                                  '${'time'.tr()}: ${getTimeDifference(transects[index]!.startDate, transects[index]?.endDate ?? DateTime.now())}'),
+                                '${'markers'.tr()}: ${transects[index]?.markers?.length ?? 0} '
+                                '${'distance'.tr()}: ${calculateDistance(transects[index]?.points?.map((e) => LatLng(e.latitude, e.longitude)).toList() ?? []).toStringAsFixed(2)}km '
+                                '${'time'.tr()}: ${getTimeDifference(transects[index]!.startDate, transects[index]?.endDate ?? DateTime.now())}',
+                                style: const TextStyle(fontSize: 11),
+                              ),
+                              const SizedBox(height: 4),
                               Row(children: [
                                 ElevatedButton.icon(
-                                  onPressed: () {
-                                    transects[index]?.shareCSV();
-                                  },
-                                  icon: const Icon(Icons.share),
-                                  label: Text('csv'.tr()),
+                                  onPressed: () => transects[index]?.shareCSV(),
+                                  icon: const Icon(Icons.share, size: 14),
+                                  style: ElevatedButton.styleFrom(
+                                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                    minimumSize: Size.zero,
+                                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                                  ),
+                                  label: Text('csv'.tr(), style: const TextStyle(fontSize: 11)),
                                 ),
-                                const SizedBox(
-                                  width: 20,
-                                ),
+                                const SizedBox(width: 8),
                                 ElevatedButton.icon(
-                                  onPressed: () {
-                                    transects[index]?.shareKML();
-                                  },
-                                  icon: const Icon(Icons.share),
-                                  label: Text('kml'.tr()),
+                                  onPressed: () => transects[index]?.shareKML(),
+                                  icon: const Icon(Icons.share, size: 14),
+                                  style: ElevatedButton.styleFrom(
+                                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                    minimumSize: Size.zero,
+                                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                                  ),
+                                  label: Text('kml'.tr(), style: const TextStyle(fontSize: 11)),
                                 ),
                               ]),
                             ],
@@ -111,10 +123,12 @@ class _TransectsHistoryState extends State<TransectsHistory> {
                 )
               : Center(child: Text('no_transects_yet'.tr())),
         ),
-        TextButton(
+        const SizedBox(height: 8),
+        OutlinedButton(
           onPressed: () => Navigator.pop(ContextHolder.currentContext),
           child: Text('close'.tr()),
         ),
+        const SizedBox(height: 8),
       ],
     );
   }
