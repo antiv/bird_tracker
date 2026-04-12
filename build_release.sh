@@ -44,7 +44,7 @@ fi
 
 echo "Building Android AppBundle..."
 # I added obfuscation options to reduce the AppBundle size further as we discussed earlier.
-flutter build appbundle --release --obfuscate --split-debug-info=build/app/outputs/symbols
+fvm flutter build appbundle --release --obfuscate --split-debug-info=build/app/outputs/symbols
 
 if [ -f "build/app/outputs/bundle/release/app-release.aab" ]; then
     echo "Copying AAB to project root..."
