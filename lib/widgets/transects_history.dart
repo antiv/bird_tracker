@@ -3,7 +3,7 @@ import 'package:bird_tracker/utils/location_helper.dart';
 import 'package:context_holder/context_holder.dart';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:intl/intl.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 import '../model/transect.dart';
 import '../service/data_service.dart';
@@ -42,7 +42,7 @@ class _TransectsHistoryState extends State<TransectsHistory> {
         const SizedBox(
           height: 20,
         ),
-        const Text('History'),
+        Text('history_title'.tr()),
         const SizedBox(
           height: 20,
         ),
@@ -59,9 +59,10 @@ class _TransectsHistoryState extends State<TransectsHistory> {
                             Navigator.pop(ContextHolder.currentContext);
                           },
                           // leading: const Icon(Icons.map_outlined),
-                          title: Text(transects[index]?.name ?? 'Transect ${transects[index]?.id}: '
-                              '${DateFormat('dd.MM.yyyy HH:mm').format(transects[index]!.startDate)} - '
-                              '${transects[index]?.endDate != null ? DateFormat('HH:mm').format(transects[index]!.endDate!) : 'in progress'}'),
+                          title: Text(transects[index]?.name ??
+                              'Transect ${transects[index]?.id}: '
+                                  '${DateFormat('dd.MM.yyyy HH:mm').format(transects[index]!.startDate)} - '
+                                  '${transects[index]?.endDate != null ? DateFormat('HH:mm').format(transects[index]!.endDate!) : 'in_progress'.tr()}'),
                           // onTap: () {
                           //   Navigator.of(context).pop();
                           // },
@@ -69,15 +70,16 @@ class _TransectsHistoryState extends State<TransectsHistory> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                  'Markers: ${transects[index]?.markers?.length ?? 0} '
-                                  'Distance: ${calculateDistance(transects[index]?.points?.map((e) => LatLng(e.latitude, e.longitude)).toList() ?? []).toStringAsFixed(2)}km '
-                                  'Time: ${getTimeDifference(transects[index]!.startDate, transects[index]?.endDate ?? DateTime.now())}'),
+                                  '${'markers'.tr()}: ${transects[index]?.markers?.length ?? 0} '
+                                  '${'distance'.tr()}: ${calculateDistance(transects[index]?.points?.map((e) => LatLng(e.latitude, e.longitude)).toList() ?? []).toStringAsFixed(2)}km '
+                                  '${'time'.tr()}: ${getTimeDifference(transects[index]!.startDate, transects[index]?.endDate ?? DateTime.now())}'),
                               Row(children: [
                                 ElevatedButton.icon(
                                   onPressed: () {
                                     transects[index]?.shareCSV();
                                   },
-                                  icon: const Icon(Icons.share), label: const Text('CSV'),
+                                  icon: const Icon(Icons.share),
+                                  label: Text('csv'.tr()),
                                 ),
                                 const SizedBox(
                                   width: 20,
@@ -87,7 +89,7 @@ class _TransectsHistoryState extends State<TransectsHistory> {
                                     transects[index]?.shareKML();
                                   },
                                   icon: const Icon(Icons.share),
-                                  label: const Text('KML'),
+                                  label: Text('kml'.tr()),
                                 ),
                               ]),
                             ],
@@ -107,11 +109,11 @@ class _TransectsHistoryState extends State<TransectsHistory> {
                     );
                   },
                 )
-              : const Center(child: Text('No transects yet.')),
+              : Center(child: Text('no_transects_yet'.tr())),
         ),
         TextButton(
           onPressed: () => Navigator.pop(ContextHolder.currentContext),
-          child: const Text('CLOSE'),
+          child: Text('close'.tr()),
         ),
       ],
     );

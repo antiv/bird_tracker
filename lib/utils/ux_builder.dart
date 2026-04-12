@@ -7,6 +7,7 @@ import 'package:context_holder/context_holder.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:share_plus/share_plus.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 import '../model/transect.dart';
 
@@ -59,26 +60,26 @@ void showAlertDialog(Widget content, List<Widget> actions) {
 void showYesNoDialog(
   VoidCallback yesFunction,
   VoidCallback noFunction, {
-  String title = 'Are you sure?',
-  String yesText = 'Yes',
-  String noText = 'No',
+  String? title,
+  String? yesText,
+  String? noText,
 }) {
   showAlertDialog(
-    Text(title),
+    Text(title ?? 'are_you_sure'.tr()),
     [
       TextButton(
         onPressed: () {
           Navigator.of(ContextHolder.currentContext).pop();
           yesFunction();
         },
-        child: Text(yesText),
+        child: Text(yesText ?? 'yes'.tr()),
       ),
       TextButton(
         onPressed: () {
           Navigator.of(ContextHolder.currentContext).pop();
           noFunction();
         },
-        child: Text(noText),
+        child: Text(noText ?? 'no'.tr()),
       ),
     ],
   );
@@ -106,13 +107,13 @@ void showTextInputDialog(String title, String hint, String? defaultValue,
           Navigator.of(ContextHolder.currentContext).pop();
           onConfirm(value);
         },
-        child: const Text('Confirm'),
+        child: Text('confirm'.tr()),
       ),
       TextButton(
         onPressed: () {
           Navigator.of(ContextHolder.currentContext).pop();
         },
-        child: const Text('Cancel'),
+        child: Text('cancel'.tr()),
       ),
     ],
   ));
@@ -142,7 +143,7 @@ void showFullScreenDialog(Widget widget, {String? title}) {
           // toolbarHeight: 30,
           elevation: 0,
           backgroundColor: Theme.of(ContextHolder.currentContext).primaryColor,
-          title: Text(title ?? 'Add Species'),
+          title: Text(title ?? 'add_species'.tr()),
           actions: [
             IconButton(
               onPressed: () => Navigator.of(ContextHolder.currentContext).pop(),
@@ -189,25 +190,23 @@ Future<bool> showPermissionInfoDialog() async {
     context: ContextHolder.currentContext,
     builder: (BuildContext context) {
       return AlertDialog(
-        title: const Text('Location Permission'),
+        title: Text('location_permission_title'.tr()),
         backgroundColor: Theme.of(context).cardColor,
-        content: const Text(
-            'Bird Tracker needs your location to track your route and record where you see birds.\n\n'
-            'We will first ask for regular location access, and then we will need "Allow all the time" permission to keep tracking even when the app is in the background or your screen is locked. Please allow both to make sure your transects are stored properly.'),
+        content: Text('location_permission_content'.tr()),
         actions: [
           TextButton(
             onPressed: () {
               Navigator.of(context).pop();
               result = false;
             },
-            child: const Text('Cancel'),
+            child: Text('cancel'.tr()),
           ),
           TextButton(
             onPressed: () {
               Navigator.of(context).pop();
               result = true;
             },
-            child: const Text('Continue'),
+            child: Text('continue'.tr()),
           ),
         ],
       );
@@ -222,11 +221,11 @@ Future<void> backupData() async {
     await SharePlus.instance.share(
       ShareParams(
         files: [XFile(backupPath)],
-        text: 'Bird Tracker Backup',
+        text: 'backup_text'.tr(),
       ),
     );
   } catch (e) {
-    showSnackBar('Error creating backup: ${e.toString()}');
+    showSnackBar('backup_error'.tr(args: [e.toString()]));
   }
 }
 
@@ -237,12 +236,12 @@ Future<void> restoreData() async {
   );
   if (result != null) {
     try {
-      showSnackBar('Restoring backup...', duration: 2);
+      showSnackBar('restoring_backup'.tr(), duration: 2);
       await IsarService().restoreBackup(result.files.single.path ?? '');
-      showSnackBar('Data restored successfully!');
+      showSnackBar('restore_success'.tr());
       DataService().setTransect(null); 
     } catch (e) {
-      showSnackBar('Error restoring data: ${e.toString()}');
+      showSnackBar('restore_error'.tr(args: [e.toString()]));
     }
   }
 }

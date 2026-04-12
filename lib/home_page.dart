@@ -12,9 +12,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_speed_dial/flutter_speed_dial.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:intl/intl.dart';
 import 'package:location/location.dart';
 import 'package:provider/provider.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 import 'model/placemark.dart';
 
@@ -46,8 +46,6 @@ class _HomePageState extends State<HomePage> {
   );
 
   late final Set<Polyline>? _polyLines;
-
-
 
   @override
   void initState() {
@@ -152,7 +150,7 @@ class _HomePageState extends State<HomePage> {
 
   Future<void> _stopTransect() async {
     /// showTextInputDialog to enter transect name
-    showTextInputDialog('Enter transect name', 'Transect name',
+    showTextInputDialog('enter_transect_name'.tr(), 'transect_name'.tr(),
         'Transect ${DateFormat('dd.MM.yyyy').format(DateTime.now())}', (name) {
       _stopListener();
       transect?.endDate = DateTime.now();
@@ -178,6 +176,7 @@ class _HomePageState extends State<HomePage> {
   void _addMarker() {
     DataService().isOpen.value = false;
     setState(() {});
+
     /// close last marker
     if (transect?.markers?.isNotEmpty ?? false) {
       Placemark lastMarker = transect!.markers!.last;
@@ -236,9 +235,9 @@ class _HomePageState extends State<HomePage> {
       }, () {
         _startNewTransect();
       },
-          title: 'Continue transect or start new one?',
-          yesText: 'Continue',
-          noText: 'New transect');
+          title: 'continue_transect'.tr(),
+          yesText: 'continue'.tr(),
+          noText: 'new_transect'.tr());
     } else {
       _startNewTransect();
     }
@@ -262,7 +261,33 @@ class _HomePageState extends State<HomePage> {
       key: _key,
       appBar: AppBar(
         backgroundColor: const Color(0xFF0F9D58),
-        title: const Text(kAppTitle, style: TextStyle(color: Colors.white)),
+        title:
+            Text('app_title'.tr(), style: const TextStyle(color: Colors.white)),
+        actions: [
+          DropdownButtonHideUnderline(
+            child: DropdownButton<Locale>(
+              value: context.locale,
+              icon: const Icon(Icons.arrow_drop_down, color: Colors.white),
+              dropdownColor: const Color(0xFF0F9D58),
+              onChanged: (Locale? newLocale) {
+                if (newLocale != null) {
+                  context.setLocale(newLocale);
+                  setState(() {});
+                }
+              },
+              items: const [
+                DropdownMenuItem(
+                  value: Locale('en'),
+                  child: Text('🇬🇧 EN', style: TextStyle(color: Colors.white)),
+                ),
+                DropdownMenuItem(
+                  value: Locale('sr', 'Latn'),
+                  child: Text('🇷🇸 SR', style: TextStyle(color: Colors.white)),
+                ),
+              ],
+            ),
+          )
+        ],
         leading: InkWell(
           onTap: () {
             _key.currentState!.openDrawer();
@@ -370,7 +395,7 @@ class _HomePageState extends State<HomePage> {
                   child: const Icon(Icons.pause),
                   backgroundColor: Colors.red.shade700,
                   foregroundColor: Colors.white,
-                  label: 'Pause',
+                  label: 'pause'.tr(),
                   onTap: () async {
                     await _pauseListener();
                     setState(() {});
@@ -380,7 +405,7 @@ class _HomePageState extends State<HomePage> {
                   child: const Icon(Icons.stop),
                   backgroundColor: Colors.red.shade700,
                   foregroundColor: Colors.white,
-                  label: 'Stop',
+                  label: 'stop'.tr(),
                   onTap: () async {
                     await _stopTransect();
                   },
@@ -391,7 +416,7 @@ class _HomePageState extends State<HomePage> {
             FloatingActionButton(
                 onPressed: locationStream != null
                     ? _addMarker
-                    : () => showSnackBar('Start transect first'),
+                    : () => showSnackBar('start_transect_first'.tr()),
                 backgroundColor: Colors.orangeAccent,
                 child: const Icon(Icons.add_location_alt_outlined)),
           ],

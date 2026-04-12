@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 
 class EnumRadio extends StatelessWidget {
-  const EnumRadio({super.key, this.enumValues, this.value, this.onChanged});
+  const EnumRadio({super.key, this.enumValues, this.value, this.onChanged, this.customLabels, this.label});
 
   final List<dynamic>? enumValues;
   final dynamic value;
   final Function(dynamic)? onChanged;
+  final Map<dynamic, Widget>? customLabels;
+  final String? label;
 
   @override
   Widget build(BuildContext context) {
@@ -44,7 +46,9 @@ class EnumRadio extends StatelessWidget {
                                 Radio<dynamic>(
                                   value: e,
                                 ),
-                                Text(e.toString().split('.').last),
+                                customLabels != null && customLabels!.containsKey(e)
+                                    ? customLabels![e]!
+                                    : Text(e.toString().split('.').last),
                               ],
                             ),
                           ))
@@ -60,7 +64,7 @@ class EnumRadio extends StatelessWidget {
           child: Container(
             padding: const EdgeInsets.only(left: 5, right: 5),
             color: Colors.white,
-            child: Text(enumValues!.first.toString().split('.').first,
+            child: Text(label ?? enumValues!.first.toString().split('.').first,
                 style: Theme.of(context).textTheme.bodySmall?.copyWith(
                       color: Colors.grey,
                     )),

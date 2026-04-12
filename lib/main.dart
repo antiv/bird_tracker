@@ -7,11 +7,19 @@ import 'package:provider/provider.dart';
 import 'configuration/constants.dart';
 import 'home_page.dart';
 
+import 'package:easy_localization/easy_localization.dart';
+
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await dotenv.load(fileName: '.env');
+  await EasyLocalization.ensureInitialized();
   runApp(ChangeNotifierProvider(create: (BuildContext context) => DataService(),
-  child: const MyApp()));
+  child: EasyLocalization(
+      supportedLocales: const [Locale('en'), Locale('sr', 'Latn')],
+      path: 'assets/translations',
+      fallbackLocale: const Locale('en'),
+      child: const MyApp(),
+    )));
 }
 
 class MyApp extends StatelessWidget {
@@ -22,6 +30,9 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       // on below line we are specifying title of our app
       title: kAppTitle,
+      localizationsDelegates: context.localizationDelegates,
+      supportedLocales: context.supportedLocales,
+      locale: context.locale,
       navigatorKey: ContextHolder.key,
       // on below line we are hiding debug banner
       debugShowCheckedModeBanner: false,

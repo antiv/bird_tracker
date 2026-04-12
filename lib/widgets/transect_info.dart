@@ -1,6 +1,7 @@
 import 'package:bird_tracker/service/isar_service.dart';
 import 'package:context_holder/context_holder.dart';
 import 'package:flutter/material.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 import '../service/data_service.dart';
 import '../utils/location_helper.dart';
@@ -26,16 +27,16 @@ class _TransectInfoState extends State<TransectInfo> {
           const SizedBox(
             height: 18,
           ),
-          const Text('Transect Info'),
+          Text('transect_info'.tr()),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(current?.dateRange ?? ''),
-              Text('${current?.markers?.length} points'),
+              Text('${current?.markers?.length} ${'points'.tr()}'),
             ],
           ),
-          Text('Duration: ${current?.duration ?? ''}'),
-          Text('Distance: ${current?.distanceString ?? ''}'),
+          Text('${'duration'.tr()}: ${current?.duration ?? ''}'),
+          Text('${'distance'.tr()}: ${current?.distanceString ?? ''}'),
           Expanded(
             // height: 340,
             child: ListView.builder(
@@ -43,28 +44,33 @@ class _TransectInfoState extends State<TransectInfo> {
               itemBuilder: (context, index) {
                 return Card(
                   child: ListTile(
-                      title: Text('Marker ${(current?.markers?[index].id ?? 0)+ 1}'),
+                      title: Text(
+                          '${'marker'.tr()} ${(current?.markers?[index].id ?? 0) + 1}'),
                       subtitle: Text(
-                          'Spices: ${current?.markers?[index].species?.length} '
-                              'Time: ${current?.markers?[index].duration} '),
+                          '${'species_title'.tr()}: ${current?.markers?[index].species?.length} '
+                          '${'time'.tr()}: ${current?.markers?[index].duration} '),
                       trailing: IconButton(
                         icon: const Icon(Icons.delete),
                         onPressed: () {
                           /// Ask for confirmation, and delete the marker
-                          showYesNoDialog(() => setState(() {
-                            current?.markers = current.markers?.toList(growable: true) ?? [];
-                            current?.markers?.removeAt(index);
-                            IsarService().updateTransect(current!);
-                            DataService().notify();
-                          }), () {});
+                          showYesNoDialog(
+                              () => setState(() {
+                                    current?.markers = current.markers
+                                            ?.toList(growable: true) ??
+                                        [];
+                                    current?.markers?.removeAt(index);
+                                    IsarService().updateTransect(current!);
+                                    DataService().notify();
+                                  }),
+                              () {});
                         },
                       ),
                       onTap: () {
                         // Navigator.pop(context);
-                        showMarkerInfo(current?.markers?[index].id  ?? 0);
-                      }
-                  ),
-                );},
+                        showMarkerInfo(current?.markers?[index].id ?? 0);
+                      }),
+                );
+              },
             ),
           ),
           Row(
@@ -72,20 +78,21 @@ class _TransectInfoState extends State<TransectInfo> {
             children: [
               TextButton(
                 onPressed: () {
-                  Navigator.of(ContextHolder.currentContext,).pop();
+                  Navigator.of(
+                    ContextHolder.currentContext,
+                  ).pop();
                   DataService().clearTransect();
-                  },
-                child: const Text('CLEAR MAP'),
+                },
+                child: Text('clear_map'.tr()),
               ),
               TextButton(
                 onPressed: () => Navigator.of(
                   ContextHolder.currentContext,
                 ).pop(),
-                child: const Text('CLOSE'),
+                child: Text('close'.tr()),
               ),
             ],
           ),
-
         ],
       ),
     );
