@@ -1,17 +1,18 @@
 import 'package:flutter/material.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 class BtAutocomplete extends StatelessWidget {
   const BtAutocomplete({
     super.key,
-    required this.spicesFocusNode,
-    required this.spicesController,
+    required this.speciesFocusNode,
+    required this.speciesController,
     required this.kOptions,
-  }) : _btFocusNode = spicesFocusNode, _btController = spicesController;
+  }) : _btFocusNode = speciesFocusNode, _btController = speciesController;
 
   final FocusNode _btFocusNode;
   final TextEditingController _btController;
-  final TextEditingController spicesController;
-  final FocusNode spicesFocusNode;
+  final TextEditingController speciesController;
+  final FocusNode speciesFocusNode;
   final List<String> kOptions;
 
   @override
@@ -31,7 +32,7 @@ class BtAutocomplete extends StatelessWidget {
             onFieldSubmitted();
           },
           decoration: InputDecoration(
-            labelText: 'Species',
+            labelText: 'species_label'.tr(),
             prefixIcon: const Icon(Icons.search),
             suffixIcon: InkWell(
               child: const Icon(Icons.clear),
@@ -42,7 +43,7 @@ class BtAutocomplete extends StatelessWidget {
           ),
           validator: (value) {
             if (value == null || value.isEmpty) {
-              return 'Please enter a value';
+              return 'please_enter_value'.tr();
             }
             return null;
           },
@@ -67,6 +68,7 @@ class BtAutocomplete extends StatelessWidget {
                   },
                   child: ListTile(
                     title: Text(option),
+                    subtitle: Text('species.$option'.tr()),
                   ),
                 ))
                     .toList(),
@@ -80,9 +82,10 @@ class BtAutocomplete extends StatelessWidget {
           return const Iterable<String>.empty();
         } else {
           return kOptions.where((String option) {
-            return option
-                .toLowerCase()
-                .contains(textEditingValue.text.toLowerCase());
+            final translated = 'species.$option'.tr().toLowerCase();
+            final original = option.toLowerCase();
+            final search = textEditingValue.text.toLowerCase();
+            return original.contains(search) || translated.contains(search);
           });
         }
       },

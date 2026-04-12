@@ -3,6 +3,7 @@ import 'package:bird_tracker/service/isar_service.dart';
 import 'package:bird_tracker/widgets/species_form.dart';
 import 'package:context_holder/context_holder.dart';
 import 'package:flutter/material.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 import '../model/placemark.dart';
 import '../utils/ux_builder.dart';
@@ -48,60 +49,75 @@ class _MarkerInfoState extends State<MarkerInfo> {
           const SizedBox(
             height: 20,
           ),
-          Text('Point ${(widget.selected?.id ?? 0) + 1}'),
+          Text('${'point'.tr()} ${(widget.selected?.id ?? 0) + 1}'),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(widget.selected?.durationWithDay ?? ''),
-              Text('${widget.selected?.species?.length} species'),
+              Text(
+                  '${widget.selected?.species?.length} ${'species_title'.tr()}'),
             ],
           ),
           Expanded(
-            child: speciesLength > 0 ? ListView.builder(
-              itemCount: speciesLength,
-              itemBuilder: (context, index) {
-                int revIdx = speciesLength - index - 1;
-                return Card(
-                child: ListTile(
-                  title: Text('${widget.selected?.species?[revIdx].species}'),
-                  subtitle: Text(
-                      'Count: ${widget.selected?.species?[revIdx].count} '
-                      'Time: ${widget.selected?.species?[revIdx].time} '
-                      'Direction: ${widget.selected?.species?[revIdx].direction?.toString().split('.').last ?? '-'} '
-                      'Strat.: ${widget.selected?.species?[revIdx].stratification?.toString().split('.').last ?? '-'}'),
-                  trailing: IconButton(
-                    icon: const Icon(Icons.delete),
-                    onPressed: () {
-                      showYesNoDialog(() => setState(() {
-                        widget.selected?.species =
-                            widget.selected?.species?.toList(growable: true) ?? [];
-                        widget.selected?.species?.removeAt(revIdx);
-                      }), () {});
-
+            child: speciesLength > 0
+                ? ListView.builder(
+                    itemCount: speciesLength,
+                    itemBuilder: (context, index) {
+                      int revIdx = speciesLength - index - 1;
+                      return Card(
+                        child: ListTile(
+                            title: Text(
+                                '${widget.selected?.species?[revIdx].species}'),
+                            subtitle: Text(
+                                '${'count_label'.tr()} ${widget.selected?.species?[revIdx].count} '
+                                '${'time_label'.tr()} ${widget.selected?.species?[revIdx].time} '
+                                '${'direction_label'.tr()} ${widget.selected?.species?[revIdx].direction?.toString().split('.').last ?? '-'} '
+                                '${'strat_label'.tr()} ${widget.selected?.species?[revIdx].stratification?.toString().split('.').last ?? '-'}'),
+                            trailing: IconButton(
+                              icon: const Icon(Icons.delete),
+                              onPressed: () {
+                                showYesNoDialog(
+                                    () => setState(() {
+                                          widget.selected?.species = widget
+                                                  .selected?.species
+                                                  ?.toList(growable: true) ??
+                                              [];
+                                          widget.selected?.species
+                                              ?.removeAt(revIdx);
+                                        }),
+                                    () {});
+                              },
+                            ),
+                            onTap: () {
+                              showFullScreenDialog(
+                                SpeciesForm(
+                                  species: widget.selected?.species?[revIdx],
+                                  onSaved: (species, _) {
+                                    setState(() {
+                                      widget.selected?.species?[revIdx] =
+                                          species;
+                                    });
+                                    DataService()
+                                        .transect
+                                        ?.updateMarker(widget.selected!);
+                                    IsarService().updateTransect(
+                                        DataService().transect!);
+                                  },
+                                ),
+                                title: 'edit_species_title'.tr(),
+                              );
+                            }),
+                      );
                     },
-                  ),
-                  onTap: () {
-                    showFullScreenDialog(SpeciesForm(
-                      species: widget.selected?.species?[revIdx],
-                      onSaved: (species, _) {
-                        setState(() {
-                          widget.selected?.species?[revIdx] = species;
-                        });
-                        DataService().transect?.updateMarker(widget.selected!);
-                        IsarService().updateTransect(DataService().transect!);
-                      },
-                    ), title: 'Edit species',);
-                  }
-                ),
-              );},
-            ) : Text(widget.selected?.description ?? ''),
+                  )
+                : Text(widget.selected?.description ?? ''),
           ),
           Row(
             mainAxisAlignment: MainAxisAlignment.end,
             children: [
               TextButton(
                 onPressed: () => _addSpecies(),
-                child: const Text('ADD SPECIES'),
+                child: Text('add_species_btn'.tr()),
               ),
               const SizedBox(
                 width: 10,
@@ -110,11 +126,10 @@ class _MarkerInfoState extends State<MarkerInfo> {
                 onPressed: () => Navigator.of(
                   ContextHolder.currentContext,
                 ).pop(),
-                child: const Text('CLOSE'),
+                child: Text('close'.tr()),
               ),
             ],
           ),
-
         ],
       ),
     );

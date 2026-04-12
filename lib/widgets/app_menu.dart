@@ -7,6 +7,7 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import 'package:easy_localization/easy_localization.dart';
 import '../configuration/constants.dart';
 import '../service/data_service.dart';
 import '../utils/ux_builder.dart';
@@ -20,7 +21,7 @@ class AppMenu extends StatelessWidget {
     if (DataService().transect != null) {
       showBottomModal(const TransectInfo());
     } else {
-      showSnackBar('No transect selected');
+      showSnackBar('no_transect_selected'.tr());
     }
   }
 
@@ -69,7 +70,7 @@ class AppMenu extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.end,
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Text(kAppTitle,
+                        Text('app_title'.tr(),
                             style: Theme.of(context)
                                 .textTheme
                                 .titleSmall
@@ -78,7 +79,7 @@ class AppMenu extends StatelessWidget {
                             future: PackageInfo.fromPlatform(),
                             builder: (context, snapshot) {
                               return Text(
-                                'v${snapshot.hasData ? snapshot.data!.version : ''}',
+                                'app_version'.tr(args: [snapshot.hasData ? snapshot.data!.version : '']),
                                 style: Theme.of(context)
                                     .textTheme
                                     .bodySmall
@@ -95,7 +96,7 @@ class AppMenu extends StatelessWidget {
             ),
             ListTile(
               leading: const Icon(Icons.fmd_bad_outlined),
-              title: const Text('Current track'),
+              title: Text('current_track'.tr()),
               onTap: () {
                 Navigator.pop(context);
                 _showTrackInfo();
@@ -103,7 +104,7 @@ class AppMenu extends StatelessWidget {
             ),
             ListTile(
               leading: const Icon(Icons.history),
-              title: const Text('Saved tracks'),
+              title: Text('saved_tracks'.tr()),
               onTap: () {
                 Navigator.pop(context);
                 _showTracksHistory();
@@ -111,11 +112,11 @@ class AppMenu extends StatelessWidget {
             ),
             ExpansionTile(
               leading: const Icon(Icons.tune),
-              title: const Text('Settings'),
+              title: Text('settings'.tr()),
               // subtitle: Text(''),
               children: <Widget>[
                 ListTile(
-                  title: const Text('Select map type'),
+                  title: Text('select_map_type'.tr()),
                   leading: const Icon(
                     Icons.layers_outlined,
                   ),
@@ -126,32 +127,32 @@ class AppMenu extends StatelessWidget {
                             DataService().setMapType(MapType.normal);
                             Navigator.pop(context);
                           },
-                          child: const Text('Map')),
+                          child: Text('map'.tr())),
                       TextButton(
                           onPressed: () {
                             DataService().setMapType(MapType.satellite);
                             Navigator.pop(context);
                           },
-                          child: const Text('Satellite')),
+                          child: Text('satellite'.tr())),
                       TextButton(
                           onPressed: () {
                             DataService().setMapType(MapType.hybrid);
                             Navigator.pop(context);
                           },
-                          child: const Text('Hybrid'))
+                          child: Text('hybrid'.tr()))
                     ],
                   ),
                 ),
                 ListTile(
-                  title: const Text('Set email address'),
+                  title: Text('set_email'.tr()),
                   leading: const Icon(
                     Icons.email_outlined,
                   ),
                   onTap: () {
                     Navigator.pop(context);
                     showTextInputDialog(
-                        'Enter email address to send track data',
-                        'Enter email address',
+                        'email_dialog_title'.tr(),
+                        'email_dialog_hint'.tr(),
                         DataService().getEmailPreference(), (value) {
                       DataService().setEmailPreference(value);
                       // Navigator.pop(context);
@@ -162,7 +163,7 @@ class AppMenu extends StatelessWidget {
             ),
             ListTile(
               leading: const Icon(Icons.file_open_outlined),
-              title: const Text('Import KML'),
+              title: Text('import_kml'.tr()),
               onTap: () {
                 Navigator.pop(context);
                 showImportKMLDialog();
@@ -170,7 +171,7 @@ class AppMenu extends StatelessWidget {
             ),
             ListTile(
               leading: const Icon(Icons.backup_outlined),
-              title: const Text('Backup Data'),
+              title: Text('backup_data'.tr()),
               onTap: () {
                 Navigator.pop(context);
                 backupData();
@@ -178,7 +179,7 @@ class AppMenu extends StatelessWidget {
             ),
             ListTile(
               leading: const Icon(Icons.restore_outlined),
-              title: const Text('Restore Data'),
+              title: Text('restore_data'.tr()),
               onTap: () {
                 Navigator.pop(context);
                 restoreData();
@@ -187,7 +188,7 @@ class AppMenu extends StatelessWidget {
             const Divider(),
             ListTile(
               leading: const Icon(Icons.privacy_tip_outlined),
-              title: const Text('Privacy Policy'),
+              title: Text('privacy_policy'.tr()),
               onTap: () {
                 Navigator.pop(context);
                 _openPrivacyPolicy();

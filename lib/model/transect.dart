@@ -29,8 +29,12 @@ class Transect {
   }
 
   void updateMarker(Placemark marker) {
-    markers?[markers!.indexWhere((element) => element.id == marker.id)] =
-        marker;
+    if (markers != null) {
+      final index = markers!.indexWhere((element) => element.id == marker.id);
+      if (index != -1) {
+        markers![index] = marker;
+      }
+    }
   }
 
   void deleteMarker(Placemark marker) {

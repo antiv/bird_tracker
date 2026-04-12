@@ -6,12 +6,13 @@ import 'package:flutter_svg/flutter_svg.dart';
 
 class WorldSidePicker extends StatelessWidget {
   const WorldSidePicker(
-      {super.key, this.selectedSide, this.onChanged, this.color, this.radius});
+      {super.key, this.selectedSide, this.onChanged, this.color, this.radius, this.label});
 
   final Direction? selectedSide;
   final Function(dynamic)? onChanged;
   final Color? color;
   final double? radius;
+  final String? label;
 
   @override
   Widget build(BuildContext context) {
@@ -72,7 +73,7 @@ class WorldSidePicker extends StatelessWidget {
             child: Container(
               padding: const EdgeInsets.only(left: 5, right: 5),
               color: Colors.white,
-              child: Text(Direction.values.first.toString().split('.').first,
+              child: Text(label ?? Direction.values.first.toString().split('.').first,
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
                     color: Colors.grey,
                   )),

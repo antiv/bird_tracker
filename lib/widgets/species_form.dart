@@ -4,7 +4,7 @@ import 'package:bird_tracker/model/species.dart';
 import 'package:bird_tracker/widgets/enum_radio.dart';
 import 'package:bird_tracker/widgets/world_side_picker.dart';
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 import '../utils/ux_builder.dart';
 import 'bt_autocomplete.dart';
@@ -21,11 +21,11 @@ class SpeciesForm extends StatefulWidget {
 
 class _SpeciesFormState extends State<SpeciesForm> {
   final _formKey = GlobalKey<FormState>();
-  final TextEditingController _spicesController = TextEditingController();
+  final TextEditingController _speciesController = TextEditingController();
   final TextEditingController _countController =
       TextEditingController(text: '1');
   final TextEditingController _descriptionController = TextEditingController();
-  final FocusNode _spicesFocusNode = FocusNode();
+  final FocusNode _speciesFocusNode = FocusNode();
 
   Direction? _direction;
   Stratification? _stratification = Stratification.d;
@@ -38,23 +38,23 @@ class _SpeciesFormState extends State<SpeciesForm> {
     // _spicesFocusNode.requestFocus();
     if (widget.species != null) {
       _isEdit = true;
-      _spicesController.text = widget.species?.species ?? '';
+      _speciesController.text = widget.species?.species ?? '';
       _countController.text = widget.species!.count.toString();
       _descriptionController.text = widget.species!.description ?? '';
       _direction = widget.species?.direction;
       _stratification = widget.species?.stratification ?? Stratification.d;
       _code = widget.species?.code;
     } else {
-      _spicesFocusNode.requestFocus();
+      _speciesFocusNode.requestFocus();
     }
     super.initState();
   }
 
   @override
   void dispose() {
-    _spicesController.dispose();
+    _speciesController.dispose();
     _countController.dispose();
-    _spicesFocusNode.dispose();
+    _speciesFocusNode.dispose();
     _descriptionController.dispose();
     super.dispose();
   }
@@ -62,10 +62,13 @@ class _SpeciesFormState extends State<SpeciesForm> {
   bool _save(bool close) {
     if (_formKey.currentState!.validate()) {
       final species = Species()
-        ..species = _spicesController.text
+        ..species = _speciesController.text
         ..code = _code
-        ..count = int.parse(_countController.text)
-        ..time = _isEdit ? (widget.species?.time ?? DateFormat.Hms().format(DateTime.now())) : DateFormat.Hms().format(DateTime.now())
+        ..count = int.tryParse(_countController.text) ?? 1
+        ..time = _isEdit
+            ? (widget.species?.time ??
+                DateFormat('HH:mm:ss').format(DateTime.now()))
+            : DateFormat('HH:mm:ss').format(DateTime.now())
         ..direction = _direction
         ..stratification = _stratification
         ..description = _descriptionController.text;
@@ -75,8 +78,8 @@ class _SpeciesFormState extends State<SpeciesForm> {
       return true;
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Please enter valid data'),
+        SnackBar(
+          content: Text('enter_valid_data'.tr()),
         ),
       );
       return false;
@@ -85,9 +88,9 @@ class _SpeciesFormState extends State<SpeciesForm> {
 
   void _clear() {
     setState(() {
-      _spicesController.clear();
+      _speciesController.clear();
       _countController.text = '1';
-      _spicesFocusNode.requestFocus();
+      _speciesFocusNode.requestFocus();
       _descriptionController.clear();
       _code = null;
       _direction = null;
@@ -109,8 +112,8 @@ class _SpeciesFormState extends State<SpeciesForm> {
               mainAxisSize: MainAxisSize.min,
               children: [
                 BtAutocomplete(
-                  spicesFocusNode: _spicesFocusNode,
-                  spicesController: _spicesController,
+                  speciesFocusNode: _speciesFocusNode,
+                  speciesController: _speciesController,
                   kOptions: kSpecies,
                 ),
                 Row(
@@ -119,48 +122,56 @@ class _SpeciesFormState extends State<SpeciesForm> {
                   children: [
                     Row(
                       mainAxisSize: MainAxisSize.min,
-                      children:[ TextButton(
-                          onPressed: () {
-                            /// show poput to select atlas code
-                            showDialogBox(
-                              AlertDialog(
-                                // icon: const Icon(Icons.code),
-                                backgroundColor: Theme.of(context).cardColor,
-                                title: const Text('Select atlas code'),
-                                contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 20),
-                                content: SingleChildScrollView(
-                                  child: Column(
-                                    children: [
-                                      for (var code in kCodes.keys)
-                                        Card(
-                                          child: ListTile(
-                                            leading: Text('$code.'),
-                                            dense: true,
-                                            title: Text(kCodes[code]!),
-                                            onTap: () {
-                                              setState(() {
-                                                _code = code;
-                                              });
-                                              Navigator.pop(context);
-                                            },
+                      children: [
+                        TextButton(
+                            onPressed: () {
+                              /// show poput to select atlas code
+                              showDialogBox(
+                                AlertDialog(
+                                  // icon: const Icon(Icons.code),
+                                  backgroundColor: Theme.of(context).cardColor,
+                                  title: Text('select_atlas_code'.tr()),
+                                  contentPadding: const EdgeInsets.symmetric(
+                                      horizontal: 10, vertical: 20),
+                                  content: SingleChildScrollView(
+                                    child: Column(
+                                      children: [
+                                        for (var code in kCodes.keys)
+                                          Card(
+                                            child: ListTile(
+                                              leading: Text('$code.'),
+                                              dense: true,
+                                              title: Text('codes.$code'.tr()),
+                                              onTap: () {
+                                                setState(() {
+                                                  _code = code;
+                                                });
+                                                Navigator.pop(context);
+                                              },
+                                            ),
                                           ),
-                                        ),
-                                    ],
+                                      ],
+                                    ),
                                   ),
                                 ),
-                              ),
-                            );
-                          },
-                          child: Text(
-                            _code != null
-                                ? 'Select code: $_code'
-                                : 'Select atlas code',
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          )),
-                        InkWell(onTap:() => setState(() {
-                          _code = null;
-                        }),child: const Icon(Icons.clear, color: Colors.grey, size: 20,)),
+                              );
+                            },
+                            child: Text(
+                              _code != null
+                                  ? 'select_code'.tr(args: [_code.toString()])
+                                  : 'select_atlas_code'.tr(),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            )),
+                        InkWell(
+                            onTap: () => setState(() {
+                                  _code = null;
+                                }),
+                            child: const Icon(
+                              Icons.clear,
+                              color: Colors.grey,
+                              size: 20,
+                            )),
                       ],
                     ),
                     SizedBox(
@@ -168,7 +179,7 @@ class _SpeciesFormState extends State<SpeciesForm> {
                       child: TextFormField(
                         controller: _countController,
                         decoration: InputDecoration(
-                          labelText: 'Count',
+                          labelText: 'count'.tr(),
                           suffixIcon: InkWell(
                               onTap: () {
                                 if (_countController.text.isNotEmpty) {
@@ -196,7 +207,7 @@ class _SpeciesFormState extends State<SpeciesForm> {
                         ),
                         validator: (value) {
                           if (value == null || value.isEmpty) {
-                            return 'Please enter count';
+                            return 'enter_valid_data'.tr();
                           }
                           return null;
                         },
@@ -213,9 +224,12 @@ class _SpeciesFormState extends State<SpeciesForm> {
                     WorldSidePicker(
                       key: ValueKey('dir$_direction'),
                       selectedSide: _direction,
-                      onChanged: (val) => setState(() {_direction = val;}),
+                      onChanged: (val) => setState(() {
+                        _direction = val;
+                      }),
                       color: Theme.of(context).primaryColor,
                       radius: 80,
+                      label: 'direction_label'.tr(),
                     ),
                     SizedBox(
                       width: 110,
@@ -223,16 +237,25 @@ class _SpeciesFormState extends State<SpeciesForm> {
                         key: ValueKey('stratification$_stratification'),
                         enumValues: Stratification.values,
                         value: _stratification,
-                        onChanged: (val) => setState(() {_stratification = val;}),
+                        onChanged: (val) => setState(() {
+                          _stratification = val;
+                        }),
+                        label: 'strat_label'.tr(),
+                        customLabels: const {
+                          Stratification.g: Icon(Icons.vertical_align_top),
+                          Stratification.s: Icon(Icons.vertical_align_center),
+                          Stratification.d: Icon(Icons.vertical_align_bottom),
+                        },
                       ),
                     ),
                   ],
                 ),
+
                 /// description field
                 TextFormField(
                   controller: _descriptionController,
                   decoration: InputDecoration(
-                    labelText: 'Behavior',
+                    labelText: 'behavior'.tr(),
                     prefixIcon: const Icon(Icons.description),
                     suffixIcon: InkWell(
                       child: const Icon(Icons.clear),
@@ -254,17 +277,16 @@ class _SpeciesFormState extends State<SpeciesForm> {
                             Navigator.pop(context);
                           }
                         },
-                        child: const Text('Save')),
+                        child: Text('save'.tr())),
+                    if (!_isEdit) const SizedBox(width: 10),
                     if (!_isEdit)
-                    const SizedBox(width: 10),
-                    if (!_isEdit)
-                    ElevatedButton(
-                        onPressed: () {
-                          if (_save(false)) {
-                            _clear();
-                          }
-                        },
-                        child: const Text('Save and new')),
+                      ElevatedButton(
+                          onPressed: () {
+                            if (_save(false)) {
+                              _clear();
+                            }
+                          },
+                          child: Text('save_and_new'.tr())),
                     // const SizedBox(width: 10),
                     // ElevatedButton(onPressed: () => Navigator.pop(context), child: const Text('Cancel')),
                   ],
