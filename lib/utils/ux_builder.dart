@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:bird_tracker/service/data_service.dart';
 import 'package:bird_tracker/service/isar_service.dart';
+import 'package:bird_tracker/service/sembast_service.dart';
 import 'package:bird_tracker/utils/kml_utils.dart';
 import 'package:context_holder/context_holder.dart';
 import 'package:file_picker/file_picker.dart';
@@ -175,7 +176,7 @@ Future<void> showImportKMLDialog() async {
     String fileData = await file.readAsString();
     Transect transect =
         KMLUtils().kmlToTransect(fileData, file.lastModifiedSync());
-    IsarService().addTransect(transect);
+    SembastService().addTransect(transect);
     DataService().setTransect(transect);
     showSnackBar('import_success'.tr());
   }
@@ -213,7 +214,7 @@ Future<bool> showPermissionInfoDialog() async {
 
 Future<void> backupData() async {
   try {
-    String backupPath = await IsarService().createBackupPath();
+    String backupPath = await SembastService().createBackupPath();
     await SharePlus.instance.share(
       ShareParams(
         files: [XFile(backupPath)],
@@ -226,16 +227,24 @@ Future<void> backupData() async {
 }
 
 Future<void> restoreData() async {
+  // Accept both .json (new format) and .isar (legacy backup)
   FilePickerResult? result = await FilePicker.pickFiles(
     type: FileType.custom,
-    allowedExtensions: [
-      'isar'
-    ], // isar doesn't always have extension, but we can default to any
+    allowedExtensions: ['json', 'isar'],
   );
   if (result != null) {
     try {
       showSnackBar('restoring_backup'.tr(), duration: 2);
-      await IsarService().restoreBackup(result.files.single.path ?? '');
+      final path = result.files.single.path ?? '';
+      final isLegacyIsar = path.toLowerCase().endsWith('.isar');
+
+      if (isLegacyIsar) {
+        // Legacy restore: read .isar file via IsarService, import into sembast
+        await IsarService().restoreFromIsarBackup(path);
+      } else {
+        // New JSON restore via SembastService
+        await SembastService().restoreFromJson(path);
+      }
       showSnackBar('restore_success'.tr());
       DataService().setTransect(null);
     } catch (e) {

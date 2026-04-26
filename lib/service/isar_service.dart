@@ -4,9 +4,15 @@ import 'package:isar/isar.dart';
 import 'package:path_provider/path_provider.dart';
 
 import '../model/transect.dart';
+import 'sembast_service.dart';
 
-/// Singleton class to initiate and use isar database
-
+/// Isar service — kept only for v1.0.4 migration purposes.
+/// 
+/// On [init], checks if an old `.isar` database file exists.
+/// If it does, all data is migrated to [SembastService] automatically,
+/// and the `.isar` file is deleted.
+///
+/// In v1.0.5, this class and all `isar*` dependencies will be removed.
 class IsarService with ChangeNotifier {
   static final IsarService _isarService = IsarService._internal();
 
@@ -16,61 +22,71 @@ class IsarService with ChangeNotifier {
 
   IsarService._internal();
 
-  late Isar _isar;
+  Isar? _isar;
 
   Future<void> init() async {
-    _isar = await openIsar();
-  }
-
-  Future<Isar> openIsar() async {
     final dir = await getApplicationDocumentsDirectory();
-    return await Isar.open([TransectSchema],
-        directory: dir.path, name: 'bird_tracker.isar');
-  }
+    final isarFile = File('${dir.path}/bird_tracker.isar');
 
-  Isar get isar {
-    return _isar;
-  }
-
- /// commands for collection Transect
-  Future<void> addTransect(Transect transect) async {
-    await isar.writeTxn<int>(() async => await isar.transects.put(transect));
-  }
-
-  Future<void> updateTransect(Transect transect) async {
-    await isar.writeTxn<int>(() async => await isar.transects.put(transect));
-  }
-
-  Future<bool> deleteTransect(Transect transect) async {
-    return await isar.writeTxn<bool>(() async => isar.transects.delete(transect.id));
-  }
-
-  Future<List<Transect?>> getAllTransects() {
-    return isar.transects.filter().idGreaterThan(-1).sortByStartDateDesc().findAll();
-  }
-
-  Future<Transect?> getTransectById(int id) async {
-    return await _isar.transects.get(id);
-  }
-
-  Future<String> createBackupPath() async {
-    final tempDir = await getTemporaryDirectory();
-    final backupFile = File('${tempDir.path}/bird_tracker_backup.isar');
-    if (backupFile.existsSync()) {
-      backupFile.deleteSync();
+    // Auto-migrate if old .isar database still exists on device
+    if (isarFile.existsSync()) {
+      await _migrateToSembast(dir.path, isarFile);
     }
-    await _isar.copyToFile(backupFile.path);
-    return backupFile.path;
   }
 
-  Future<void> restoreBackup(String backupFilePath) async {
-    final dbPath = _isar.path;
-    await _isar.close();
-    
-    final backupFile = File(backupFilePath);
-    await backupFile.copy(dbPath!);
-    
-    await init();
-    notifyListeners();
+  /// Opens the Isar db, reads all transects, writes them to sembast,
+  /// then deletes the .isar file so migration never runs again.
+  Future<void> _migrateToSembast(String dirPath, File isarFile) async {
+    try {
+      _isar = await Isar.open(
+        [TransectSchema],
+        directory: dirPath,
+        name: 'bird_tracker',
+      );
+
+      final transects = await _isar!.transects.where().findAll();
+
+      await SembastService().init();
+      final sembastHasData = await SembastService().hasData();
+
+      // Only import if sembast is empty (avoid duplicate migration)
+      if (!sembastHasData && transects.isNotEmpty) {
+        await SembastService().importTransects(transects);
+      }
+
+      await _isar!.close();
+      _isar = null;
+
+      // Rename instead of delete for safety — remove on next launch
+      await isarFile.rename('${isarFile.path}.migrated');
+    } catch (e) {
+      // Migration failure is non-fatal — user still has their data in Isar
+      debugPrint('Isar migration error: $e');
+    }
+  }
+
+  /// Restore from an old .isar backup file.
+  /// Opens the provided file as an Isar DB, reads all transects,
+  /// imports them into sembast, then closes.
+  Future<void> restoreFromIsarBackup(String backupFilePath) async {
+    final tempDir = await getTemporaryDirectory();
+
+    // Copy backup to a temp location Isar can open
+    final tempFile = File('${tempDir.path}/restore_temp.isar');
+    await File(backupFilePath).copy(tempFile.path);
+
+    final isar = await Isar.open(
+      [TransectSchema],
+      directory: tempDir.path,
+      name: 'restore_temp',
+    );
+
+    try {
+      final transects = await isar.transects.where().findAll();
+      await SembastService().importTransects(transects);
+    } finally {
+      await isar.close();
+      if (tempFile.existsSync()) await tempFile.delete();
+    }
   }
 }

@@ -1,5 +1,5 @@
 import 'package:bird_tracker/service/data_service.dart';
-import 'package:bird_tracker/service/isar_service.dart';
+import 'package:bird_tracker/service/sembast_service.dart';
 import 'package:bird_tracker/widgets/species_form.dart';
 import 'package:context_holder/context_holder.dart';
 import 'package:flutter/material.dart';
@@ -32,7 +32,7 @@ class _MarkerInfoState extends State<MarkerInfo> {
             species,
           );
         });
-        IsarService().updateTransect(DataService().transect!);
+        SembastService().updateTransect(DataService().transect!);
       },
     ));
   }
@@ -111,7 +111,7 @@ class _MarkerInfoState extends State<MarkerInfo> {
                                     DataService()
                                         .transect
                                         ?.updateMarker(widget.selected!);
-                                    IsarService().updateTransect(
+                                    SembastService().updateTransect(
                                         DataService().transect!);
                                   },
                                 ),

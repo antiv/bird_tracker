@@ -1,4 +1,4 @@
-import 'package:bird_tracker/service/isar_service.dart';
+import 'package:bird_tracker/service/sembast_service.dart';
 import 'package:context_holder/context_holder.dart';
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
@@ -72,7 +72,7 @@ class _TransectInfoState extends State<TransectInfo> {
                                             ?.toList(growable: true) ??
                                         [];
                                     current?.markers?.removeAt(index);
-                                    IsarService().updateTransect(current!);
+                                    SembastService().updateTransect(current!);
                                     DataService().notify();
                                   }),
                               () {});

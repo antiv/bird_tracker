@@ -17,6 +17,31 @@ class Species {
   @Enumerated(EnumType.ordinal32)
   Direction? direction;
 
+  Map<String, dynamic> toJson() => {
+        'species': species,
+        'time': time,
+        'count': count,
+        'code': code,
+        'description': description,
+        'stratification': stratification?.name,
+        'direction': direction?.name,
+      };
+
+  static Species fromJson(Map<String, dynamic> json) => Species()
+    ..species = json['species'] as String
+    ..time = json['time'] as String
+    ..count = json['count'] as int
+    ..code = json['code'] as int?
+    ..description = json['description'] as String?
+    ..stratification = json['stratification'] != null
+        ? Stratification.values.firstWhereOrNull(
+            (e) => e.name == json['stratification'])
+        : null
+    ..direction = json['direction'] != null
+        ? Direction.values.firstWhereOrNull(
+            (e) => e.name == json['direction'])
+        : null;
+
   String get speciesString {
     return '$species: $count, ${code ?? '-'}, $time, ${stratification?.toShortString() ?? ''}, ${direction?.toShortString() ?? ''}; ${description ?? ''}';
   }

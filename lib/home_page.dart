@@ -4,6 +4,7 @@ import 'package:bird_tracker/model/point.dart';
 import 'package:bird_tracker/model/transect.dart';
 import 'package:bird_tracker/service/data_service.dart';
 import 'package:bird_tracker/service/isar_service.dart';
+import 'package:bird_tracker/service/sembast_service.dart';
 import 'package:bird_tracker/utils/location_helper.dart';
 import 'package:bird_tracker/utils/ux_builder.dart';
 import 'package:bird_tracker/widgets/app_menu.dart';
@@ -49,7 +50,8 @@ class _HomePageState extends State<HomePage> {
 
   @override
   void initState() {
-    IsarService().init();
+    // Migrate old Isar data to sembast if needed, then init sembast
+    IsarService().init().then((_) => SembastService().init());
     _polyLines = {
       Polyline(
           polylineId: const PolylineId('1'),
@@ -139,7 +141,7 @@ class _HomePageState extends State<HomePage> {
           ..latitude = e.latitude
           ..longitude = e.longitude)
         .toList();
-    await IsarService().updateTransect(transect!);
+    await SembastService().updateTransect(transect!);
     _stopListener();
   }
 
@@ -166,7 +168,7 @@ class _HomePageState extends State<HomePage> {
         Placemark lastMarker = transect!.markers!.last;
         lastMarker.endDate ??= DateTime.now();
       }
-      IsarService().updateTransect(transect!);
+      SembastService().updateTransect(transect!);
       transect = null;
       DataService().setTransect(null);
       setState(() {});
@@ -194,7 +196,7 @@ class _HomePageState extends State<HomePage> {
             Placemark lastMarker = transect!.markers!.last;
             if (lastMarker.endDate == null) {
               lastMarker.species?.add(species);
-              IsarService().updateTransect(transect!);
+              SembastService().updateTransect(transect!);
               return;
             } else {
               transect?.markers?.add(
@@ -222,7 +224,7 @@ class _HomePageState extends State<HomePage> {
           }
         });
         _goToCurrentLocation();
-        IsarService().updateTransect(transect!);
+        SembastService().updateTransect(transect!);
       },
     ));
   }
@@ -251,7 +253,7 @@ class _HomePageState extends State<HomePage> {
     DataService().setTransect(transect);
 
     /// insert transect to db
-    IsarService().addTransect(transect!);
+    SembastService().addTransect(transect!);
     _startListener();
   }
 

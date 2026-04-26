@@ -10,4 +10,13 @@ class Point {
 
   @ignore
   LatLng get latLng => LatLng(latitude, longitude);
+
+  Map<String, dynamic> toJson() => {
+        'latitude': latitude,
+        'longitude': longitude,
+      };
+
+  static Point fromJson(Map<String, dynamic> json) => Point()
+    ..latitude = (json['latitude'] as num).toDouble()
+    ..longitude = (json['longitude'] as num).toDouble();
 }

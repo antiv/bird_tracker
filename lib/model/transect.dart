@@ -24,6 +24,33 @@ class Transect {
   List<Point>? points;
   List<Placemark>? markers;
 
+  Map<String, dynamic> toJson() => {
+        'id': id,
+        'startDate': startDate.toIso8601String(),
+        'name': name,
+        'endDate': endDate?.toIso8601String(),
+        'description': description,
+        'points': points?.map((p) => p.toJson()).toList() ?? [],
+        'markers': markers?.map((m) => m.toJson()).toList() ?? [],
+      };
+
+  static Transect fromJson(Map<String, dynamic> json) => Transect()
+    ..id = (json['id'] as int?) ?? Isar.autoIncrement
+    ..startDate = DateTime.parse(json['startDate'] as String)
+    ..name = json['name'] as String?
+    ..endDate = json['endDate'] != null
+        ? DateTime.parse(json['endDate'] as String)
+        : null
+    ..description = json['description'] as String?
+    ..points = (json['points'] as List<dynamic>?)
+            ?.map((p) => Point.fromJson(p as Map<String, dynamic>))
+            .toList() ??
+        []
+    ..markers = (json['markers'] as List<dynamic>?)
+            ?.map((m) => Placemark.fromJson(m as Map<String, dynamic>))
+            .toList() ??
+        [];
+
   void addMarker(Placemark marker) {
     markers?.add(marker);
   }
@@ -48,12 +75,13 @@ class Transect {
     }
     return '';
   }
+
   /// get duration in format hh:mm:ss - hh:mm:ss
   String get fromTo {
-      if (endDate == null) {
-        return DateFormat('hh:mm:ss').format(startDate);
-      }
-      return '${DateFormat('hh:mm:ss').format(startDate)} - ${DateFormat('hh:mm:ss').format(endDate!)}';
+    if (endDate == null) {
+      return DateFormat('hh:mm:ss').format(startDate);
+    }
+    return '${DateFormat('hh:mm:ss').format(startDate)} - ${DateFormat('hh:mm:ss').format(endDate!)}';
   }
 
   double get distance {
@@ -95,13 +123,15 @@ class Transect {
   String toCSV() {
     final sb = StringBuffer();
     sb.writeln(
-        'Species, Date, Time (from - to), Time, Latitude(DMS),Longitude(DMS),Count, Behavior, Stratification, Direction, Code');
+        'Species, Date, Time (from - to), Time, Latitude,Longitude,Latitude(DMS),Longitude(DMS),Count, Behavior, Stratification, Direction, Code');
     markers?.forEach((placeMark) {
       placeMark.species?.forEach((species) {
         sb.writeln('${species.species},'
             '${DateFormat('dd/MM/yyyy').format(placeMark.startDate!)},'
             '${placeMark.duration},'
             '${species.time},'
+            '${placeMark.latitude},'
+            '${placeMark.longitude},'
             '${convertLatLng(placeMark.latitude!, true)},'
             '${convertLatLng(placeMark.longitude!, false)},'
             '${species.count},'
@@ -119,11 +149,11 @@ class Transect {
     return KMLUtils.generateKML(this);
   }
 
-
   /// share transect as CSV file
   Future<void> shareCSV() async {
     Uint8List? bytes = Uint8List.fromList(toCSV().codeUnits);
-    String path = await storeFileTemporarily(bytes, '$name-${DateFormat('dd-MM-yyyy').format(startDate)}.csv');
+    String path = await storeFileTemporarily(
+        bytes, '$name-${DateFormat('dd-MM-yyyy').format(startDate)}.csv');
     await SharePlus.instance.share(ShareParams(
       files: [XFile(path)],
       text: '$name ${DateFormat('dd/MM/yyyy').format(startDate)}',
@@ -134,7 +164,8 @@ class Transect {
   /// share transect as KML file
   Future<void> shareKML() async {
     Uint8List? bytes = Uint8List.fromList(toKML().codeUnits);
-    String path = await storeFileTemporarily(bytes, '$name-${DateFormat('dd-MM-yyyy').format(startDate)}.kml');
+    String path = await storeFileTemporarily(
+        bytes, '$name-${DateFormat('dd-MM-yyyy').format(startDate)}.kml');
 
     await SharePlus.instance.share(ShareParams(
       files: [XFile(path)],
@@ -145,16 +176,12 @@ class Transect {
 
   void goToFirst() {
     if (points?.isNotEmpty ?? false) {
-      goToLocation(
-          points!.first.latLng, DataService().controller,
-          DataService().completer
-      );
+      goToLocation(points!.first.latLng, DataService().controller,
+          DataService().completer);
     } else {
       if (markers?.isNotEmpty ?? false) {
-        goToLocation(
-            markers!.first.latLng, DataService().controller,
-            DataService().completer
-        );
+        goToLocation(markers!.first.latLng, DataService().controller,
+            DataService().completer);
       }
     }
   }

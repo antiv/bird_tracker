@@ -1,4 +1,4 @@
-import 'package:bird_tracker/service/isar_service.dart';
+import 'package:bird_tracker/service/sembast_service.dart';
 import 'package:bird_tracker/utils/location_helper.dart';
 import 'package:context_holder/context_holder.dart';
 import 'package:flutter/material.dart';
@@ -19,7 +19,7 @@ class TransectsHistory extends StatefulWidget {
 }
 
 class _TransectsHistoryState extends State<TransectsHistory> {
-  List<Transect?> transects = [];
+  List<Transect> transects = [];
 
   @override
   void initState() {
@@ -28,7 +28,7 @@ class _TransectsHistoryState extends State<TransectsHistory> {
   }
 
   Future<void> _getTransects() async {
-    final List<Transect?> transects = await IsarService().getAllTransects();
+    final List<Transect> transects = await SembastService().getAllTransects();
     setState(() {
       this.transects = transects;
     });
@@ -110,7 +110,7 @@ class _TransectsHistoryState extends State<TransectsHistory> {
                           trailing: IconButton(
                             onPressed: () {
                               showYesNoDialog(() {
-                                IsarService().deleteTransect(transects[index]!);
+                                SembastService().deleteTransect(transects[index]!);
                                 setState(() {
                                   transects.removeAt(index);
                                 });

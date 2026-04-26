@@ -27,6 +27,33 @@ class Placemark {
     this.species,
   });
 
+  Map<String, dynamic> toJson() => {
+        'id': id,
+        'startDate': startDate?.toIso8601String(),
+        'endDate': endDate?.toIso8601String(),
+        'latitude': latitude,
+        'longitude': longitude,
+        'description': description,
+        'species': species?.map((s) => s.toJson()).toList() ?? [],
+      };
+
+  static Placemark fromJson(Map<String, dynamic> json) => Placemark(
+        id: json['id'] as int?,
+        startDate: json['startDate'] != null
+            ? DateTime.parse(json['startDate'] as String)
+            : null,
+        endDate: json['endDate'] != null
+            ? DateTime.parse(json['endDate'] as String)
+            : null,
+        latitude: (json['latitude'] as num?)?.toDouble(),
+        longitude: (json['longitude'] as num?)?.toDouble(),
+        description: json['description'] as String?,
+        species: (json['species'] as List<dynamic>?)
+                ?.map((s) => Species.fromJson(s as Map<String, dynamic>))
+                .toList() ??
+            [],
+      );
+
   static List<Placemark> fromMarkers(List<Marker> markers) {
     return markers.map((e) => Placemark.fromMarker(e, 1)).toList();
   }
