@@ -5,18 +5,14 @@ import 'package:bird_tracker/model/point.dart';
 import 'package:bird_tracker/model/species.dart';
 import 'package:bird_tracker/utils/kml_utils.dart';
 import 'package:intl/intl.dart';
-import 'package:isar/isar.dart';
 import 'package:share_plus/share_plus.dart';
 
 import '../service/data_service.dart';
 import '../utils/file_utils.dart';
 import '../utils/location_helper.dart';
 
-part 'transect.g.dart';
-
-@collection
 class Transect {
-  Id id = Isar.autoIncrement;
+  int id = 0;
   late DateTime startDate;
   String? name;
   DateTime? endDate;
@@ -35,7 +31,7 @@ class Transect {
       };
 
   static Transect fromJson(Map<String, dynamic> json) => Transect()
-    ..id = (json['id'] as int?) ?? Isar.autoIncrement
+    ..id = (json['id'] as int?) ?? 0
     ..startDate = DateTime.parse(json['startDate'] as String)
     ..name = json['name'] as String?
     ..endDate = json['endDate'] != null

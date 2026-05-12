@@ -427,5 +427,12 @@
   "pause": "Pause",
   "stop": "Stop",
   "about_description": "Universal application for field bird data collection.",
-  "copyright": "© 2025 Ant BioCode. All rights reserved."
+  "copyright": "© 2025 Ant BioCode. All rights reserved.",
+  "set_point_radius": "Set point grouping radius (m)",
+  "point_radius_dialog_title": "Point Radius",
+  "point_radius_dialog_hint": "Enter radius in meters",
+  "point_nearby_title": "Point nearby",
+  "point_nearby_content": "There is an existing point within {}m. Do you want to add the species to the existing point or create a new one?",
+  "add_to_existing": "Add to existing",
+  "create_new": "Create new"
 }

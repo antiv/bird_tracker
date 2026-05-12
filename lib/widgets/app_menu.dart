@@ -179,6 +179,24 @@ class AppMenu extends StatelessWidget {
                         );
                       },
                     ),
+                    ListTile(
+                      title: Text('set_point_radius'.tr()),
+                      leading: const Icon(Icons.radar_outlined),
+                      onTap: () {
+                        Navigator.pop(context);
+                        showTextInputDialog(
+                          'point_radius_dialog_title'.tr(),
+                          'point_radius_dialog_hint'.tr(),
+                          DataService().getPointRadiusPreference().toString(),
+                          (value) {
+                            final radius = int.tryParse(value);
+                            if (radius != null) {
+                              DataService().setPointRadiusPreference(radius);
+                            }
+                          },
+                        );
+                      },
+                    ),
                   ],
                 ),
                 ListTile(

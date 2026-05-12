@@ -427,5 +427,12 @@
   "pause": "Pauza",
   "stop": "Stop",
   "about_description": "Univerzalna aplikacija za terensko prikupljanje podataka o pticama.",
-  "copyright": "© 2025 Ant BioCode. Sva prava zadržana."
+  "copyright": "© 2025 Ant BioCode. Sva prava zadržana.",
+  "set_point_radius": "Podesi radijus grupisanja tačaka (m)",
+  "point_radius_dialog_title": "Radijus tačaka",
+  "point_radius_dialog_hint": "Unesite radijus u metrima",
+  "point_nearby_title": "Tačka u blizini",
+  "point_nearby_content": "Postoji tačka na udaljenosti manjoj od {}m. Da li želite da dodate vrstu u postojeću tačku ili da kreirate novu?",
+  "add_to_existing": "Dodaj u postojeću",
+  "create_new": "Kreiraj novu"
 }

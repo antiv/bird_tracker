@@ -27,6 +27,14 @@ class DataService with ChangeNotifier{
     prefs?.setString('email', email);
   }
 
+  void setPointRadiusPreference(int radius) {
+    prefs?.setInt('point_radius', radius);
+  }
+
+  int getPointRadiusPreference() {
+    return prefs?.getInt('point_radius') ?? 10;
+  }
+
   DataService._internal();
 
   Transect? transect;

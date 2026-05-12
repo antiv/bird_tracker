@@ -3,7 +3,6 @@ import 'package:bird_tracker/configuration/constants.dart';
 import 'package:bird_tracker/model/point.dart';
 import 'package:bird_tracker/model/transect.dart';
 import 'package:bird_tracker/service/data_service.dart';
-import 'package:bird_tracker/service/isar_service.dart';
 import 'package:bird_tracker/service/sembast_service.dart';
 import 'package:bird_tracker/utils/location_helper.dart';
 import 'package:bird_tracker/utils/ux_builder.dart';
@@ -50,8 +49,7 @@ class _HomePageState extends State<HomePage> {
 
   @override
   void initState() {
-    // Migrate old Isar data to sembast if needed, then init sembast
-    IsarService().init().then((_) => SembastService().init());
+    SembastService().init();
     _polyLines = {
       Polyline(
           polylineId: const PolylineId('1'),
@@ -179,6 +177,81 @@ class _HomePageState extends State<HomePage> {
     DataService().isOpen.value = false;
     setState(() {});
 
+    int radius = DataService().getPointRadiusPreference();
+    Placemark? closestMarker;
+    double minDistanceMeters = double.infinity;
+
+    for (var marker in transect?.markers ?? <Placemark>[]) {
+      double distKm = getStraightLineDistance(
+          marker.latitude ?? 0,
+          marker.longitude ?? 0,
+          _locationData!.latitude!,
+          _locationData!.longitude!);
+      double distM = distKm * 1000;
+      if (distM < radius && distM < minDistanceMeters) {
+        minDistanceMeters = distM;
+        closestMarker = marker;
+      }
+    }
+
+    if (closestMarker != null) {
+      showAlertDialog(
+        Padding(
+          padding: const EdgeInsets.only(top: 8.0),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text('point_nearby_title'.tr(), style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+              const SizedBox(height: 10),
+              Text('point_nearby_content'.tr(args: [radius.toString()])),
+            ],
+          ),
+        ),
+        [
+          Row(
+            children: [
+              Expanded(
+                child: OutlinedButton(
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                    _createNewMarker();
+                  },
+                  child: FittedBox(child: Text('create_new'.tr())),
+                ),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: ElevatedButton(
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                    _addToExistingMarker(closestMarker!);
+                  },
+                  child: FittedBox(child: Text('add_to_existing'.tr())),
+                ),
+              ),
+            ],
+          )
+        ],
+      );
+    } else {
+      _createNewMarker();
+    }
+  }
+
+  void _addToExistingMarker(Placemark marker) {
+    showFullScreenDialog(SpeciesForm(
+      onSaved: (species, close) {
+        setState(() {
+          marker.species?.add(species);
+        });
+        _goToCurrentLocation();
+        SembastService().updateTransect(transect!);
+      },
+    ));
+  }
+
+  void _createNewMarker() {
     /// close last marker
     if (transect?.markers?.isNotEmpty ?? false) {
       Placemark lastMarker = transect!.markers!.last;
@@ -188,40 +261,16 @@ class _HomePageState extends State<HomePage> {
       onSaved: (species, close) {
         setState(() {
           transect?.markers = transect?.markers?.toList(growable: true) ?? [];
-
-          /// Find last marker
-          /// if this marker is not closed, add species to it
-          /// else create new marker
-          if (transect?.markers?.isNotEmpty ?? false) {
-            Placemark lastMarker = transect!.markers!.last;
-            if (lastMarker.endDate == null) {
-              lastMarker.species?.add(species);
-              SembastService().updateTransect(transect!);
-              return;
-            } else {
-              transect?.markers?.add(
-                Placemark(
-                  latitude: _locationData!.latitude!,
-                  longitude: _locationData!.longitude!,
-                  startDate: DateTime.now(),
-                  endDate: null,
-                  id: transect?.markers?.length ?? 0,
-                  species: [species],
-                ),
-              );
-            }
-          } else {
-            transect?.markers?.add(
-              Placemark(
-                latitude: _locationData!.latitude!,
-                longitude: _locationData!.longitude!,
-                startDate: DateTime.now(),
-                endDate: null,
-                id: transect?.markers?.length ?? 0,
-                species: [species],
-              ),
-            );
-          }
+          transect?.markers?.add(
+            Placemark(
+              latitude: _locationData!.latitude!,
+              longitude: _locationData!.longitude!,
+              startDate: DateTime.now(),
+              endDate: null,
+              id: transect?.markers?.length ?? 0,
+              species: [species],
+            ),
+          );
         });
         _goToCurrentLocation();
         SembastService().updateTransect(transect!);

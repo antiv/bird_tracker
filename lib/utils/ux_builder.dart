@@ -1,7 +1,6 @@
 import 'dart:io';
 
 import 'package:bird_tracker/service/data_service.dart';
-import 'package:bird_tracker/service/isar_service.dart';
 import 'package:bird_tracker/service/sembast_service.dart';
 import 'package:bird_tracker/utils/kml_utils.dart';
 import 'package:context_holder/context_holder.dart';
@@ -227,24 +226,21 @@ Future<void> backupData() async {
 }
 
 Future<void> restoreData() async {
-  // Accept both .json (new format) and .isar (legacy backup)
   FilePickerResult? result = await FilePicker.pickFiles(
-    type: FileType.custom,
-    allowedExtensions: ['json', 'isar'],
+    type: FileType.any,
   );
   if (result != null) {
     try {
-      showSnackBar('restoring_backup'.tr(), duration: 2);
       final path = result.files.single.path ?? '';
-      final isLegacyIsar = path.toLowerCase().endsWith('.isar');
-
-      if (isLegacyIsar) {
-        // Legacy restore: read .isar file via IsarService, import into sembast
-        await IsarService().restoreFromIsarBackup(path);
-      } else {
-        // New JSON restore via SembastService
-        await SembastService().restoreFromJson(path);
+      if (!path.toLowerCase().endsWith('.json')) {
+        showSnackBar('invalid_file_format'.tr());
+        return;
       }
+
+      showSnackBar('restoring_backup'.tr(), duration: 2);
+
+      // JSON restore via SembastService
+      await SembastService().restoreFromJson(path);
       showSnackBar('restore_success'.tr());
       DataService().setTransect(null);
     } catch (e) {

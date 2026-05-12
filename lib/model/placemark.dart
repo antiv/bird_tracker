@@ -1,13 +1,9 @@
 import 'package:bird_tracker/model/species.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:intl/intl.dart';
-import 'package:isar/isar.dart';
 
 import '../utils/location_helper.dart';
 
-part 'placemark.g.dart';
-
-@embedded
 class Placemark {
   int? id;
   DateTime? startDate;
@@ -115,7 +111,6 @@ class Placemark {
     }
   }
 
-  @ignore
   LatLng get latLng {
     return LatLng(latitude!, longitude!);
   }

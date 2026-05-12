@@ -1,9 +1,5 @@
-import 'package:isar/isar.dart';
 import 'package:collection/collection.dart';
 
-part 'species.g.dart';
-
-@embedded
 class Species {
   late String species;
   late String time; // hh:mm:ss
@@ -12,9 +8,7 @@ class Species {
 
   late String? description;
 
-  @Enumerated(EnumType.ordinal32)
   Stratification? stratification;
-  @Enumerated(EnumType.ordinal32)
   Direction? direction;
 
   Map<String, dynamic> toJson() => {
