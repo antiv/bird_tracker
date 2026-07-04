@@ -434,5 +434,10 @@
   "point_nearby_title": "Tačka u blizini",
   "point_nearby_content": "Postoji tačka na udaljenosti manjoj od {}m. Da li želite da dodate vrstu u postojeću tačku ili da kreirate novu?",
   "add_to_existing": "Dodaj u postojeću",
-  "create_new": "Kreiraj novu"
+  "create_new": "Kreiraj novu",
+  "getting_current_location": "Pribavljanje trenutne lokacije...",
+  "location_not_available": "Lokacija nije dostupna",
+  "field_work": "Terenski rad",
+  "data_management": "Upravljanje podacima",
+  "configuration": "Konfiguracija"
 }

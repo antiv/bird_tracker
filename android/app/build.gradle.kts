@@ -46,7 +46,8 @@ android {
             }
         }
     }
-    val mapsApiKey = envProperties.getProperty("MAPS_API_KEY") ?: ""
+    val mapsApiKey = (envProperties.getProperty("MAPS_API_KEY_ANDROID") 
+        ?: envProperties.getProperty("MAPS_API_KEY")) ?: ""
 
     defaultConfig {
         applicationId = "rs.antonijevic.bird_tracker"

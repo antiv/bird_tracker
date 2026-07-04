@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:developer';
 import 'package:bird_tracker/configuration/constants.dart';
 import 'package:bird_tracker/model/point.dart';
 import 'package:bird_tracker/model/transect.dart';
@@ -76,22 +77,35 @@ class _HomePageState extends State<HomePage> {
   Future<void> _goToCurrentLocation() async {
     if (locationStream != null) {
       await _stopListener();
-      await goToCurrentLocation(_serviceEnabled ?? false, location,
+      final loc = await goToCurrentLocation(_serviceEnabled ?? false, location,
           _locationData, controller, _completer);
+      if (loc != null) {
+        setState(() {
+          _locationData = loc;
+        });
+      }
       for (final mark in _markers) {
         await controller?.hideMarkerInfoWindow(mark.markerId);
       }
-      await DataService()
-          .controller
-          ?.showMarkerInfoWindow(_markers.last.markerId);
+      if (_markers.isNotEmpty) {
+        await DataService()
+            .controller
+            ?.showMarkerInfoWindow(_markers.last.markerId);
+      }
       await _startListener();
     } else {
-      await goToCurrentLocation(_serviceEnabled ?? false, location,
+      final loc = await goToCurrentLocation(_serviceEnabled ?? false, location,
           _locationData, controller, _completer);
+      if (loc != null) {
+        setState(() {
+          _locationData = loc;
+        });
+      }
     }
   }
 
   void onLocationChange(LocationData currentLocation) {
+    log('Location updated in listener: lat=${currentLocation.latitude}, lng=${currentLocation.longitude}');
     setState(() {
       _locationData = currentLocation;
       // points.add(LatLng(_locationData!.latitude!, _locationData!.longitude!));
@@ -122,11 +136,24 @@ class _HomePageState extends State<HomePage> {
   Future<void> _startListener() async {
     if (locationStream == null) {
       location.changeSettings(
-          accuracy: LocationAccuracy.high, interval: 1000, distanceFilter: 10);
+          accuracy: LocationAccuracy.high, interval: 1000, distanceFilter: 0);
       DataService().isOpen.value = false;
+      
       locationStream =
           location.onLocationChanged.listen((LocationData currentLocation) {
         onLocationChange(currentLocation);
+      });
+
+      log('Fetching initial location for startListener...');
+      location.getLocation().timeout(const Duration(seconds: 4)).then((initialLocation) {
+        log('initialLocation fetched for startListener: lat=${initialLocation.latitude}, lng=${initialLocation.longitude}');
+        if (mounted) {
+          setState(() {
+            _locationData = initialLocation;
+          });
+        }
+      }).catchError((e) {
+        log('Error getting initial location on startListener: $e');
       });
     }
   }
@@ -173,9 +200,29 @@ class _HomePageState extends State<HomePage> {
     });
   }
 
-  void _addMarker() {
+  void _addMarker() async {
     DataService().isOpen.value = false;
     setState(() {});
+
+    if (_locationData == null ||
+        _locationData!.latitude == null ||
+        _locationData!.longitude == null) {
+      showSnackBar('getting_current_location'.tr());
+      try {
+        log('Attempting to fetch location via getLocation() with timeout...');
+        _locationData = await location.getLocation().timeout(const Duration(seconds: 4));
+        log('getLocation() returned: lat=${_locationData?.latitude}, lng=${_locationData?.longitude}');
+      } catch (e) {
+        log('Error getting location: ${e.toString()}');
+      }
+    }
+
+    if (_locationData == null ||
+        _locationData!.latitude == null ||
+        _locationData!.longitude == null) {
+      showSnackBar('location_not_available'.tr());
+      return;
+    }
 
     int radius = DataService().getPointRadiusPreference();
     Placemark? closestMarker;
@@ -202,7 +249,9 @@ class _HomePageState extends State<HomePage> {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text('point_nearby_title'.tr(), style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+              Text('point_nearby_title'.tr(),
+                  style: const TextStyle(
+                      fontSize: 18, fontWeight: FontWeight.bold)),
               const SizedBox(height: 10),
               Text('point_nearby_content'.tr(args: [radius.toString()])),
             ],
@@ -257,14 +306,23 @@ class _HomePageState extends State<HomePage> {
       Placemark lastMarker = transect!.markers!.last;
       lastMarker.endDate ??= DateTime.now();
     }
+
+    final double? markerLatitude = _locationData?.latitude;
+    final double? markerLongitude = _locationData?.longitude;
+
+    if (markerLatitude == null || markerLongitude == null) {
+      showSnackBar('location_not_available'.tr());
+      return;
+    }
+
     showFullScreenDialog(SpeciesForm(
       onSaved: (species, close) {
         setState(() {
           transect?.markers = transect?.markers?.toList(growable: true) ?? [];
           transect?.markers?.add(
             Placemark(
-              latitude: _locationData!.latitude!,
-              longitude: _locationData!.longitude!,
+              latitude: markerLatitude,
+              longitude: markerLongitude,
               startDate: DateTime.now(),
               endDate: null,
               id: transect?.markers?.length ?? 0,

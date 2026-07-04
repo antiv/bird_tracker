@@ -434,5 +434,10 @@
   "point_nearby_title": "Point nearby",
   "point_nearby_content": "There is an existing point within {}m. Do you want to add the species to the existing point or create a new one?",
   "add_to_existing": "Add to existing",
-  "create_new": "Create new"
+  "create_new": "Create new",
+  "getting_current_location": "Getting current location...",
+  "location_not_available": "Location not available",
+  "field_work": "Field Work",
+  "data_management": "Data Management",
+  "configuration": "Configuration"
 }

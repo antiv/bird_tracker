@@ -9,7 +9,7 @@ import 'package:location/location.dart';
 
 import '../widgets/marker_info.dart';
 
-Future<void> goToCurrentLocation(
+Future<LocationData?> goToCurrentLocation(
     bool serviceEnabled,
     Location location,
     LocationData? locationData,
@@ -19,29 +19,29 @@ Future<void> goToCurrentLocation(
   if (!serviceEnabled) {
     serviceEnabled = await location.requestService();
     if (!serviceEnabled) {
-      return;
+      return null;
     }
   }
 
   PermissionStatus permissionGranted = await location.hasPermission();
   if (permissionGranted == PermissionStatus.denied) {
     bool ok = await showPermissionInfoDialog();
-    if (!ok) return;
+    if (!ok) return null;
 
     permissionGranted = await location.requestPermission();
     if (permissionGranted != PermissionStatus.granted) {
-      return;
+      return null;
     }
   }
 
-  locationData = await location.getLocation();
+  final currentLoc = await location.getLocation();
 
   // specified current users location
   CameraPosition cameraPosition = CameraPosition(
-    target: LatLng(locationData.latitude!, locationData.longitude!),
+    target: LatLng(currentLoc.latitude!, currentLoc.longitude!),
     zoom: 16,
   );
-  enableBackgroundMode(location);
+  await enableBackgroundMode(location);
 
   /// if controller is not initialized, wait for it
   // if (!_controller.isCompleted) {
@@ -50,6 +50,7 @@ Future<void> goToCurrentLocation(
   controller ??= await completer.future;
   controller.animateCamera(CameraUpdate.newCameraPosition(cameraPosition));
   // });
+  return currentLoc;
 }
 
 Future<void> goToLocation(
@@ -70,7 +71,7 @@ Future<bool> enableBackgroundMode(
     return true;
   } else {
     try {
-      bgModeEnabled = await location.enableBackgroundMode();
+      bgModeEnabled = await location.enableBackgroundMode(enable: true);
     } catch (e) {
       log('Error enabling background mode: ${e.toString()}');
       bgModeEnabled = false;

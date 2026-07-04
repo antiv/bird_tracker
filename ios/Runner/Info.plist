@@ -48,8 +48,16 @@
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
 	<key>NSLocationWhenInUseUsageDescription</key>
-	<true/>
+	<string>Aplikacija koristi lokaciju u toku rada za prikaz vaše trenutne pozicije na mapi i beleženje lokacija posmatranja ptica.</string>
+	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+	<string>Aplikacija koristi lokaciju u pozadini kako bi pratila vašu putanju kretanja tokom transektnog popisa ptica, čak i kada je ekran zaključan ili aplikacija nije aktivna.</string>
+	<key>NSLocationAlwaysUsageDescription</key>
+	<string>Aplikacija koristi lokaciju u pozadini kako bi pratila vašu putanju kretanja tokom transektnog popisa ptica, čak i kada je ekran zaključan ili aplikacija nije aktivna.</string>
 	<key>UIBackgroundModes</key>
-	<string>location</string>
+	<array>
+		<string>location</string>
+	</array>
+	<key>ITSAppUsesNonExemptEncryption</key>
+	<false/>
 </dict>
 </plist>
