@@ -57,15 +57,15 @@ class _TransectsHistoryState extends State<TransectsHistory> {
                           dense: true,
                           visualDensity: VisualDensity.compact,
                           onTap: () {
-                            DataService().setTransect(transects[index]!);
+                            DataService().setTransect(transects[index]);
                             Navigator.pop(ContextHolder.currentContext);
                           },
                           // leading: const Icon(Icons.map_outlined),
                           title: Text(
-                            transects[index]?.name ??
-                                'Transect ${transects[index]?.id}: '
-                                    '${DateFormat('dd.MM.yyyy HH:mm').format(transects[index]!.startDate)} - '
-                                    '${transects[index]?.endDate != null ? DateFormat('HH:mm').format(transects[index]!.endDate!) : 'in_progress'.tr()}',
+                            transects[index].name ??
+                                'Transect ${transects[index].id}: '
+                                    '${DateFormat('dd.MM.yyyy HH:mm').format(transects[index].startDate)} - '
+                                    '${transects[index].endDate != null ? DateFormat('HH:mm').format(transects[index].endDate!) : 'in_progress'.tr()}',
                             style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold),
                           ),
                           // onTap: () {
@@ -75,15 +75,15 @@ class _TransectsHistoryState extends State<TransectsHistory> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                '${'markers'.tr()}: ${transects[index]?.markers?.length ?? 0} '
-                                '${'distance'.tr()}: ${calculateDistance(transects[index]?.points?.map((e) => LatLng(e.latitude, e.longitude)).toList() ?? []).toStringAsFixed(2)}km '
-                                '${'time'.tr()}: ${getTimeDifference(transects[index]!.startDate, transects[index]?.endDate ?? DateTime.now())}',
+                                '${'markers'.tr()}: ${transects[index].markers?.length ?? 0} '
+                                '${'distance'.tr()}: ${calculateDistance(transects[index].points?.map((e) => LatLng(e.latitude, e.longitude)).toList() ?? []).toStringAsFixed(2)}km '
+                                '${'time'.tr()}: ${getTimeDifference(transects[index].startDate, transects[index].endDate ?? DateTime.now())}',
                                 style: const TextStyle(fontSize: 11),
                               ),
                               const SizedBox(height: 4),
                               Row(children: [
                                 ElevatedButton.icon(
-                                  onPressed: () => transects[index]?.shareCSV(),
+                                  onPressed: () => transects[index].shareCSV(),
                                   icon: const Icon(Icons.share, size: 14),
                                   style: ElevatedButton.styleFrom(
                                     padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
@@ -94,7 +94,7 @@ class _TransectsHistoryState extends State<TransectsHistory> {
                                 ),
                                 const SizedBox(width: 8),
                                 ElevatedButton.icon(
-                                  onPressed: () => transects[index]?.shareKML(),
+                                  onPressed: () => transects[index].shareKML(),
                                   icon: const Icon(Icons.share, size: 14),
                                   style: ElevatedButton.styleFrom(
                                     padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
@@ -110,7 +110,7 @@ class _TransectsHistoryState extends State<TransectsHistory> {
                           trailing: IconButton(
                             onPressed: () {
                               showYesNoDialog(() {
-                                SembastService().deleteTransect(transects[index]!);
+                                SembastService().deleteTransect(transects[index]);
                                 setState(() {
                                   transects.removeAt(index);
                                 });

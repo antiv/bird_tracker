@@ -51,3 +51,6 @@ hidde
 # Environment
 .env
 android/key.properties
+pubspec.yaml
+*.aab
+*.apk
