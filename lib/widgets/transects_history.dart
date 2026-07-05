@@ -80,30 +80,41 @@ class _TransectsHistoryState extends State<TransectsHistory> {
                                 '${'time'.tr()}: ${getTimeDifference(transects[index].startDate, transects[index].endDate ?? DateTime.now())}',
                                 style: const TextStyle(fontSize: 11),
                               ),
-                              const SizedBox(height: 4),
-                              Row(children: [
-                                ElevatedButton.icon(
-                                  onPressed: () => transects[index].shareCSV(),
-                                  icon: const Icon(Icons.share, size: 14),
-                                  style: ElevatedButton.styleFrom(
-                                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                                    minimumSize: Size.zero,
-                                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                                Row(children: [
+                                  Builder(
+                                    builder: (buttonContext) => ElevatedButton.icon(
+                                      onPressed: () {
+                                        final box = buttonContext.findRenderObject() as RenderBox?;
+                                        final rect = box != null ? (box.localToGlobal(Offset.zero) & box.size) : null;
+                                        transects[index].shareCSV(rect);
+                                      },
+                                      icon: const Icon(Icons.share, size: 14),
+                                      style: ElevatedButton.styleFrom(
+                                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                        minimumSize: Size.zero,
+                                        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                                      ),
+                                      label: Text('csv'.tr(), style: const TextStyle(fontSize: 11)),
+                                    ),
                                   ),
-                                  label: Text('csv'.tr(), style: const TextStyle(fontSize: 11)),
-                                ),
-                                const SizedBox(width: 8),
-                                ElevatedButton.icon(
-                                  onPressed: () => transects[index].shareKML(),
-                                  icon: const Icon(Icons.share, size: 14),
-                                  style: ElevatedButton.styleFrom(
-                                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                                    minimumSize: Size.zero,
-                                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                                  const SizedBox(width: 8),
+                                  Builder(
+                                    builder: (buttonContext) => ElevatedButton.icon(
+                                      onPressed: () {
+                                        final box = buttonContext.findRenderObject() as RenderBox?;
+                                        final rect = box != null ? (box.localToGlobal(Offset.zero) & box.size) : null;
+                                        transects[index].shareKML(rect);
+                                      },
+                                      icon: const Icon(Icons.share, size: 14),
+                                      style: ElevatedButton.styleFrom(
+                                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                        minimumSize: Size.zero,
+                                        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                                      ),
+                                      label: Text('kml'.tr(), style: const TextStyle(fontSize: 11)),
+                                    ),
                                   ),
-                                  label: Text('kml'.tr(), style: const TextStyle(fontSize: 11)),
-                                ),
-                              ]),
+                                ]),
                             ],
                           ),
                           isThreeLine: true,

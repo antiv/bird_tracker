@@ -97,15 +97,18 @@ mkdir -p "$(dirname "$ARCHIVE")" "$IPA_DIR"
 
 # --- 1) Flutter build (assets + App.framework), bez potpisivanja ---
 echo "==> flutter build ios (release, --no-codesign)"
-$FLUTTER build ios --release --no-codesign
+# Generišemo konfiguraciju (uključujući SPM Package.swift) pre kompilacije
+$FLUTTER build ios --config-only
 
-# flutter build ios regeneriše FlutterGeneratedPluginSwiftPackage/Package.swift sa
+# flutter build ios --config-only generiše FlutterGeneratedPluginSwiftPackage/Package.swift sa
 # .iOS("13.0") (Flutter SDK minimum), ali file_picker 12+ zahteva .iOS("14.0").
-# Patch primenjujemo POSLE flutter build-a, pre xcodebuild-a koji vrši SPM validaciju.
+# Patch primenjujemo PRE samog build-a kako ne bi pukao zbog Target Integrity provjere.
 SPM_PKG="ios/Flutter/ephemeral/Packages/FlutterGeneratedPluginSwiftPackage/Package.swift"
 if [[ -f "$SPM_PKG" ]]; then
   sed -i '' 's/.iOS("13.0")/.iOS("14.0")/' "$SPM_PKG"
 fi
+
+$FLUTTER build ios --release --no-codesign
 
 cat > "$EXPORT_PLIST" <<PLIST
 <?xml version="1.0" encoding="UTF-8"?>

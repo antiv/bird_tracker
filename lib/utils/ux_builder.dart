@@ -211,13 +211,14 @@ Future<bool> showPermissionInfoDialog() async {
   return result;
 }
 
-Future<void> backupData() async {
+Future<void> backupData([Rect? sharePositionOrigin]) async {
   try {
     String backupPath = await SembastService().createBackupPath();
     await SharePlus.instance.share(
       ShareParams(
         files: [XFile(backupPath)],
         text: 'backup_text'.tr(),
+        sharePositionOrigin: sharePositionOrigin,
       ),
     );
   } catch (e) {

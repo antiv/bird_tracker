@@ -1,4 +1,5 @@
 import 'dart:typed_data';
+import 'dart:ui';
 
 import 'package:bird_tracker/model/placemark.dart';
 import 'package:bird_tracker/model/point.dart';
@@ -146,7 +147,7 @@ class Transect {
   }
 
   /// share transect as CSV file
-  Future<void> shareCSV() async {
+  Future<void> shareCSV([Rect? sharePositionOrigin]) async {
     Uint8List? bytes = Uint8List.fromList(toCSV().codeUnits);
     String path = await storeFileTemporarily(
         bytes, '$name-${DateFormat('dd-MM-yyyy').format(startDate)}.csv');
@@ -154,11 +155,12 @@ class Transect {
       files: [XFile(path)],
       text: '$name ${DateFormat('dd/MM/yyyy').format(startDate)}',
       subject: '$name ${DateFormat('dd/MM/yyyy').format(startDate)}',
+      sharePositionOrigin: sharePositionOrigin,
     ));
   }
 
   /// share transect as KML file
-  Future<void> shareKML() async {
+  Future<void> shareKML([Rect? sharePositionOrigin]) async {
     Uint8List? bytes = Uint8List.fromList(toKML().codeUnits);
     String path = await storeFileTemporarily(
         bytes, '$name-${DateFormat('dd-MM-yyyy').format(startDate)}.kml');
@@ -167,6 +169,7 @@ class Transect {
       files: [XFile(path)],
       text: '$name ${DateFormat('dd/MM/yyyy').format(startDate)} as KML',
       subject: '$name ${DateFormat('dd/MM/yyyy').format(startDate)} as KML',
+      sharePositionOrigin: sharePositionOrigin,
     ));
   }
 

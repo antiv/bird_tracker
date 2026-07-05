@@ -129,8 +129,10 @@ class AppMenu extends StatelessWidget {
                       const Icon(Icons.backup_outlined, color: Colors.green),
                   title: Text('backup_data'.tr()),
                   onTap: () {
+                    final box = context.findRenderObject() as RenderBox?;
+                    final rect = box != null ? (box.localToGlobal(Offset.zero) & box.size) : null;
                     Navigator.pop(context);
-                    backupData();
+                    backupData(rect);
                   },
                 ),
                 ListTile(
