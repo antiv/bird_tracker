@@ -419,6 +419,7 @@
   "cancel": "Cancel",
   "location_permission_title": "Location Permission",
   "location_permission_content": "Bird Tracker needs your location to track your route and record where you see birds.\n\nWe will first ask for regular location access, and then we will need \"Allow all the time\" permission to keep tracking even when the app is in the background or your screen is locked. Please allow both to make sure your transects are stored properly.",
+  "location_permission_content_ios": "Bird Tracker needs your location to track your route and record where you see birds.\n\nPlease choose \"Allow While Using App\" in the next step. If iOS later asks to change the access to \"Always Allow\", please accept it so tracking can continue even when your screen is locked.",
   "restoring_backup": "Restoring backup...",
   "restore_success": "Data restored successfully!",
   "restore_error": "Error restoring data: {}",

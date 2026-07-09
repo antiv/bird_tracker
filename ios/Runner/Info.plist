@@ -47,12 +47,18 @@
 	<true/>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
+	<key>CFBundleLocalizations</key>
+	<array>
+		<string>en</string>
+		<string>sr-Latn</string>
+		<string>sr</string>
+	</array>
 	<key>NSLocationWhenInUseUsageDescription</key>
-	<string>Aplikacija koristi lokaciju u toku rada za prikaz vaše trenutne pozicije na mapi i beleženje lokacija posmatranja ptica.</string>
+	<string>The app uses your location while in use to show your current position on the map and to record bird observation locations.</string>
 	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
-	<string>Aplikacija koristi lokaciju u pozadini kako bi pratila vašu putanju kretanja tokom transektnog popisa ptica, čak i kada je ekran zaključan ili aplikacija nije aktivna.</string>
+	<string>The app uses your location in the background to track your route during a bird transect survey, even when the screen is locked or the app is not active.</string>
 	<key>NSLocationAlwaysUsageDescription</key>
-	<string>Aplikacija koristi lokaciju u pozadini kako bi pratila vašu putanju kretanja tokom transektnog popisa ptica, čak i kada je ekran zaključan ili aplikacija nije aktivna.</string>
+	<string>The app uses your location in the background to track your route during a bird transect survey, even when the screen is locked or the app is not active.</string>
 	<key>UIBackgroundModes</key>
 	<array>
 		<string>location</string>

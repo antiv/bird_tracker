@@ -419,6 +419,7 @@
   "cancel": "Otkaži",
   "location_permission_title": "Dozvola za lokaciju",
   "location_permission_content": "Bird Tracker zahteva vašu lokaciju da prati vašu rutu i beleži gde vidite ptice.\n\nPrvo ćemo tražiti redovan pristup lokaciji, a zatim će nam trebati dozvola \"Dozvoli sve vreme\" da nastavimo praćenje čak i kada je aplikacija u pozadini ili je ekran zaključan. Molimo dozvolite obe kako biste bili sigurni da su vaši transekti ispravno sačuvani.",
+  "location_permission_content_ios": "Bird Tracker zahteva vašu lokaciju da prati vašu rutu i beleži gde vidite ptice.\n\nU sledećem koraku izaberite \"Dozvoli dok se koristi aplikacija\". Ako vas iOS kasnije pita da promenite pristup na \"Uvek dozvoli\", prihvatite kako bi praćenje nastavilo da radi i kada je ekran zaključan.",
   "restoring_backup": "Vraćanje rezervne kopije...",
   "restore_success": "Podaci uspešno vraćeni!",
   "restore_error": "Greška pri vraćanju podataka: {}",

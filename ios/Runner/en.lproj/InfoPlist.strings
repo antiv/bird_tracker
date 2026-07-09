@@ -1,0 +1,3 @@
+"NSLocationWhenInUseUsageDescription" = "The app uses your location while in use to show your current position on the map and to record bird observation locations.";
+"NSLocationAlwaysAndWhenInUseUsageDescription" = "The app uses your location in the background to track your route during a bird transect survey, even when the screen is locked or the app is not active.";
+"NSLocationAlwaysUsageDescription" = "The app uses your location in the background to track your route during a bird transect survey, even when the screen is locked or the app is not active.";

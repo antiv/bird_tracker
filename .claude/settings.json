@@ -1,0 +1,12 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(plutil -p /Users/ivanantonijevic/development/bird_tracker/build/ios/iphoneos/Runner.app/Info.plist)",
+      "Bash(grep -iA5 \"Localizations\\\\|BundleVersion\\\\|ShortVersion\")",
+      "Bash(plutil -p /Users/ivanantonijevic/development/bird_tracker/build/ios/iphoneos/Runner.app/sr-Latn.lproj/InfoPlist.strings)",
+      "Bash(python3 -m json.tool /Users/ivanantonijevic/development/bird_tracker/assets/translations/en.json)",
+      "Bash(python3 -m json.tool /Users/ivanantonijevic/development/bird_tracker/assets/translations/sr-Latn.json)",
+      "Bash(/Users/ivanantonijevic/fvm/versions/stable/bin/flutter analyze *)"
+    ]
+  }
+}

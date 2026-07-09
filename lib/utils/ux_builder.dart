@@ -188,7 +188,9 @@ Future<bool> showPermissionInfoDialog() async {
     builder: (BuildContext context) {
       return AlertDialog(
         title: Text('location_permission_title'.tr()),
-        content: Text('location_permission_content'.tr()),
+        content: Text(Platform.isIOS
+            ? 'location_permission_content_ios'.tr()
+            : 'location_permission_content'.tr()),
         actions: [
           TextButton(
             onPressed: () {
