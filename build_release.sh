@@ -37,7 +37,7 @@ if [ "$BUMP" = true ]; then
     echo "New version: $NEW_VERSION"
     
     # Update pubspec.yaml safely
-    sed -i "s/^version: .*/version: $NEW_VERSION/" pubspec.yaml
+    sed -i '' "s/^version: .*/version: $NEW_VERSION/" pubspec.yaml
 else
     echo "Skipping version bump. Pass --bump to update the version."
 fi

@@ -34,7 +34,16 @@ Future<LocationData?> goToCurrentLocation(
     }
   }
 
-  final currentLoc = await location.getLocation();
+  LocationData currentLoc;
+  try {
+    currentLoc = await location.getLocation().timeout(const Duration(seconds: 5));
+  } catch (e) {
+    log('Error getting current location: ${e.toString()}');
+    return null;
+  }
+  if (currentLoc.latitude == null || currentLoc.longitude == null) {
+    return null;
+  }
 
   // specified current users location
   CameraPosition cameraPosition = CameraPosition(

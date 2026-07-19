@@ -98,7 +98,17 @@ class _TransectInfoState extends State<TransectInfo> {
               ElevatedButton.icon(
                 onPressed: () {
                   Navigator.of(ContextHolder.currentContext).pop();
-                  DataService().clearTransect();
+                  if (current != null && current.endDate == null) {
+                    /// clearing the map while a transect is active ends it —
+                    /// it must not stay open in the database
+                    showYesNoDialog(() {
+                      current.endDate = DateTime.now();
+                      SembastService().updateTransect(current);
+                      DataService().clearTransect();
+                    }, () {}, title: 'clear_map_ends_transect'.tr());
+                  } else {
+                    DataService().clearTransect();
+                  }
                 },
                 icon: const Icon(Icons.clear_all),
                 style: ElevatedButton.styleFrom(

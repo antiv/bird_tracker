@@ -6,7 +6,18 @@
       "Bash(plutil -p /Users/ivanantonijevic/development/bird_tracker/build/ios/iphoneos/Runner.app/sr-Latn.lproj/InfoPlist.strings)",
       "Bash(python3 -m json.tool /Users/ivanantonijevic/development/bird_tracker/assets/translations/en.json)",
       "Bash(python3 -m json.tool /Users/ivanantonijevic/development/bird_tracker/assets/translations/sr-Latn.json)",
-      "Bash(/Users/ivanantonijevic/fvm/versions/stable/bin/flutter analyze *)"
+      "Bash(/Users/ivanantonijevic/fvm/versions/stable/bin/flutter analyze *)",
+      "Bash(fvm flutter *)",
+      "Bash(mdls -name kMDItemNumberOfPages /Users/ivanantonijevic/development/bird_tracker/Birds_of_Serbia.pdf)",
+      "Bash(python3 -c ' *)",
+      "Bash(python3 -c \"import pypdf\")",
+      "Bash(python3 -c \"import PyPDF2\")",
+      "Bash(python3 -c \"import fitz\")",
+      "Bash(python3 -c \"import pdfplumber\")",
+      "Bash(pip3 install *)",
+      "Bash(python3)",
+      "Bash(python3 -c \"import openpyxl; print\\('openpyxl ok'\\)\")",
+      "Bash(./build_release.sh --bump)"
     ]
   }
 }

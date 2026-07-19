@@ -127,7 +127,10 @@ class KMLUtils {
       transect.startDate = DateTime.parse(timeStamp.findAllElements('when').first.innerText);
       transect.endDate = DateTime.parse(timeStamp.findAllElements('when').first.innerText);
     } else {
+      /// an imported transect is always finished — endDate must not stay
+      /// null, that would mark it as the active one
       transect.startDate = fileDate;
+      transect.endDate = fileDate;
     }
     if (elDocument.findAllElements('description').isNotEmpty) {
       transect.description = elDocument

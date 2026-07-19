@@ -120,7 +120,7 @@ class _SpeciesFormState extends State<SpeciesForm> {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Expanded(
-                      flex: 2,
+                      flex: 3,
                       child: OutlinedButton.icon(
                         onPressed: () {
                           showDialog(
@@ -165,13 +165,17 @@ class _SpeciesFormState extends State<SpeciesForm> {
                           );
                         },
                         icon: const Icon(Icons.explore, size: 18),
-                        label: Text(
-                          _code != null
-                              ? 'select_code'.tr(args: [_code.toString()])
-                              : 'select_atlas_code'.tr(),
+                        label: FittedBox(
+                          fit: BoxFit.scaleDown,
+                          child: Text(
+                            _code != null
+                                ? 'select_code'.tr(args: [_code.toString()])
+                                : 'select_atlas_code'.tr(),
+                          ),
                         ),
                         style: OutlinedButton.styleFrom(
-                          padding: const EdgeInsets.symmetric(vertical: 12),
+                          padding: const EdgeInsets.symmetric(
+                              vertical: 12, horizontal: 8),
                           shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(12)),
                         ),
@@ -180,26 +184,46 @@ class _SpeciesFormState extends State<SpeciesForm> {
                     if (_code != null)
                       IconButton(
                         onPressed: () => setState(() => _code = null),
-                        icon: const Icon(Icons.clear, color: Colors.grey),
+                        icon: const Icon(Icons.clear,
+                            color: Colors.grey, size: 18),
+                        visualDensity: VisualDensity.compact,
+                        padding: EdgeInsets.zero,
+                        constraints: const BoxConstraints(
+                            minWidth: 32, minHeight: 32),
                       ),
-                    const SizedBox(width: 16),
+                    const SizedBox(width: 8),
                     Expanded(
-                      flex: 1,
+                      flex: 2,
                       child: TextFormField(
                         controller: _countController,
                         textAlign: TextAlign.center,
                         decoration: InputDecoration(
                           labelText: 'count'.tr(),
+                          isDense: true,
+                          contentPadding: const EdgeInsets.symmetric(
+                              horizontal: 4, vertical: 16),
+                          suffixIconConstraints: const BoxConstraints(
+                              minWidth: 32, minHeight: 32),
                           suffixIcon: IconButton(
                             icon: const Icon(Icons.add, size: 18),
+                            visualDensity: VisualDensity.compact,
+                            padding: EdgeInsets.zero,
+                            constraints: const BoxConstraints(
+                                minWidth: 32, minHeight: 32),
                             onPressed: () {
                               final current =
                                   int.tryParse(_countController.text) ?? 0;
                               _countController.text = (current + 1).toString();
                             },
                           ),
+                          prefixIconConstraints: const BoxConstraints(
+                              minWidth: 32, minHeight: 32),
                           prefixIcon: IconButton(
                             icon: const Icon(Icons.remove, size: 18),
+                            visualDensity: VisualDensity.compact,
+                            padding: EdgeInsets.zero,
+                            constraints: const BoxConstraints(
+                                minWidth: 32, minHeight: 32),
                             onPressed: () {
                               final current =
                                   int.tryParse(_countController.text) ?? 0;

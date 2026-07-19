@@ -18,14 +18,15 @@ class SembastService with ChangeNotifier {
 
   late Database _db;
   final _store = intMapStoreFactory.store('transects');
-  bool _initialized = false;
+  Future<void>? _initFuture;
 
-  Future<void> init() async {
-    if (_initialized) return;
+  /// Safe to call (and await) multiple times — the database is opened once.
+  Future<void> init() => _initFuture ??= _openDatabase();
+
+  Future<void> _openDatabase() async {
     final dir = await getApplicationDocumentsDirectory();
     final dbPath = '${dir.path}/bird_tracker.db';
     _db = await databaseFactoryIo.openDatabase(dbPath);
-    _initialized = true;
   }
 
   Database get db => _db;
@@ -50,6 +51,22 @@ class SembastService with ChangeNotifier {
     final snapshots = await _store.find(
       _db,
       finder: Finder(sortOrders: [SortOrder('startDate', false)]),
+    );
+    return snapshots.map((s) {
+      final json = Map<String, dynamic>.from(s.value);
+      json['id'] = s.key;
+      return Transect.fromJson(json);
+    }).toList();
+  }
+
+  /// Transects that were never finished (endDate == null), newest first.
+  Future<List<Transect>> getOpenTransects() async {
+    final snapshots = await _store.find(
+      _db,
+      finder: Finder(
+        filter: Filter.isNull('endDate'),
+        sortOrders: [SortOrder('startDate', false)],
+      ),
     );
     return snapshots.map((s) {
       final json = Map<String, dynamic>.from(s.value);

@@ -66,7 +66,54 @@ class _HomePageState extends State<HomePage> {
     DataService().completer = _completer;
     DataService().controller = controller;
     _goToCurrentLocation();
+    WidgetsBinding.instance.addPostFrameCallback((_) => _checkOpenTransect());
     super.initState();
+  }
+
+  /// A transect is "open" while its endDate is null. Only one may exist:
+  /// on startup, stale open transects (left behind by kills/crashes or the
+  /// old multi-active bug) are closed, and for the most recent one the user
+  /// decides whether to continue or finish it — silently resuming could draw
+  /// a false straight line if the user is now somewhere else entirely.
+  Future<void> _checkOpenTransect() async {
+    await SembastService().init();
+    final openTransects = await SembastService().getOpenTransects();
+    if (openTransects.isEmpty) return;
+
+    for (final stale in openTransects.skip(1)) {
+      _closeTransect(stale);
+    }
+
+    final open = openTransects.first;
+    showYesNoDialog(() async {
+      DataService().setTransect(open);
+
+      /// the user confirmed they are resuming this transect — start
+      /// recording right away so the track continues from its last point;
+      /// setTransect moved the camera to the transect start (goToFirst),
+      /// so bring it back to where the user actually is
+      await _startListener();
+      await _goToCurrentLocation();
+      showSnackBar('transect_resumed'.tr());
+      if (mounted) setState(() {});
+    }, () {
+      _closeTransect(open);
+    },
+        title: 'unfinished_transect'
+            .tr(args: [DateFormat('dd.MM.yyyy HH:mm').format(open.startDate)]),
+        yesText: 'continue'.tr(),
+        noText: 'finish'.tr());
+  }
+
+  /// Route points carry no timestamps, so the last marker time (or the
+  /// start) is the best available estimate for when recording ended.
+  void _closeTransect(Transect transect) {
+    final markers = transect.markers;
+    transect.endDate = (markers != null && markers.isNotEmpty
+            ? markers.last.endDate ?? markers.last.startDate
+            : null) ??
+        transect.startDate;
+    SembastService().updateTransect(transect);
   }
 
   @override
@@ -77,22 +124,27 @@ class _HomePageState extends State<HomePage> {
   Future<void> _goToCurrentLocation() async {
     if (locationStream != null) {
       await _stopListener();
-      final loc = await goToCurrentLocation(_serviceEnabled ?? false, location,
-          _locationData, controller, _completer);
-      if (loc != null) {
-        setState(() {
-          _locationData = loc;
-        });
+      try {
+        final loc = await goToCurrentLocation(_serviceEnabled ?? false,
+            location, _locationData, controller, _completer);
+        if (loc != null) {
+          setState(() {
+            _locationData = loc;
+          });
+        }
+        for (final mark in _markers) {
+          await controller?.hideMarkerInfoWindow(mark.markerId);
+        }
+        if (_markers.isNotEmpty) {
+          await DataService()
+              .controller
+              ?.showMarkerInfoWindow(_markers.last.markerId);
+        }
+      } catch (e) {
+        log('Error in goToCurrentLocation: ${e.toString()}');
+      } finally {
+        await _startListener();
       }
-      for (final mark in _markers) {
-        await controller?.hideMarkerInfoWindow(mark.markerId);
-      }
-      if (_markers.isNotEmpty) {
-        await DataService()
-            .controller
-            ?.showMarkerInfoWindow(_markers.last.markerId);
-      }
-      await _startListener();
     } else {
       final loc = await goToCurrentLocation(_serviceEnabled ?? false, location,
           _locationData, controller, _completer);
@@ -337,19 +389,26 @@ class _HomePageState extends State<HomePage> {
   }
 
   Future<void> _startTransect() async {
-    if (transect != null) {
-      /// ask to continue or open new transect
-      showYesNoDialog(() {
-        _startListener();
-      }, () {
-        _startNewTransect();
-      },
-          title: 'continue_transect'.tr(),
-          yesText: 'continue'.tr(),
-          noText: 'new_transect'.tr());
+    /// only one transect may be active — an open one is always resumed,
+    /// never replaced; a new one requires closing the old one via Stop
+    if (transect != null && transect!.endDate == null) {
+      await _startListener();
+      showSnackBar('transect_resumed'.tr());
     } else {
-      _startNewTransect();
+      /// in-memory transect is null (or a closed one viewed from history);
+      /// the DB may still hold an open transect — resume it instead of
+      /// creating a second one
+      final openTransects = await SembastService().getOpenTransects();
+      if (openTransects.isNotEmpty) {
+        transect = openTransects.first;
+        DataService().setTransect(transect);
+        await _startListener();
+        showSnackBar('transect_resumed'.tr());
+      } else {
+        _startNewTransect();
+      }
     }
+    if (mounted) setState(() {});
   }
 
   void _startNewTransect() {
@@ -422,6 +481,15 @@ class _HomePageState extends State<HomePage> {
         // on below line creating google maps
         child: Consumer<DataService>(builder: (context, dataService, _) {
           transect = dataService.transect;
+
+          /// transect was cleared externally (e.g. "clear map") while
+          /// recording — stop the location listener too
+          if (transect == null && locationStream != null) {
+            WidgetsBinding.instance.addPostFrameCallback((_) async {
+              await _stopListener();
+              if (mounted) setState(() {});
+            });
+          }
           _polyLines?.first.points.clear();
           _polyLines?.first.points.addAll(transect?.points
                   ?.map((e) => LatLng(e.latitude, e.longitude))
