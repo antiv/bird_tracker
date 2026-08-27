@@ -33,6 +33,8 @@ migrate_working_dir/
 .pub-cache/
 .pub/
 /build/
+android/build/
+android/.kotlin/
 
 # Symbolication related
 app.*.symbols
@@ -45,7 +47,6 @@ app.*.map.json
 /android/app/profile
 /android/app/release
 
-hidde
 
 # FVM Version Cache
 .fvm/
@@ -53,7 +54,9 @@ hidde
 # Environment
 .env
 android/key.properties
-pubspec.yaml
 *.aab
 *.apk
 ios/deploy.env
+
+# CodeGraph index
+.codegraph/

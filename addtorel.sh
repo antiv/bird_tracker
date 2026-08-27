@@ -1,1 +1,0 @@
-cp build/app/outputs/flutter-apk/app-release.apk bird-tracker.apk && gh release upload v1.0.0+8 bird-tracker.apk --clobber
