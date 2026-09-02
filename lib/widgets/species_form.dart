@@ -1,7 +1,9 @@
 import 'package:bird_tracker/configuration/codes.dart';
 import 'package:bird_tracker/configuration/species.dart';
 import 'package:bird_tracker/model/species.dart';
+import 'package:bird_tracker/service/media_service.dart';
 import 'package:bird_tracker/widgets/enum_radio.dart';
+import 'package:bird_tracker/widgets/photo_strip.dart';
 import 'package:bird_tracker/widgets/world_side_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
@@ -32,6 +34,13 @@ class _SpeciesFormState extends State<SpeciesForm> {
   int? _code;
   bool _isEdit = false;
 
+  /// Photos hit the disk the moment they are taken, before the record exists.
+  /// [_committed] is what the record being edited already owns: anything in
+  /// [_photos] beyond it was added and is dropped if the form is cancelled,
+  /// and anything in it that a save no longer lists is deleted on that save.
+  List<String> _photos = [];
+  Set<String> _committed = {};
+
   @override
   void initState() {
     // _spicesFocusNode.requestFocus();
@@ -43,6 +52,8 @@ class _SpeciesFormState extends State<SpeciesForm> {
       _direction = widget.species?.direction;
       _stratification = widget.species?.stratification ?? Stratification.d;
       _code = widget.species?.code;
+      _photos = List.of(widget.species!.photos);
+      _committed.addAll(_photos);
     } else {
       _speciesFocusNode.requestFocus();
     }
@@ -51,6 +62,12 @@ class _SpeciesFormState extends State<SpeciesForm> {
 
   @override
   void dispose() {
+    /// covers both Cancel and the close button in showFullScreenDialog's
+    /// AppBar — the gallery copy stays, the way a camera app behaves
+    final orphans = _photos.where((n) => !_committed.contains(n)).toList();
+    if (orphans.isNotEmpty) {
+      MediaService().delete(orphans);
+    }
     _speciesController.dispose();
     _countController.dispose();
     _speciesFocusNode.dispose();
@@ -70,7 +87,13 @@ class _SpeciesFormState extends State<SpeciesForm> {
             : DateFormat('HH:mm:ss').format(DateTime.now())
         ..direction = _direction
         ..stratification = _stratification
-        ..description = _descriptionController.text;
+        ..description = _descriptionController.text
+        ..photos = List.of(_photos);
+
+      /// the save makes the removals permanent, so their files can go
+      MediaService().delete(_committed.difference(_photos.toSet()));
+      _committed = _photos.toSet();
+
       if (widget.onSaved != null) {
         widget.onSaved!(species, close);
       }
@@ -94,6 +117,11 @@ class _SpeciesFormState extends State<SpeciesForm> {
       _code = null;
       _direction = null;
       _stratification = Stratification.d;
+
+      /// the record just saved owns its photos now; the next one starts with
+      /// none, and must not be able to delete the previous one's files
+      _committed = {};
+      _photos = [];
     });
   }
 
@@ -288,6 +316,11 @@ class _SpeciesFormState extends State<SpeciesForm> {
                   minLines: 1,
                   keyboardType: TextInputType.multiline,
                   textInputAction: TextInputAction.newline,
+                ),
+                const SizedBox(height: 12),
+                PhotoStrip(
+                  names: _photos,
+                  onChanged: (names) => setState(() => _photos = names),
                 ),
                 const SizedBox(height: 16),
                 Row(

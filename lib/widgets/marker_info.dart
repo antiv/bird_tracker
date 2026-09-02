@@ -87,16 +87,26 @@ class _MarkerInfoState extends State<MarkerInfo> {
                             trailing: IconButton(
                               icon: const Icon(Icons.delete),
                               onPressed: () {
-                                showYesNoDialog(
-                                    () => setState(() {
-                                          widget.selected?.species = widget
-                                                  .selected?.species
-                                                  ?.toList(growable: true) ??
-                                              [];
-                                          widget.selected?.species
-                                              ?.removeAt(revIdx);
-                                        }),
-                                    () {});
+                                showDeleteWithPhotosDialog(
+                                    widget.selected?.species?[revIdx].photos ??
+                                        const [], (_) {
+                                  setState(() {
+                                    widget.selected?.species = widget
+                                            .selected?.species
+                                            ?.toList(growable: true) ??
+                                        [];
+                                    widget.selected?.species?.removeAt(revIdx);
+                                  });
+
+                                  /// the removal has to reach the database —
+                                  /// setState alone brought the record back on
+                                  /// the next load
+                                  DataService()
+                                      .transect
+                                      ?.updateMarker(widget.selected!);
+                                  SembastService()
+                                      .updateTransect(DataService().transect!);
+                                });
                               },
                             ),
                             onTap: () {
