@@ -1,8 +1,11 @@
+import 'dart:developer';
 import 'dart:io';
 
 import 'package:bird_tracker/service/data_service.dart';
+import 'package:bird_tracker/service/media_service.dart';
 import 'package:bird_tracker/service/sembast_service.dart';
 import 'package:bird_tracker/utils/kml_utils.dart';
+import 'package:bird_tracker/utils/kmz_utils.dart';
 import 'package:context_holder/context_holder.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
@@ -91,6 +94,56 @@ void showYesNoDialog(
   );
 }
 
+/// Confirm a delete that would leave photo files behind, with an opt-in to
+/// delete them too. The checkbox starts **off**: a record vanishing from the
+/// database must never take the pictures with it unless the user says so.
+/// With no photos in play this is the plain yes/no dialog.
+void showDeleteWithPhotosDialog(
+    List<String> photos, void Function(bool deletePhotos) onConfirm) {
+  if (photos.isEmpty) {
+    showYesNoDialog(() => onConfirm(false), () {});
+    return;
+  }
+
+  bool deletePhotos = false;
+  showDialogBox(StatefulBuilder(
+    builder: (context, setState) => AlertDialog(
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text('are_you_sure'.tr(), style: const TextStyle(fontSize: 16)),
+          const SizedBox(height: 8),
+          CheckboxListTile(
+            value: deletePhotos,
+            onChanged: (value) => setState(() => deletePhotos = value ?? false),
+            title: Text('delete_photos_too'.tr(args: ['${photos.length}'])),
+            subtitle: Text('delete_photos_hint'.tr(),
+                style: const TextStyle(fontSize: 12)),
+            contentPadding: EdgeInsets.zero,
+            controlAffinity: ListTileControlAffinity.leading,
+            visualDensity: VisualDensity.compact,
+          ),
+        ],
+      ),
+      actions: [
+        OutlinedButton(
+          onPressed: () => Navigator.of(ContextHolder.currentContext).pop(),
+          child: Text('no'.tr()),
+        ),
+        ElevatedButton(
+          onPressed: () {
+            Navigator.of(ContextHolder.currentContext).pop();
+            if (deletePhotos) MediaService().delete(photos);
+            onConfirm(deletePhotos);
+          },
+          child: Text('yes'.tr()),
+        ),
+      ],
+    ),
+  ));
+}
+
 void showTextInputDialog(String title, String hint, String? defaultValue,
     Function(String) onConfirm) {
   String value = defaultValue ?? '';
@@ -164,33 +217,93 @@ void showFullScreenDialog(Widget widget, {String? title}) {
   );
 }
 
-Future<void> showImportKMLDialog() async {
-  FilePickerResult? result = await FilePicker.pickFiles(
-    type: FileType.custom,
-    allowedExtensions: ['kml'],
-  );
+/// Imports either format the app exports. A KMZ brings its photos with it;
+/// a plain KML brings only the names they had.
+Future<void> showImportDialog() async {
+  /// deliberately not FileType.custom: that maps the extensions through
+  /// Android's MimeTypeMap, which knows neither kml nor kmz, and the files
+  /// end up greyed out in the picker. Filter here instead, the way
+  /// [restoreData] does.
+  final PlatformFile? picked = await FilePicker.pickFile(type: FileType.any);
+  if (picked == null) return;
 
-  if (result != null) {
-    File file = File(result.files.single.path ?? '');
-    String fileData = await file.readAsString();
-    Transect transect =
-        KMLUtils().kmlToTransect(fileData, file.lastModifiedSync());
-    SembastService().addTransect(transect);
+  /// on mobile the picker always hands back a local copy; a null path would
+  /// mean a cloud entry we cannot read
+  final String? path = picked.path;
+  if (path == null) {
+    showSnackBar('invalid_file_format'.tr());
+    return;
+  }
+
+  final File file = File(path);
+  final DateTime fileDate = file.lastModifiedSync();
+  try {
+    /// The format is decided by what the file *is*, not what it is called.
+    /// Mail clients, chat apps and cloud drives rename attachments freely —
+    /// one came back as "Transect 30.08.2026 as KMZ" with no extension at
+    /// all, and reading a zip as UTF-8 fails with a decode error rather than
+    /// anything a user could act on.
+    final Transect transect = await _isZip(file)
+        ? await KMZUtils.readKMZ(path, fileDate)
+        : KMLUtils().kmlToTransect(await file.readAsString(), fileDate);
+    await SembastService().addTransect(transect);
     DataService().setTransect(transect);
     showSnackBar('import_success'.tr());
+  } catch (e) {
+    log('Could not import ${picked.name}: ${e.toString()}');
+    showSnackBar('invalid_file_format'.tr());
   }
 }
 
-Future<bool> showPermissionInfoDialog() async {
+/// Every zip — and so every KMZ — starts with the local file header magic.
+Future<bool> _isZip(File file) async {
+  final RandomAccessFile handle = await file.open();
+  try {
+    final head = await handle.read(4);
+    return head.length == 4 &&
+        head[0] == 0x50 &&
+        head[1] == 0x4B &&
+        head[2] == 0x03 &&
+        head[3] == 0x04;
+  } catch (e) {
+    return false;
+  } finally {
+    await handle.close();
+  }
+}
+
+Future<bool> showPermissionInfoDialog() => _showRationaleDialog(
+      'location_permission_title'.tr(),
+      Platform.isIOS
+          ? 'location_permission_content_ios'.tr()
+          : 'location_permission_content'.tr(),
+    );
+
+/// Second step of the Android permission flow: "Allow all the time" has to be
+/// requested on its own, after the foreground grant, or Android 11+ shows
+/// nothing at all. Google also expects a rationale immediately before it.
+Future<bool> showBackgroundPermissionInfoDialog() => _showRationaleDialog(
+      'location_background_title'.tr(),
+      'location_background_content'.tr(),
+    );
+
+/// Shown when the background request came back denied: on Android 11+ the only
+/// place left to grant it is the app's own settings page.
+Future<bool> showBackgroundPermissionDeniedDialog() => _showRationaleDialog(
+      'location_background_title'.tr(),
+      'location_background_denied'.tr(),
+      confirmText: 'open_settings'.tr(),
+    );
+
+Future<bool> _showRationaleDialog(String title, String content,
+    {String? confirmText}) async {
   bool result = false;
   await showDialog(
     context: ContextHolder.currentContext,
     builder: (BuildContext context) {
       return AlertDialog(
-        title: Text('location_permission_title'.tr()),
-        content: Text(Platform.isIOS
-            ? 'location_permission_content_ios'.tr()
-            : 'location_permission_content'.tr()),
+        title: Text(title),
+        content: Text(content),
         actions: [
           TextButton(
             onPressed: () {
@@ -204,7 +317,7 @@ Future<bool> showPermissionInfoDialog() async {
               Navigator.of(context).pop();
               result = true;
             },
-            child: Text('continue'.tr()),
+            child: Text(confirmText ?? 'continue'.tr()),
           ),
         ],
       );
@@ -229,25 +342,24 @@ Future<void> backupData([Rect? sharePositionOrigin]) async {
 }
 
 Future<void> restoreData() async {
-  FilePickerResult? result = await FilePicker.pickFiles(
-    type: FileType.any,
-  );
-  if (result != null) {
-    try {
-      final path = result.files.single.path ?? '';
-      if (!path.toLowerCase().endsWith('.json')) {
-        showSnackBar('invalid_file_format'.tr());
-        return;
-      }
+  final PlatformFile? picked = await FilePicker.pickFile(type: FileType.any);
+  if (picked == null) return;
 
-      showSnackBar('restoring_backup'.tr(), duration: 2);
+  final String? path = picked.path;
+  const accepted = {'json', 'zip'};
+  if (path == null || !accepted.contains(picked.extension?.toLowerCase())) {
+    showSnackBar('invalid_file_format'.tr());
+    return;
+  }
 
-      // JSON restore via SembastService
-      await SembastService().restoreFromJson(path);
-      showSnackBar('restore_success'.tr());
-      DataService().setTransect(null);
-    } catch (e) {
-      showSnackBar('restore_error'.tr(args: [e.toString()]));
-    }
+  try {
+    showSnackBar('restoring_backup'.tr(), duration: 2);
+
+    /// .zip carries the photos too; plain .json is the older backup format
+    await SembastService().restoreFromBackup(path);
+    showSnackBar('restore_success'.tr());
+    DataService().setTransect(null);
+  } catch (e) {
+    showSnackBar('restore_error'.tr(args: [e.toString()]));
   }
 }

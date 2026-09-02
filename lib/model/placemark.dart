@@ -23,6 +23,10 @@ class Placemark {
     this.species,
   });
 
+  /// Photo file names of every record on this point.
+  List<String> get photoNames =>
+      [for (final record in species ?? <Species>[]) ...record.photos];
+
   Map<String, dynamic> toJson() => {
         'id': id,
         'startDate': startDate?.toIso8601String(),

@@ -1,3 +1,5 @@
+import 'dart:convert';
+import 'dart:io';
 import 'dart:typed_data';
 import 'dart:ui';
 
@@ -5,6 +7,7 @@ import 'package:bird_tracker/model/placemark.dart';
 import 'package:bird_tracker/model/point.dart';
 import 'package:bird_tracker/model/species.dart';
 import 'package:bird_tracker/utils/kml_utils.dart';
+import 'package:bird_tracker/utils/kmz_utils.dart';
 import 'package:intl/intl.dart';
 import 'package:share_plus/share_plus.dart';
 
@@ -122,9 +125,14 @@ class Transect {
     sb.writeln(
         'Species, Date, Time (from - to), Time, Latitude,Longitude,Latitude(DMS),Longitude(DMS),Count, Behavior, Stratification, Direction, Code');
     markers?.forEach((placeMark) {
+      /// A KML imported from before the ExtendedData payload carries no
+      /// timestamps, so this is genuinely null — the same empty cell
+      /// [Placemark.duration] already falls back to, rather than a crash on
+      /// the way to the share sheet.
+      final DateTime? date = placeMark.startDate;
       placeMark.species?.forEach((species) {
         sb.writeln('${species.species},'
-            '${DateFormat('dd/MM/yyyy').format(placeMark.startDate!)},'
+            '${date == null ? '' : DateFormat('dd/MM/yyyy').format(date)},'
             '${placeMark.duration},'
             '${species.time},'
             '${placeMark.latitude},'
@@ -146,29 +154,62 @@ class Transect {
     return KMLUtils.generateKML(this);
   }
 
+  /// Photo file names of every record in the transect.
+  List<String> get photoNames =>
+      [for (final marker in markers ?? <Placemark>[]) ...marker.photoNames];
+
+  /// True when any record names a photo. Deliberately reads nothing off the
+  /// disk — the history list calls this from its item builder on every frame.
+  /// The export checks what is actually there, once, in [shareKML].
+  bool get hasPhotos =>
+      markers?.any((marker) =>
+          marker.species?.any((record) => record.photos.isNotEmpty) ?? false) ??
+      false;
+
+  /// Both the file name and the share subject are built from this. Some share
+  /// targets name the saved file after the subject, so it must not carry a
+  /// path separator either — that is how an export came back as a KMZ with no
+  /// extension and two stray directories in its name.
+  String get _exportLabel => sanitizeFileName(
+      '${name ?? ''} ${DateFormat('dd.MM.yyyy').format(startDate)}');
+
+  String get _exportFileBase => sanitizeFileName(
+      '${name ?? ''}-${DateFormat('dd-MM-yyyy').format(startDate)}');
+
   /// share transect as CSV file
   Future<void> shareCSV([Rect? sharePositionOrigin]) async {
-    Uint8List? bytes = Uint8List.fromList(toCSV().codeUnits);
-    String path = await storeFileTemporarily(
-        bytes, '$name-${DateFormat('dd-MM-yyyy').format(startDate)}.csv');
+    /// UTF-8 with BOM — species names and behaviour notes carry č/ć/š/ž/đ and
+    /// Excel needs the BOM to pick the right encoding
+    Uint8List bytes =
+        Uint8List.fromList([0xEF, 0xBB, 0xBF, ...utf8.encode(toCSV())]);
+    String path = await storeFileTemporarily(bytes, '$_exportFileBase.csv');
     await SharePlus.instance.share(ShareParams(
       files: [XFile(path)],
-      text: '$name ${DateFormat('dd/MM/yyyy').format(startDate)}',
-      subject: '$name ${DateFormat('dd/MM/yyyy').format(startDate)}',
+      text: _exportLabel,
+      subject: _exportLabel,
       sharePositionOrigin: sharePositionOrigin,
     ));
   }
 
-  /// share transect as KML file
+  /// Share the transect as KML, or as KMZ when there are photos to embed —
+  /// a plain KML could only name them. This is the one place that asks the
+  /// disk which of the named photos still exist.
   Future<void> shareKML([Rect? sharePositionOrigin]) async {
-    Uint8List? bytes = Uint8List.fromList(toKML().codeUnits);
-    String path = await storeFileTemporarily(
-        bytes, '$name-${DateFormat('dd-MM-yyyy').format(startDate)}.kml');
+    final photos = hasPhotos ? KMZUtils.availablePhotos(this) : <String>[];
+    final label = photos.isEmpty ? 'KML' : 'KMZ';
+    final String path =
+        await temporaryFilePath('$_exportFileBase.${label.toLowerCase()}');
+
+    if (photos.isEmpty) {
+      await File(path).writeAsBytes(utf8.encode(toKML()), flush: true);
+    } else {
+      await KMZUtils.writeKMZ(this, path, photos);
+    }
 
     await SharePlus.instance.share(ShareParams(
       files: [XFile(path)],
-      text: '$name ${DateFormat('dd/MM/yyyy').format(startDate)} as KML',
-      subject: '$name ${DateFormat('dd/MM/yyyy').format(startDate)} as KML',
+      text: '$_exportLabel $label',
+      subject: '$_exportLabel $label',
       sharePositionOrigin: sharePositionOrigin,
     ));
   }

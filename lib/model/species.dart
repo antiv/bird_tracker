@@ -11,6 +11,10 @@ class Species {
   Stratification? stratification;
   Direction? direction;
 
+  /// File names only, never paths — the app documents directory moves between
+  /// installs on iOS. Resolve through [MediaService.fileFor] when reading.
+  List<String> photos = [];
+
   Map<String, dynamic> toJson() => {
         'species': species,
         'time': time,
@@ -19,6 +23,7 @@ class Species {
         'description': description,
         'stratification': stratification?.name,
         'direction': direction?.name,
+        'photos': photos,
       };
 
   static Species fromJson(Map<String, dynamic> json) => Species()
@@ -34,7 +39,9 @@ class Species {
     ..direction = json['direction'] != null
         ? Direction.values.firstWhereOrNull(
             (e) => e.name == json['direction'])
-        : null;
+        : null
+    ..photos =
+        (json['photos'] as List<dynamic>?)?.cast<String>().toList() ?? [];
 
   String get speciesString {
     return '$species: $count, ${code ?? '-'}, $time, ${stratification?.toShortString() ?? ''}, ${direction?.toShortString() ?? ''}; ${description ?? ''}';
