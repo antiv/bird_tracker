@@ -146,6 +146,49 @@ void main() {
     expect(record.photos, isEmpty);
   });
 
+  test('coordinates the map cannot place are dropped on import', () {
+    /// `double.parse('NaN')` succeeds in Dart, and the Maps renderer kills
+    /// the process on its own thread when handed a NaN target — so neither
+    /// a KML nor a backup may carry one through to the map
+    const kml = '''
+<?xml version="1.0" encoding="UTF-8"?>
+<kml xmlns="http://www.opengis.net/kml/2.2">
+<Document>
+<name>Los</name>
+<Placemark><name>Point 1</name><description>Parus major: 1</description>
+<Point><coordinates>NaN,NaN</coordinates></Point></Placemark>
+<Placemark><name>Point 2</name><description>Parus major: 2</description>
+<Point><coordinates>20.36,44.81</coordinates></Point></Placemark>
+<Placemark><name>Ruta</name>
+<LineString><coordinates>
+  20.36,44.81 NaN,44.82
+	20.37,Infinity	20.38,44.83
+</coordinates></LineString>
+</Placemark>
+</Document>
+</kml>''';
+
+    /// the route is split on any whitespace — Google Earth writes one tuple
+    /// per line — and only the two placeable tuples survive
+    final imported = KMLUtils().kmlToTransect(kml, DateTime(2026, 8, 30));
+    expect(imported.markers!.map((m) => m.latitude), [44.81]);
+    expect(imported.points!.map((p) => p.longitude), [20.36, 20.38]);
+
+    final restored = Transect.fromJson({
+      'startDate': '2026-08-30T10:00:00.000',
+      'points': [
+        {'latitude': 44.81, 'longitude': 20.36},
+        {'latitude': double.nan, 'longitude': 20.37},
+        {'latitude': 44.82, 'longitude': null},
+      ],
+      'markers': [
+        {'id': 0, 'latitude': double.nan, 'longitude': 20.36, 'species': []},
+      ],
+    });
+    expect(restored.points!.map((p) => p.latitude), [44.81]);
+    expect(restored.markers!.single.hasFiniteLatLng, isFalse);
+  });
+
   test('a legacy import with no timestamps still exports to CSV', () {
     /// markers imported from a description-only KML carry no startDate, and
     /// the date cell used to force-unwrap it — sharing CSV for an imported

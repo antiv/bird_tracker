@@ -485,5 +485,8 @@
   "location_background_title": "Allow location all the time",
   "location_background_content": "To keep recording your transect while the app is in the background or your screen is locked, Bird Tracker needs the \"Allow all the time\" location setting.\n\nAndroid asks for this separately: on the next screen choose \"Allow all the time\". Without it the route stops being recorded as soon as you leave the app.",
   "location_background_denied": "Background location is still not allowed, so the route will only be recorded while the app is open on screen.\n\nYou can turn it on in the app settings: Permissions → Location → \"Allow all the time\".",
-  "open_settings": "Open settings"
+  "open_settings": "Open settings",
+  "location_permission_required": "Recording a transect needs access to your location. Allow it to start.",
+  "location_permission_denied_forever": "Location access is turned off for Bird Tracker, so a transect cannot be recorded.\n\nYou can turn it on in the app settings: Permissions → Location.",
+  "precise_location_required": "Bird Tracker needs precise location to record the route and the sightings. Approximate location is not enough.\n\nIn the app settings, under Permissions → Location, turn on \"Use precise location\"."
 }

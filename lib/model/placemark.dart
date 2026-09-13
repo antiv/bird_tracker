@@ -2,6 +2,7 @@ import 'package:bird_tracker/model/species.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:intl/intl.dart';
 
+import '../utils/geo_utils.dart';
 import '../utils/location_helper.dart';
 
 class Placemark {
@@ -45,8 +46,8 @@ class Placemark {
         endDate: json['endDate'] != null
             ? DateTime.parse(json['endDate'] as String)
             : null,
-        latitude: (json['latitude'] as num?)?.toDouble(),
-        longitude: (json['longitude'] as num?)?.toDouble(),
+        latitude: finiteOrNull(json['latitude'] as num?),
+        longitude: finiteOrNull(json['longitude'] as num?),
         description: json['description'] as String?,
         species: (json['species'] as List<dynamic>?)
                 ?.map((s) => Species.fromJson(s as Map<String, dynamic>))
@@ -118,5 +119,9 @@ class Placemark {
   LatLng get latLng {
     return LatLng(latitude!, longitude!);
   }
+
+  /// Whether the map can place this point at all.
+  bool get hasFiniteLatLng =>
+      finiteOrNull(latitude) != null && finiteOrNull(longitude) != null;
 }
 

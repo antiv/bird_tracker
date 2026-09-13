@@ -485,5 +485,8 @@
   "location_background_title": "Dozvoli lokaciju sve vreme",
   "location_background_content": "Da bi nastavio da beleži transekt dok je aplikacija u pozadini ili je ekran zaključan, Bird Tracker-u je potrebno podešavanje lokacije \"Dozvoli sve vreme\".\n\nAndroid ovo traži posebno: na sledećem ekranu izaberite \"Dozvoli sve vreme\". Bez toga se ruta prestaje beležiti čim izađete iz aplikacije.",
   "location_background_denied": "Lokacija u pozadini i dalje nije dozvoljena, pa će ruta biti beležena samo dok je aplikacija otvorena na ekranu.\n\nMožete je uključiti u podešavanjima aplikacije: Dozvole → Lokacija → \"Dozvoli sve vreme\".",
-  "open_settings": "Otvori podešavanja"
+  "open_settings": "Otvori podešavanja",
+  "location_permission_required": "Za beleženje transekta potreban je pristup lokaciji. Dozvolite ga da biste započeli.",
+  "location_permission_denied_forever": "Pristup lokaciji je isključen za Bird Tracker, pa transekt ne može da se beleži.\n\nMožete ga uključiti u podešavanjima aplikacije: Dozvole → Lokacija.",
+  "precise_location_required": "Bird Tracker-u je potrebna precizna lokacija da bi beležio rutu i zapažanja. Približna lokacija nije dovoljna.\n\nU podešavanjima aplikacije, pod Dozvole → Lokacija, uključite \"Koristi preciznu lokaciju\"."
 }
