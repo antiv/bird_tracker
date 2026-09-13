@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:bird_tracker/configuration/species.dart';
 import 'package:easy_localization/easy_localization.dart';
 
 class BtAutocomplete extends StatelessWidget {
@@ -81,7 +82,7 @@ class BtAutocomplete extends StatelessWidget {
                       child: ListTile(
                         dense: true,
                         title: Text(option, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
-                        subtitle: Text('species.$option'.tr(), style: TextStyle(color: Colors.green.shade700, fontSize: 12)),
+                        subtitle: Text(speciesTranslationKey(option).tr(), style: TextStyle(color: Colors.green.shade700, fontSize: 12)),
                         trailing: const Icon(Icons.arrow_forward_ios, size: 12),
                         visualDensity: VisualDensity.compact,
                       ),
@@ -98,7 +99,7 @@ class BtAutocomplete extends StatelessWidget {
           return const Iterable<String>.empty();
         } else {
           return kOptions.where((String option) {
-            final translated = 'species.$option'.tr().toLowerCase();
+            final translated = speciesTranslationKey(option).tr().toLowerCase();
             final original = option.toLowerCase();
             final search = textEditingValue.text.toLowerCase();
             return original.contains(search) || translated.contains(search);

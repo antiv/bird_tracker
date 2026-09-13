@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:bird_tracker/configuration/species.dart';
 import 'package:bird_tracker/model/species.dart';
 import 'package:bird_tracker/service/data_service.dart';
 import 'package:bird_tracker/service/media_service.dart';
@@ -52,6 +53,20 @@ void main() {
 
   tearDownAll(() async {
     if (mediaRoot.existsSync()) await mediaRoot.delete(recursive: true);
+  });
+
+  testWidgets('every catalog name has a translation in both locales',
+      (tester) async {
+    /// easy_localization treats a dot in a key as a path separator, so
+    /// "Anas sp." used to come back as the raw key in the autocomplete —
+    /// speciesTranslationKey maps such names to their underscore keys
+    for (final locale in const [Locale('en'), Locale('sr', 'Latn')]) {
+      await pumpForm(tester, const SizedBox(), startLocale: locale);
+      for (final name in kSpecies) {
+        final key = speciesTranslationKey(name);
+        expect(key.tr(), isNot(key), reason: '$name in $locale');
+      }
+    }
   });
 
   testWidgets('shows the record fields and the photo strip', (tester) async {

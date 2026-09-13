@@ -50,7 +50,7 @@ Single-screen app: `lib/home_page.dart` hosts the Google Map and drives everythi
 
 ## Localization — keep three places in sync
 
-1. **App strings**: easy_localization with `assets/translations/en.json` and `sr-Latn.json`; supported locales `en` and `sr-Latn`, fallback `en` (`lib/main.dart`). Any new UI string needs a key in **both** JSON files.
+1. **App strings**: easy_localization with `assets/translations/en.json` and `sr-Latn.json`; supported locales `en` and `sr-Latn`, fallback `en` (`lib/main.dart`). Any new UI string needs a key in **both** JSON files. **No dots in keys**: easy_localization reads a dot as a path separator, so a species name like `Anas sp.` came back as the raw key. The `species.*` block stores such names with an underscore (`Anas sp_`) and every lookup goes through `speciesTranslationKey()` (`lib/configuration/species.dart`); the Latin names in `kSpecies` keep their dots — they are what records and exports carry. `species_form_test.dart` checks that every catalog name resolves in both locales.
 2. **iOS permission strings**: `ios/Runner/Info.plist` holds the English (default) `NSLocation*UsageDescription`, `NSCameraUsageDescription`, `NSPhotoLibraryAddUsageDescription` and `NSPhotoLibraryUsageDescription` values; localized overrides live in `ios/Runner/{en,sr-Latn,sr}.lproj/InfoPlist.strings` (registered as a variant group in project.pbxproj). If a permission string changes, update the plist **and all three** .strings files — Apple rejected the app once (Guideline 4) for permission prompts not matching the app's language.
 3. **Android**: permission dialogs are system-provided; no strings to maintain.
 

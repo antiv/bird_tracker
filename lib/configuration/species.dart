@@ -360,3 +360,11 @@ const kSpecies = [
   'Calcarius lapponicus',
   'Plectrophenax nivalis',
 ];
+
+/// The translation key for a catalog name. easy_localization reads a dot as
+/// a path separator, so "Anas sp." would be looked up as species → "Anas sp"
+/// → "" and come back as the raw key; the dotted names are stored under an
+/// underscore instead ("Anas sp_"). The Latin name itself is untouched — it
+/// is what records, CSV and KML carry.
+String speciesTranslationKey(String name) =>
+    'species.${name.replaceAll('.', '_')}';
